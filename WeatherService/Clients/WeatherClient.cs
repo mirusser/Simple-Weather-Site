@@ -21,7 +21,19 @@ namespace WeatherService.Clients
         public record Wind(decimal speed, int deg);
         public record Clouds(int all);
         public record Sys(int type, int id, string country, long sunrise, long sunset);
-        public record Forecast(Coord coord, Weather[] weather, Main main, int visibility, Wind wind, Clouds clouds, long dt, Sys sys, int timezone, int id, string name, int cod);
+        public record Forecast(
+            Coord coord, 
+            Weather[] weather, 
+            Main main, 
+            int visibility, 
+            Wind wind, 
+            Clouds clouds, 
+            long dt, 
+            Sys sys, 
+            int timezone, 
+            int id, 
+            string name, 
+            int cod);
         #endregion
 
         public WeatherClient(
