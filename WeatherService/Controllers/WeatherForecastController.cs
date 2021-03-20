@@ -27,14 +27,17 @@ namespace WeatherService.Controllers
         [Route("{city}")]
         public async Task<WeatherForecast> Get(string city)
         {
-            var forecast = await _weatherClient.GetCurrentWeaterAsync(city);
+            // var forecast = await _weatherClient.GetCurrentWeaterAsync(city);
+            var forecast = await _weatherClient.GetCurrentWeaterMockAsync(city);
 
-            return new WeatherForecast
+            WeatherForecast weatherForecast = new()
             {
                 Summary = forecast.weather[0].description,
                 TemperatureC = (int)forecast.main.temp,
                 Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime
             };
+
+            return weatherForecast;
         }
     }
 }

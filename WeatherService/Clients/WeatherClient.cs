@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -32,6 +33,14 @@ namespace WeatherService.Clients
             var forecast = await _httpClient.GetFromJsonAsync<Forecast>(
                 $"https://{_serviceSettings.OpenWeatherHost}/data/2.5/weather?q={city}&appid={_serviceSettings.ApiKey}&units=metric"
             );
+
+            return forecast;
+        }
+
+        public async Task<Forecast> GetCurrentWeaterMockAsync(string city)
+        {
+            var weather = new Weather("broken clouds");
+            var forecast = new Forecast(new Weather[] { weather }, new Main(Convert.ToDecimal(2.01)), 1616253049);
 
             return forecast;
         }
