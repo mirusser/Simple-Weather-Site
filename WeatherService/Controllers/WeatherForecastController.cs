@@ -27,8 +27,8 @@ namespace WeatherService.Controllers
         [Route("{city}")]
         public async Task<WeatherForecast> Get(string city)
         {
-            // var forecast = await _weatherClient.GetCurrentWeaterAsync(city);
-            var forecast = await _weatherClient.GetCurrentWeaterMockAsync(city);
+            var forecast = await _weatherClient.GetCurrentWeatherAsync(city);
+            // var forecast = await _weatherClient.GetCurrentWeaterMockAsync(city);
 
             WeatherForecast weatherForecast = new()
             {
