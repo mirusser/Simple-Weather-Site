@@ -5,9 +5,8 @@ Setup:
 2. Create user secrets in WeatherService project: `dotnet user-secrets init` 
 <br /> There should be this entry in WeatherService.csproj: 
 <br /> 
-```
-<PropertyGroup>
-  ...
+```<PropertyGroup>
+...
   <UserSecretsId>some_guid</UserSecretsId>
 <PropertyGroup>
 ```
