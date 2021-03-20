@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Polly;
 using WeatherService.Clients;
+using WeatherService.HealthCheck;
 using WeatherService.Settings;
 
 namespace WeatherService
@@ -39,6 +40,9 @@ namespace WeatherService
             services.AddHttpClient<WeatherClient>()
                  .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(10, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
                  .AddTransientHttpErrorPolicy(builder => builder.CircuitBreakerAsync(3, TimeSpan.FromSeconds(10)));
+
+            services.AddHealthChecks()
+                .AddCheck<ExternalEndpointHealthCheck>("OpenWeather");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +64,7 @@ namespace WeatherService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/api/weatherforecast/health");
             });
         }
     }

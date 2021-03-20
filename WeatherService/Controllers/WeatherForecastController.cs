@@ -9,7 +9,7 @@ using WeatherService.Clients;
 namespace WeatherService.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/weatherforecast")]
     public class WeatherForecastController : ControllerBase
     {
         private readonly ILogger<WeatherForecastController> _logger;
