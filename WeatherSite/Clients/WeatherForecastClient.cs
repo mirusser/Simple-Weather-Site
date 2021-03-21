@@ -33,7 +33,7 @@ namespace WeatherSite.Clients
             WeatherForecast weatherForecast = null;
             try
             {
-                var url = $"{_apiEndpoints.WeatherServiceApiUrl}get/{city}";
+                var url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityName/{city}";
                 weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
             }
             catch (Exception ex)

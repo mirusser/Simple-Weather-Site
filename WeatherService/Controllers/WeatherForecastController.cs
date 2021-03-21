@@ -24,7 +24,6 @@ namespace WeatherService.Controllers
         }
 
         [HttpGet("{city}", Name = "GetByCityName")]
-        // [Route("{city}")]
         public async Task<WeatherForecast> GetByCityName(string city)
         {
             var forecast = await _weatherClient.GetCurrentWeatherByCityNameAsync(city);
@@ -41,7 +40,6 @@ namespace WeatherService.Controllers
         }
 
         [HttpGet("{cityId}", Name = "GetByCityId")]
-        // [Route("{cityId}")]
         public async Task<WeatherForecast> GetByCityId(decimal cityId)
         {
             var forecast = await _weatherClient.GetCurrentWeatherByCityIdAsync(cityId);
