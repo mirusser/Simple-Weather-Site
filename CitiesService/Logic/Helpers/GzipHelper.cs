@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CitiesService.Helpers
+namespace CitiesService.Logic.Helpers
 {
     public static class GzipHelper
     {

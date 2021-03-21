@@ -1,7 +1,16 @@
+using CitiesService.Data;
+using CitiesService.Data.DatabaseModels;
+using CitiesService.Logic.Managers;
+using CitiesService.Logic.Managers.Contracts;
+using CitiesService.Logic.Repositories;
+using CitiesService.Logic.Repositories.Contracts;
+using CitiesService.Mappings;
+using CitiesService.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +35,11 @@ namespace CitiesService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<FileUrlsAndPaths>(Configuration.GetSection(nameof(FileUrlsAndPaths)));
+            services.Configure<ConnectionStrings>(Configuration.GetSection(nameof(ConnectionStrings)));
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -34,6 +48,11 @@ namespace CitiesService
             });
 
             services.AddHttpClient();
+            services.AddAutoMapper(typeof(Maps));
+
+            services.AddScoped<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
+
+            services.AddScoped<ICityManager, CityManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
