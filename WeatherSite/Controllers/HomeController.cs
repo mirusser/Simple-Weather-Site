@@ -37,10 +37,6 @@ namespace WeatherSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            //var weatherForecast = await _weatherForecastClient.GetCurrentWeatherForCity();
-
-            //var foo = await _cityClient.GetCitiesByName("Poznań");
-
             var vm = new HomeVM()
             {
                 CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl

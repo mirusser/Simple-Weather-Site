@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using WeatherSite.Clients.Models.Records;
 using WeatherSite.Settings;
 
 namespace WeatherSite.Clients
@@ -15,10 +16,6 @@ namespace WeatherSite.Clients
         private readonly HttpClient _httpClient;
         private readonly ApiEndpoints _apiEndpoints;
         #endregion
-
-        #region records
-        public record WeatherForecast(DateTime Date, int TemperatureC, int TemperatureF, string Summary);
-        #endregion
         
         public WeatherForecastClient(
             HttpClient httpClient,
@@ -28,7 +25,7 @@ namespace WeatherSite.Clients
             _apiEndpoints = options.Value;
         }
 
-        public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city = "Poznan")
+        public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city)
         {
             WeatherForecast weatherForecast = null;
             try

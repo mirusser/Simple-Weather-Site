@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Web;
+using WeatherSite.Clients.Models.Records;
 using WeatherSite.Settings;
 
 namespace WeatherSite.Clients
@@ -15,11 +16,6 @@ namespace WeatherSite.Clients
         #region Properties
         private readonly HttpClient _httpClient;
         private readonly ApiEndpoints _apiEndpoints;
-        #endregion
-
-        #region Records
-        public record Coord(decimal Lon, decimal Lat);
-        public record City(decimal Id, string Name, string State, string Country, Coord Coord);
         #endregion
 
         public CityClient(HttpClient httpClient,
