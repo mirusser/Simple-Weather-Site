@@ -1,4 +1,8 @@
-﻿@{
+﻿@using WeatherSite.Models
+
+@model HomeVM
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -6,3 +10,55 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label asp-for="CityId" class="control-label"></label>
+            <select asp-for="CityId" class="select-city-ajax" style="width:100%">
+            </select>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        $('.select-city-ajax').select2({
+            placeholder: "Select city...",
+            allowClear: true,
+            language: {
+                searching: function () {
+                    return "Searching...";
+                },
+                errorLoading: function () {
+                    return "Error...";
+                },
+                noResults: function () {
+                    return "Not found";
+                }
+            },
+            ajax: {
+                delay: 550,
+                cache: false,
+                dataType: 'json',
+                url: function (params) {
+                    return 'https://localhost:44385/api/city/' + params.term + '/10';
+                },
+                processResults: function (data) {
+                    console.log(data);
+
+                    var transformedData = $.map(data, function (obj) {
+
+                        obj.id = obj.id;
+                        obj.text = obj.text || (obj.name + ' (' + obj.country + ')');
+                        return obj;
+                    });
+                    return {
+                        results: transformedData
+                    };
+                }
+            }
+        });
+    </script>
+}

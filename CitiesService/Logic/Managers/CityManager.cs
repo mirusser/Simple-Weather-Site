@@ -39,11 +39,16 @@ namespace CitiesService.Logic.Managers
 
             if (!string.IsNullOrEmpty(cityName) && limit > 0)
             {
-                var cityInfos = await _cityInfoRepo.FindAll(c => c.Name.Contains(cityName), takeNumberOfRows: limit);
+                var cityInfos = await _cityInfoRepo.FindAll(
+                    c => c.Name.Contains(cityName), 
+                    takeNumberOfRows: limit);
 
                 if (cityInfos != null && cityInfos.Any())
                 {
-                    cities = _mapper.Map<List<City>>(cityInfos.ToList());
+                    var cityInfoList = cityInfos.ToList();
+                    cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
+
+                    cities = _mapper.Map<List<City>>(cityInfoList);
                 }
             }
 

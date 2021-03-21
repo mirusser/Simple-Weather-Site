@@ -33,9 +33,11 @@ namespace WeatherSite.Controllers
         {
             //var weatherForecast = await _weatherForecastClient.GetCurrentWeatherForCity();
 
-            var foo = await _cityClient.GetCitiesByName("Poznań");
+            //var foo = await _cityClient.GetCitiesByName("Poznań");
 
-            return View();
+            var vm = new HomeVM();
+
+            return View(vm);
         }
 
         public IActionResult Privacy()
