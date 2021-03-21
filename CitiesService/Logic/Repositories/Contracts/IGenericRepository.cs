@@ -11,6 +11,8 @@ namespace CitiesService.Logic.Repositories.Contracts
         Task<IQueryable<T>> FindAll(
             Expression<Func<T, bool>> searchExpression = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
+            int skipNumberOfRows = default,
+            int takeNumberOfRows = default,
             List<string> includes = null);
 
         Task<T> Find(Expression<Func<T, bool>> searchExpression = null, List<string> includes = null);

@@ -21,8 +21,10 @@ namespace CitiesService.Logic.Repositories
         }
 
         public async Task<IQueryable<T>> FindAll(
-            Expression<Func<T, bool>> searchExpression = null, 
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null, 
+            Expression<Func<T, bool>> searchExpression = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
+            int skipNumberOfRows = default,
+            int takeNumberOfRows = default,
             List<string> includes = null)
         {
             IQueryable<T> query = db;
@@ -43,6 +45,16 @@ namespace CitiesService.Logic.Repositories
             if (orderByExpression != null)
             {
                 query = orderByExpression(query);
+            }
+
+            if (skipNumberOfRows > 0)
+            {
+                query = query.Skip(skipNumberOfRows);
+            }
+
+            if (takeNumberOfRows > 0)
+            {
+                query = query.Take(takeNumberOfRows);
             }
 
             return query;

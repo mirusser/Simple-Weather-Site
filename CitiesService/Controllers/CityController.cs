@@ -10,6 +10,7 @@ using System.IO.Compression;
 using CitiesService.Logic.Helpers;
 using Newtonsoft.Json;
 using CitiesService.Logic.Managers.Contracts;
+using CitiesService.Models;
 
 namespace CitiesService.Controllers
 {
@@ -17,15 +18,21 @@ namespace CitiesService.Controllers
     [Route("api/city")]
     public class CityController : Controller
     {
-        private readonly HttpClient _httpClient;
         private readonly ICityManager _cityManager;
 
-        public CityController(
-            HttpClient httpClient,
-            ICityManager cityManager)
+        public CityController(ICityManager cityManager)
         {
-            _httpClient = httpClient;
             _cityManager = cityManager;
+        }
+
+        [HttpGet("{cityName}, {limit}", Name = "GetCitiesByName")]
+        public async Task<ActionResult<List<City>>> GetCitiesByName(string cityName, int limit = 10)
+        {
+            var cities = await _cityManager.GetCitiesByName(cityName, limit);
+
+            return cities != null && cities.Any() ? 
+                Ok(cities) : 
+                NotFound();
         }
 
         [HttpGet]
