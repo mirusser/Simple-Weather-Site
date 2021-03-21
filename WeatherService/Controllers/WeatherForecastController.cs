@@ -9,25 +9,42 @@ using WeatherService.Clients;
 namespace WeatherService.Controllers
 {
     [ApiController]
-    [Route("api/weatherforecast")]
+    [Route("api/[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly WeatherClient _weatherClient;
 
         public WeatherForecastController(
-            ILogger<WeatherForecastController> logger, 
+            ILogger<WeatherForecastController> logger,
             WeatherClient weatherClient)
         {
             _logger = logger;
             _weatherClient = weatherClient;
         }
 
-        [HttpGet]
-        [Route("{city}")]
-        public async Task<WeatherForecast> Get(string city)
+        [HttpGet("{city}", Name = "GetByCityName")]
+        // [Route("{city}")]
+        public async Task<WeatherForecast> GetByCityName(string city)
         {
-            var forecast = await _weatherClient.GetCurrentWeatherAsync(city);
+            var forecast = await _weatherClient.GetCurrentWeatherByCityNameAsync(city);
+            // var forecast = await _weatherClient.GetCurrentWeaterMockAsync(city);
+
+            WeatherForecast weatherForecast = new()
+            {
+                Summary = forecast.weather[0].description,
+                TemperatureC = (int)forecast.main.temp,
+                Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime
+            };
+
+            return weatherForecast;
+        }
+
+        [HttpGet("{cityId}", Name = "GetByCityId")]
+        // [Route("{cityId}")]
+        public async Task<WeatherForecast> GetByCityId(decimal cityId)
+        {
+            var forecast = await _weatherClient.GetCurrentWeatherByCityIdAsync(cityId);
             // var forecast = await _weatherClient.GetCurrentWeaterMockAsync(city);
 
             WeatherForecast weatherForecast = new()

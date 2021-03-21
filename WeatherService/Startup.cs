@@ -66,6 +66,7 @@ namespace WeatherService
                 endpoints.MapControllers();
                 endpoints.MapHealthChecks("/api/weatherforecast/health");
             });
+            
         }
     }
 }

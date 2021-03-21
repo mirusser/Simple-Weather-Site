@@ -1,4 +1,6 @@
 ﻿@using WeatherSite.Models
+@using WeatherSite.Controllers
+@using WeatherSite.Helpers
 
 @model HomeVM
 
@@ -13,13 +15,37 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div class="form-group">
-            <label asp-for="CityId" class="control-label"></label>
-            <select asp-for="CityId" class="select-city-ajax" style="width:100%">
-            </select>
-        </div>
+        <form asp-action="@(nameof(HomeController.Index))" asp-controller="@(MvcHelper.NameOfController<HomeController>())">
+
+            <input asp-for="CitiesServiceEndpoint" type="hidden" />
+
+            <div class="form-group">
+                <span asp-validation-for="CityId" class="text-danger"></span>
+                <label asp-for="CityId" class="control-label"></label>
+                <select asp-for="CityId" class="select-city-ajax" style="width:100%">
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Get weather" class="btn btn-primary btn-block" />
+            </div>
+        </form>
     </div>
 </div>
+
+@if (Model != null && Model.WeatherForecast != null)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label class="control-label">@Model.WeatherForecast.Date</label>
+                <label class="control-label">@Model.WeatherForecast.Summary</label>
+                <label class="control-label">@Model.WeatherForecast.TemperatureC</label>
+                <label class="control-label">@Model.WeatherForecast.TemperatureF</label>
+            </div>
+        </div>
+    </div>
+}
 
 @section Scripts{
     <script>
@@ -43,7 +69,7 @@
                 cache: false,
                 dataType: 'json',
                 url: function (params) {
-                    return 'https://localhost:44385/api/city/' + params.term + '/10';
+                    return '@(Model.CitiesServiceEndpoint)' + params.term + '/10';
                 },
                 processResults: function (data) {
                     console.log(data);

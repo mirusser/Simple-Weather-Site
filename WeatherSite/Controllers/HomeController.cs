@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 //using System.Text.Json;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using WeatherSite.Clients;
 using WeatherSite.Models;
+using WeatherSite.Settings;
 
 namespace WeatherSite.Controllers
 {
@@ -18,26 +20,40 @@ namespace WeatherSite.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly WeatherForecastClient _weatherForecastClient;
         private readonly CityClient _cityClient;
+        private readonly ApiEndpoints _apiEndpoints;
 
         public HomeController(
             ILogger<HomeController> logger,
             WeatherForecastClient weatherForecastClient,
-            CityClient cityClient)
+            CityClient cityClient,
+            IOptions<ApiEndpoints> options)
         {
             _logger = logger;
             _weatherForecastClient = weatherForecastClient;
             _cityClient = cityClient;
+            _apiEndpoints = options.Value;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             //var weatherForecast = await _weatherForecastClient.GetCurrentWeatherForCity();
 
             //var foo = await _cityClient.GetCitiesByName("Poznań");
 
-            var vm = new HomeVM();
+            var vm = new HomeVM()
+            {
+                CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl
+            };
 
             return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Index(HomeVM homeVM)
+        {
+            homeVM.WeatherForecast = await _weatherForecastClient.GetCurrentWeatherForCityByCityId(homeVM.CityId);
+            return View(homeVM);
         }
 
         public IActionResult Privacy()

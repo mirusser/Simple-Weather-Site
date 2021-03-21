@@ -28,12 +28,29 @@ namespace WeatherSite.Clients
             _apiEndpoints = options.Value;
         }
 
-        public async Task<WeatherForecast> GetCurrentWeatherForCity(string city = "Poznan")
+        public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city = "Poznan")
         {
             WeatherForecast weatherForecast = null;
             try
             {
-                weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>($"{_apiEndpoints.WeatherServiceApiUrl}{city}");
+                var url = $"{_apiEndpoints.WeatherServiceApiUrl}get/{city}";
+                weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
+            }
+            catch (Exception ex)
+            {
+                //TODO: do something with error here
+            }
+
+            return weatherForecast;
+        }
+
+        public async Task<WeatherForecast> GetCurrentWeatherForCityByCityId(decimal cityId)
+        {
+            WeatherForecast weatherForecast = null;
+            try
+            {
+                var url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityId/{cityId}";
+                weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
             }
             catch (Exception ex)
             {
