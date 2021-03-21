@@ -17,18 +17,23 @@ namespace WeatherSite.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly WeatherForecastClient _weatherForecastClient;
+        private readonly CityClient _cityClient;
 
         public HomeController(
             ILogger<HomeController> logger,
-            WeatherForecastClient weatherForecastClient)
+            WeatherForecastClient weatherForecastClient,
+            CityClient cityClient)
         {
             _logger = logger;
             _weatherForecastClient = weatherForecastClient;
+            _cityClient = cityClient;
         }
 
         public async Task<IActionResult> Index()
         {
-            var weatherForecast = await _weatherForecastClient.GetCurrentWeatherForCity();
+            //var weatherForecast = await _weatherForecastClient.GetCurrentWeatherForCity();
+
+            var foo = await _cityClient.GetCitiesByName("Poznań");
 
             return View();
         }

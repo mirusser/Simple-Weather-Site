@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace WeatherSite.Settings
 {
-    public class SiteSettings
+    public class ApiEndpoints
     {
         public string WeatherServiceApiUrl { get; set; }
+        public string CitiesServiceApiUrl { get; set; }
     }
 }

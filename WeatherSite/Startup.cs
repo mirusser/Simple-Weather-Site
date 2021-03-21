@@ -25,11 +25,12 @@ namespace WeatherSite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<SiteSettings>(Configuration.GetSection("ApiEndpoints"));
+            services.Configure<ApiEndpoints>(Configuration.GetSection(nameof(ApiEndpoints)));
 
             services.AddControllersWithViews();
 
             services.AddHttpClient<WeatherForecastClient>();
+            services.AddHttpClient<CityClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

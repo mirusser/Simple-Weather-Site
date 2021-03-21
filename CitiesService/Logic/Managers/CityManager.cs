@@ -33,6 +33,23 @@ namespace CitiesService.Logic.Managers
             _cityInfoRepo = cityInfoRepo;
         }
 
+        public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
+        {
+            List<City> cities = new();
+
+            if (!string.IsNullOrEmpty(cityName) && limit > 0)
+            {
+                var cityInfos = await _cityInfoRepo.FindAll(c => c.Name.Contains(cityName), takeNumberOfRows: limit);
+
+                if (cityInfos != null && cityInfos.Any())
+                {
+                    cities = _mapper.Map<List<City>>(cityInfos.ToList());
+                }
+            }
+
+            return cities;
+        }
+
         public async Task<bool> DownloadCityFile()
         {
             if (!File.Exists(_fileUrlsAndPaths.CompressedCityListFilePath))
@@ -71,23 +88,6 @@ namespace CitiesService.Logic.Managers
             }
 
             return result;
-        }
-
-        public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
-        {
-            List<City> cities = new();
-
-            if (!string.IsNullOrEmpty(cityName) && limit > 0)
-            {
-                var cityInfos = await _cityInfoRepo.FindAll(c => c.Name.Contains(cityName), takeNumberOfRows: limit);
-
-                if (cityInfos != null && cityInfos.Any())
-                {
-                    cities = _mapper.Map<List<City>>(cityInfos.ToList());
-                }
-            }
-
-            return cities;
         }
     }
 }

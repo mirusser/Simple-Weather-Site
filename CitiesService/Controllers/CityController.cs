@@ -25,7 +25,7 @@ namespace CitiesService.Controllers
             _cityManager = cityManager;
         }
 
-        [HttpGet("{cityName}, {limit}", Name = "GetCitiesByName")]
+        [HttpGet("{cityName}/{limit}", Name = "GetCitiesByName")]
         public async Task<ActionResult<List<City>>> GetCitiesByName(string cityName, int limit = 10)
         {
             var cities = await _cityManager.GetCitiesByName(cityName, limit);
