@@ -1,4 +1,4 @@
-﻿using CitiesService.Models;
+﻿using CitiesService.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +10,6 @@ namespace CitiesService.Logic.Managers.Contracts
     {
         Task<bool> DownloadCityFile();
         Task<bool> SaveCitiesFromFileToDatabase();
-        Task<List<City>> GetCitiesByName(string cityName, int limit = 10);
+        Task<List<CityDto>> GetCitiesByName(string cityName, int limit = 10);
     }
 }

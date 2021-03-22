@@ -6,6 +6,9 @@ using CitiesService.Logic.Repositories;
 using CitiesService.Logic.Repositories.Contracts;
 using CitiesService.Mappings;
 using CitiesService.Settings;
+using Convey;
+using Convey.CQRS.Commands;
+using Convey.CQRS.Queries;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -53,6 +56,22 @@ namespace CitiesService
                         .AllowAnyHeader();
                     });
             });
+
+            services.AddConvey()
+                //    .AddConsul()
+                .AddCommandHandlers()
+                // .AddEventHandlers()
+                .AddQueryHandlers()
+                // .AddServiceBusEventDispatcher()
+                // .AddServiceBusCommandDispatcher()
+                .AddInMemoryCommandDispatcher()
+                // .AddInMemoryEventDispatcher()
+                .AddInMemoryQueryDispatcher()
+                //    .AddRedis()
+                // .AddRabbitMq()
+                //.AddMongo()
+                .Build();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CitiesService", Version = "v1" });

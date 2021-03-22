@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using CitiesService.Data;
 using CitiesService.Data.DatabaseModels;
+using CitiesService.Dto;
 using CitiesService.Logic.Helpers;
 using CitiesService.Logic.Managers.Contracts;
 using CitiesService.Logic.Repositories.Contracts;
-using CitiesService.Models;
 using CitiesService.Settings;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -33,9 +33,9 @@ namespace CitiesService.Logic.Managers
             _cityInfoRepo = cityInfoRepo;
         }
 
-        public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
+        public async Task<List<CityDto>> GetCitiesByName(string cityName, int limit = 10)
         {
-            List<City> cities = new();
+            List<CityDto> cities = new();
 
             if (!string.IsNullOrEmpty(cityName) && limit > 0)
             {
@@ -48,7 +48,7 @@ namespace CitiesService.Logic.Managers
                     var cityInfoList = cityInfos.ToList();
                     cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
 
-                    cities = _mapper.Map<List<City>>(cityInfoList);
+                    cities = _mapper.Map<List<CityDto>>(cityInfoList);
                 }
             }
 
@@ -79,13 +79,12 @@ namespace CitiesService.Logic.Managers
 
             if (File.Exists(_fileUrlsAndPaths.DecompressedCityListFilePath))
             {
-                List<City> citiesFromJson = new();
+                List<CityDto> citiesFromJson = new();
 
                 using StreamReader streamReader = new(_fileUrlsAndPaths.DecompressedCityListFilePath);
                 string json = streamReader.ReadToEnd();
-                citiesFromJson = JsonConvert.DeserializeObject<List<City>>(json);
+                citiesFromJson = JsonConvert.DeserializeObject<List<CityDto>>(json);
 
-                var cityInfo = _mapper.Map<CityInfo>(citiesFromJson.First());
                 var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
 
                 result = await _cityInfoRepo.CreateRange(cityInfos);

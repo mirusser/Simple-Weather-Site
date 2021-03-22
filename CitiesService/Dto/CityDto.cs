@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CitiesService.Models
+namespace CitiesService.Dto
 {
-    public class City
+    public class Coord
+    {
+        public decimal Lon { get; set; }
+        public decimal Lat { get; set; }
+    }
+
+    public class CityDto
     {
         public decimal Id { get; set; }
         public string Name { get; set; }

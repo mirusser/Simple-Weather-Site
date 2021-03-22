@@ -19,18 +19,15 @@ namespace WeatherSite.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly WeatherForecastClient _weatherForecastClient;
-        private readonly CityClient _cityClient;
         private readonly ApiEndpoints _apiEndpoints;
 
         public HomeController(
             ILogger<HomeController> logger,
             WeatherForecastClient weatherForecastClient,
-            CityClient cityClient,
             IOptions<ApiEndpoints> options)
         {
             _logger = logger;
             _weatherForecastClient = weatherForecastClient;
-            _cityClient = cityClient;
             _apiEndpoints = options.Value;
         }
 
