@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Cors;
 using CitiesService.Dto;
 using Convey.CQRS.Queries;
 using CitiesService.Queries;
+using Convey.CQRS.Commands;
+using CitiesService.Commands;
 
 namespace CitiesService.Controllers
 {
@@ -23,16 +25,20 @@ namespace CitiesService.Controllers
     public class CityController : ControllerBase
     {
         private readonly ICityManager _cityManager;
+        private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
 
         public CityController(
             ICityManager cityManager,
+            ICommandDispatcher commandDispatcher,
             IQueryDispatcher queryDispatcher)
         {
             _cityManager = cityManager;
+            _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
         }
 
+        #region These are normal ways of handling queries and commands
         //[HttpGet("{cityName}/{limit}", Name = "GetCitiesByName")]
         //public async Task<ActionResult<List<CityDto>>> GetCitiesByName(string cityName, int limit = 10)
         //{
@@ -43,6 +49,19 @@ namespace CitiesService.Controllers
         //        NoContent();
         //}
 
+        //[HttpGet]
+        //[Route("AddCityInfosToDatabase")]
+        //public async Task<IActionResult> AddCityInfosToDatabase()
+        //{
+        //    var result = await _cityManager.SaveCitiesFromFileToDatabase();
+
+        //    //TODO: return proper result depending on saving cities to database
+
+        //    return Ok();
+        //}
+        #endregion
+
+        #region Convey ways of handling queries and commands
         [HttpGet("{cityName}/{limit}", Name = "GetCitiesByName")]
         public async Task<ActionResult<List<CityDto>>> GetCitiesByName([FromRoute] GetCitiesQuery query)
         {
@@ -53,29 +72,18 @@ namespace CitiesService.Controllers
                 NoContent();
         }
 
-        [HttpGet]
-        [Route("DownloadCityFile")]
-        public async Task<IActionResult> DownloadCityFile()
-        {
-            return NotFound();
-        }
-
-        [HttpGet]
+        [HttpPost]
         [Route("AddCityInfosToDatabase")]
-        public async Task<IActionResult> AddCityInfosToDatabase()
+        public async Task<IActionResult> AddCityInfosToDatabase(AddCitiesToDatabaseOrder order)
         {
-            var result = await _cityManager.SaveCitiesFromFileToDatabase();
-
             //TODO: return proper result depending on saving cities to database
+            //How to do it using Convey?
+
+            await _commandDispatcher.SendAsync(order);
 
             return Ok();
         }
+        #endregion
 
-        [HttpGet]
-        [Route("Index")]
-        public IActionResult Index()
-        {
-            return NotFound();
-        }
     }
 }

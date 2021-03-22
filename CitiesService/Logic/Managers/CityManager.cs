@@ -40,7 +40,7 @@ namespace CitiesService.Logic.Managers
             if (!string.IsNullOrEmpty(cityName) && limit > 0)
             {
                 var cityInfos = await _cityInfoRepo.FindAll(
-                    c => c.Name.Contains(cityName), 
+                    c => c.Name.Contains(cityName),
                     takeNumberOfRows: limit);
 
                 if (cityInfos != null && cityInfos.Any())
@@ -77,18 +77,25 @@ namespace CitiesService.Logic.Managers
         {
             var result = false;
 
-            if (File.Exists(_fileUrlsAndPaths.DecompressedCityListFilePath))
+            var anyCityExists = await _cityInfoRepo.CheckIfExists(c => c.Id != default);
+
+            if (!anyCityExists)
             {
-                List<CityDto> citiesFromJson = new();
+                await DownloadCityFile();
 
-                using StreamReader streamReader = new(_fileUrlsAndPaths.DecompressedCityListFilePath);
-                string json = streamReader.ReadToEnd();
-                citiesFromJson = JsonConvert.DeserializeObject<List<CityDto>>(json);
+                if (File.Exists(_fileUrlsAndPaths.DecompressedCityListFilePath))
+                {
+                    List<CityDto> citiesFromJson = new();
 
-                var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
+                    using StreamReader streamReader = new(_fileUrlsAndPaths.DecompressedCityListFilePath);
+                    string json = streamReader.ReadToEnd();
+                    citiesFromJson = JsonConvert.DeserializeObject<List<CityDto>>(json);
 
-                result = await _cityInfoRepo.CreateRange(cityInfos);
-                result = result && await _cityInfoRepo.Save();
+                    var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
+
+                    result = await _cityInfoRepo.CreateRange(cityInfos);
+                    result = result && await _cityInfoRepo.Save();
+                }
             }
 
             return result;
