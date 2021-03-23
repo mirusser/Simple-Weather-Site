@@ -19,7 +19,7 @@ namespace CitiesService.Logic.Repositories.Contracts
         Task<bool> CheckIfExists(Expression<Func<T, bool>> searchExpression = null);
 
         Task<bool> Create(T entity);
-        Task<bool> CreateRange(IEnumerable<T> entities);
+        Task CreateRange(IEnumerable<T> entities);
         bool Update(T entity);
         bool Delete(T entity);
 

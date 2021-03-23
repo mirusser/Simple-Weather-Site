@@ -6,7 +6,7 @@ using CitiesService.Dto;
 using CitiesService.Logic.Managers.Contracts;
 using Convey.CQRS.Queries;
 
-namespace CitiesService.Queries.Handlers
+namespace CitiesService.Messages.Queries.Handlers
 {
     public class GetCitiesHandler : IQueryHandler<GetCitiesQuery, IEnumerable<CityDto>>
     {

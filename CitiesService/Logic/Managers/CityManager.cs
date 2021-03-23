@@ -6,6 +6,7 @@ using CitiesService.Logic.Helpers;
 using CitiesService.Logic.Managers.Contracts;
 using CitiesService.Logic.Repositories.Contracts;
 using CitiesService.Settings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -22,15 +23,18 @@ namespace CitiesService.Logic.Managers
         private readonly FileUrlsAndPaths _fileUrlsAndPaths;
         private readonly IMapper _mapper;
         private readonly IGenericRepository<CityInfo> _cityInfoRepo;
+        private readonly ILogger<CityManager> _logger;
 
         public CityManager(
             IOptions<FileUrlsAndPaths> options,
             IMapper mapper,
-            IGenericRepository<CityInfo> cityInfoRepo)
+            IGenericRepository<CityInfo> cityInfoRepo,
+            ILogger<CityManager> logger)
         {
             _fileUrlsAndPaths = options.Value;
             _mapper = mapper;
             _cityInfoRepo = cityInfoRepo;
+            _logger = logger;
         }
 
         public async Task<List<CityDto>> GetCitiesByName(string cityName, int limit = 10)
@@ -49,8 +53,15 @@ namespace CitiesService.Logic.Managers
                     cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
 
                     cities = _mapper.Map<List<CityDto>>(cityInfoList);
+
+                    _logger.LogInformation($"Properly got cities by name: {cityName}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Didn't find any city for given name: {cityName}");
                 }
             }
+
 
             return cities;
         }
@@ -93,8 +104,8 @@ namespace CitiesService.Logic.Managers
 
                     var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
 
-                    result = await _cityInfoRepo.CreateRange(cityInfos);
-                    result = result && await _cityInfoRepo.Save();
+                    await _cityInfoRepo.CreateRange(cityInfos);
+                    result = await _cityInfoRepo.Save();
                 }
             }
 

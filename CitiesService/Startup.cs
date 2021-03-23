@@ -1,5 +1,6 @@
 using CitiesService.Data;
 using CitiesService.Data.DatabaseModels;
+using CitiesService.Exceptions.Handlers;
 using CitiesService.Logic.Managers;
 using CitiesService.Logic.Managers.Contracts;
 using CitiesService.Logic.Repositories;
@@ -8,9 +9,13 @@ using CitiesService.Mappings;
 using CitiesService.Settings;
 using Convey;
 using Convey.CQRS.Commands;
+using Convey.CQRS.Events;
 using Convey.CQRS.Queries;
+using Convey.MessageBrokers.CQRS;
+using Convey.MessageBrokers.RabbitMQ;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -60,15 +65,15 @@ namespace CitiesService
             services.AddConvey()
                 //    .AddConsul()
                 .AddCommandHandlers()
-                // .AddEventHandlers()
+                .AddEventHandlers()
                 .AddQueryHandlers()
-                // .AddServiceBusEventDispatcher()
-                // .AddServiceBusCommandDispatcher()
+                .AddServiceBusEventDispatcher()
+                .AddServiceBusCommandDispatcher()
                 .AddInMemoryCommandDispatcher()
                 // .AddInMemoryEventDispatcher()
                 .AddInMemoryQueryDispatcher()
                 //    .AddRedis()
-                // .AddRabbitMq()
+                .AddRabbitMq()
                 //.AddMongo()
                 .Build();
 
@@ -78,6 +83,7 @@ namespace CitiesService
             });
 
             services.AddHttpClient();
+            services.AddHealthChecks();
             services.AddAutoMapper(typeof(Maps));
 
             services.AddScoped<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
@@ -95,8 +101,9 @@ namespace CitiesService
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
             }
 
+            app.UseServiceExceptionHandler();
             app.UseHttpsRedirection();
-
+            app.UseConvey();
             app.UseRouting();
 
             app.UseAuthorization();
@@ -106,6 +113,8 @@ namespace CitiesService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
+                endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
             });
 
 

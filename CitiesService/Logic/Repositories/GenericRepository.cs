@@ -89,21 +89,9 @@ namespace CitiesService.Logic.Repositories
             return entityEntry.State == EntityState.Added;
         }
 
-        public async Task<bool> CreateRange(IEnumerable<T> entities)
+        public async Task CreateRange(IEnumerable<T> entities)
         {
-            var result = true;
-
-            try
-            {
-                await db.AddRangeAsync(entities);
-            }
-            catch (Exception ex)
-            {
-                //TODO: do something with exception
-                result = false;
-            }
-
-            return result;
+            await db.AddRangeAsync(entities);
         }
 
         public bool Delete(T entity)

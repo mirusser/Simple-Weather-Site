@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CitiesService.Queries
+namespace CitiesService.Messages.Queries
 {
     public class GetCitiesQuery : IQuery<IEnumerable<CityDto>>
     {

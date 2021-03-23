@@ -13,9 +13,9 @@ using CitiesService.Logic.Managers.Contracts;
 using Microsoft.AspNetCore.Cors;
 using CitiesService.Dto;
 using Convey.CQRS.Queries;
-using CitiesService.Queries;
 using Convey.CQRS.Commands;
 using CitiesService.Commands;
+using CitiesService.Messages.Queries;
 
 namespace CitiesService.Controllers
 {
@@ -29,11 +29,9 @@ namespace CitiesService.Controllers
         private readonly IQueryDispatcher _queryDispatcher;
 
         public CityController(
-            ICityManager cityManager,
             ICommandDispatcher commandDispatcher,
             IQueryDispatcher queryDispatcher)
         {
-            _cityManager = cityManager;
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
         }
@@ -76,9 +74,6 @@ namespace CitiesService.Controllers
         [Route("AddCityInfosToDatabase")]
         public async Task<IActionResult> AddCityInfosToDatabase(AddCitiesToDatabaseOrder order)
         {
-            //TODO: return proper result depending on saving cities to database
-            //How to do it using Convey?
-
             await _commandDispatcher.SendAsync(order);
 
             return Ok();
