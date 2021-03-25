@@ -3,7 +3,10 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using WeatherService.Models;
 using WeatherService.Settings;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace WeatherService.Clients
 {
@@ -42,6 +45,35 @@ namespace WeatherService.Clients
         {
             _httpClient = httpClient;
             _serviceSettings = options.Value;
+        }
+
+        public async Task<Current> GetCurrentWeatherInXmlByCityNameAsync(string city = "Tokio")
+        {
+            Current currentWeather = null;
+            var url = $"https://{_serviceSettings.OpenWeatherHost}/data/2.5/weather?q={city}&appid={_serviceSettings.ApiKey}&mode=xml&units=metric";
+
+            try
+            {
+                using HttpResponseMessage responseMessage = await _httpClient.GetAsync(url);
+                using HttpContent content = responseMessage.Content;
+                string data = await content.ReadAsStringAsync();
+
+                if (data != null)
+                {
+                    XmlSerializer serializer = new(typeof(Current));
+                    using StringReader reader = new(data);
+
+                    currentWeather = (Current)serializer.Deserialize(reader);
+                }
+            }
+            catch (Exception ex)
+            {
+                //TODO: handle the exception somehow
+                var foo = ex;
+            }
+
+            return currentWeather;
+
         }
 
         public async Task<Forecast> GetCurrentWeatherByCityNameAsync(string city)

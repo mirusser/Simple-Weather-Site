@@ -39,6 +39,21 @@ namespace WeatherService.Controllers
             return weatherForecast;
         }
 
+        [HttpGet("{city}", Name = "GetInXmlByCityName")]
+        public async Task<WeatherForecast> GetInXmlByCityName(string city)
+        {
+            var current = await _weatherClient.GetCurrentWeatherInXmlByCityNameAsync(city);
+
+            WeatherForecast weatherForecast = new()
+            {
+                Summary = current.Weather.Value,
+                TemperatureC = (int)current.Temperature.Value,
+                Date = current.Lastupdate.Value
+            };
+
+            return weatherForecast;
+        }
+
         [HttpGet("{cityId}", Name = "GetByCityId")]
         public async Task<WeatherForecast> GetByCityId(decimal cityId)
         {
