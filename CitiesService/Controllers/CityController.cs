@@ -14,8 +14,8 @@ using Microsoft.AspNetCore.Cors;
 using CitiesService.Dto;
 using Convey.CQRS.Queries;
 using Convey.CQRS.Commands;
-using CitiesService.Commands;
 using CitiesService.Messages.Queries;
+using CitiesService.Messages.Commands;
 
 namespace CitiesService.Controllers
 {
@@ -67,6 +67,17 @@ namespace CitiesService.Controllers
 
             return cities != null && cities.Any() ?
                 Ok(cities) :
+                NoContent();
+        }
+
+        [HttpGet]
+        [Route("GetCitiesPagination/{numberOfCities}/{pageNumber}")]
+        public async Task<ActionResult<CitiesPaginationDto>> GetCitiesPagination([FromRoute] GetCitiesPaginationQuery query)
+        {
+            var citiesPagination = await _queryDispatcher.QueryAsync(query);
+
+            return citiesPagination != null && citiesPagination.Cities != null && citiesPagination.Cities.Any() ?
+                Ok(citiesPagination) :
                 NoContent();
         }
 

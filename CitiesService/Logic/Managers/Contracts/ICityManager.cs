@@ -8,8 +8,9 @@ namespace CitiesService.Logic.Managers.Contracts
 {
     public interface ICityManager
     {
+        Task<List<CityDto>> GetCitiesByName(string cityName, int limit = 10);
+        Task<CitiesPaginationDto> GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1);
         Task<bool> DownloadCityFile();
         Task<bool> SaveCitiesFromFileToDatabase();
-        Task<List<CityDto>> GetCitiesByName(string cityName, int limit = 10);
     }
 }

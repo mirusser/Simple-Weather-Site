@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CitiesService.Commands.Handlers
+namespace CitiesService.Messages.Commands.Handlers
 {
     public class AddCitiesToDatabaseHandler : ICommandHandler<AddCitiesToDatabaseOrder>
     {
