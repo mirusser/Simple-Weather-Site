@@ -34,12 +34,29 @@ namespace WeatherSite.Clients
                 var url = $"{_apiEndpoints.CitiesServiceApiUrl}{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
                 cities = await _httpClient.GetFromJsonAsync<List<City>>(url);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //TODO: do something with error here
             }
 
             return cities;
+        }
+
+        public async Task<CitiesPagination> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
+        {
+            CitiesPagination citiesPagination = new(default, default);
+
+            try
+            {
+                var url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
+                citiesPagination = await _httpClient.GetFromJsonAsync<CitiesPagination>(url);
+            }
+            catch (Exception)
+            {
+                //TODO: do something with error here
+            }
+
+            return citiesPagination;
         }
     }
 }

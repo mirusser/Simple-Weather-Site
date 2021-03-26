@@ -1,0 +1,35 @@
+﻿
+@using WeatherSite.Models.City
+
+@model CitiesPaginationVM
+
+@{
+    ViewData["Title"] = "GetCitiesPagination";
+}
+
+<h1>
+    Available cities
+</h1>
+
+@if (Model != null && Model.Cities != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    City name
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Cities)
+            {
+                <tr>
+                    <td>
+                        @(item.Name)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

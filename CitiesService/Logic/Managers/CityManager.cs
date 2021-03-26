@@ -67,21 +67,21 @@ namespace CitiesService.Logic.Managers
 
         public async Task<CitiesPaginationDto> GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1)
         {
-            CitiesPaginationDto citiesPaginationDto = new();
+            var totalNumberOfCities = (await _cityInfoRepo.FindAll()).Count();
+
+            CitiesPaginationDto citiesPaginationDto = new()
+            {
+                NumberOfAllCities = totalNumberOfCities
+            };
 
             if (pageNumber >= 1 && numberOfCities > 1)
             {
                 var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
 
-                var totalNumberOfCities = (await _cityInfoRepo.FindAll()).Count();
                 var cityInfos = await _cityInfoRepo.FindAll(takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
                 var cityDtoList = _mapper.Map<List<CityDto>>(cityInfos.ToList());
 
-                citiesPaginationDto = new() 
-                { 
-                    Cities = cityDtoList,
-                    NumberOfAllCities = totalNumberOfCities
-                };
+                citiesPaginationDto.Cities = cityDtoList;
             }
 
             return citiesPaginationDto;

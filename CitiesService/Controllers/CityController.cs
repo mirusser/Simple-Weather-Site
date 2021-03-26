@@ -76,7 +76,7 @@ namespace CitiesService.Controllers
         {
             var citiesPagination = await _queryDispatcher.QueryAsync(query);
 
-            return citiesPagination != null && citiesPagination.Cities != null && citiesPagination.Cities.Any() ?
+            return citiesPagination != null?
                 Ok(citiesPagination) :
                 NoContent();
         }

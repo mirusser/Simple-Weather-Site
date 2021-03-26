@@ -8,6 +8,7 @@ using WeatherSite.Clients.Models.Records;
 
 namespace WeatherSite.Models
 {
+    //TODO: move it to proper location (directory)
     public class HomeVM
     {
         public string CityName { get; set; }
@@ -18,6 +19,7 @@ namespace WeatherSite.Models
 
         public string CitiesServiceEndpoint { get; set; }
 
+        //TODO: make a proper view model of this property
         public WeatherForecast WeatherForecast { get; set; }
     }
 }
