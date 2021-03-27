@@ -1,0 +1,86 @@
+﻿
+@using WeatherSite.Models
+
+@model PaginationVM
+
+<ul class="pagination pagination-lg m-0 float-md-none">
+    @if (Model.NumberOfPages > 1)
+    {
+        @if (Model.PageNumber > 1)
+        {
+            <li class="page-item">
+                <a href="#" aria-label="Previous" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', (@Model.PageNumber - 1), @Model.NumberOfEntitiesOnPage)">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <a href="#" aria-label="Previous" class="page-link">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        }
+
+        if (Model.PageNumber != 1)
+        {
+            <li class="page-item">
+                <a href="#" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', 1, @Model.NumberOfEntitiesOnPage)">
+                    1
+                </a>
+            </li>
+
+            if (Model.PageNumber > 2)
+            {
+                <li class="page-item">
+                    <a href="#" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', (@Model.PageNumber - 1), @Model.NumberOfEntitiesOnPage)">
+                        @(Model.PageNumber - 1)
+                    </a>
+                </li>
+            }
+        }
+
+        <li class="active page-item">
+            <a href="#" class="page-link">
+                @Model.PageNumber
+                <span class="sr-only">(current)</span>
+            </a>
+        </li>
+
+        if (Model.PageNumber != Model.NumberOfPages)
+        {
+            if (Model.PageNumber < (Model.NumberOfPages - 1))
+            {
+                <li class="page-item">
+                    <a href="#" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', (@Model.PageNumber + 1), @Model.NumberOfEntitiesOnPage)">
+                        @(Model.PageNumber + 1)
+                    </a>
+                </li>
+            }
+
+            <li class="page-item">
+                <a href="#" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', @Model.NumberOfPages, @Model.NumberOfEntitiesOnPage)">
+                    @Model.NumberOfPages
+                </a>
+            </li>
+        }
+
+        @if (Model.PageNumber != Model.NumberOfPages)
+        {
+            <li class="page-item">
+                <a href="#" aria-label="Next" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', (@Model.PageNumber + 1), @Model.NumberOfEntitiesOnPage)">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <a href="#" aria-label="Next" class="page-link">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        }
+    }
+</ul>

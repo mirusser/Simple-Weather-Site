@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WeatherSite.Clients;
+using WeatherSite.Helpers;
 using WeatherSite.Models.City;
 
 namespace WeatherSite.Controllers
@@ -32,17 +33,19 @@ namespace WeatherSite.Controllers
 
         //TODO: make a proper manager (business logic layer) and some more validation
         [HttpPost]
-        public async Task<IActionResult> GetCitiesPaginationPartial(int pageNumber = 1, int numberOfCities = 25)
+        public async Task<IActionResult> GetCitiesPaginationPartial(int pageNumber = 1, int numberOfEntitiesOnPage = 25)
         {
-            var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfCities);
+            var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
             CitiesPaginationPartialVM vm = new()
             {
                 Cities = citiesPagination.Cities,
                 PaginationVM = new()
                 {
+                    ElementId = "#cities-pagination-partial-div",
+                    Url = Url.Action(nameof(CityController.GetCitiesPaginationPartial), MvcHelper.NameOfController<CityController>()),
                     PageNumber = pageNumber,
-                    NumberOfEntitiesOnPage = numberOfCities,
-                    NumberOfPages = Convert.ToInt32(Math.Ceiling((decimal)citiesPagination.NumberOfAllCities / numberOfCities))
+                    NumberOfEntitiesOnPage = numberOfEntitiesOnPage,
+                    NumberOfPages = Convert.ToInt32(Math.Ceiling((decimal)citiesPagination.NumberOfAllCities / numberOfEntitiesOnPage))
                 }
             };
 

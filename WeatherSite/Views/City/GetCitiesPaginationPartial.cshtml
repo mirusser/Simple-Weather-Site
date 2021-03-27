@@ -46,92 +46,12 @@
         }
         else
         {
-
+            //TODO: display something here
         }
     </div>
 
     <div class="card-footer clearfix" style="display: flex; justify-content: center">
-        <ul class="pagination pagination-lg m-0 float-md-none">
-            @if (Model.PaginationVM.NumberOfPages > 1)
-            {
-                @if (Model.PaginationVM.PageNumber > 1)
-                {
-                    <li class="page-item">
-                        <a href="#" aria-label="Previous" class="page-link" onclick="loadCitiesPagination((@Model.PaginationVM.PageNumber - 1), @Model.PaginationVM.NumberOfEntitiesOnPage)">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                }
-                else
-                {
-                    <li class="page-item disabled">
-                        <a href="#" aria-label="Previous" class="page-link">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                }
-
-                if (Model.PaginationVM.PageNumber != 1)
-                {
-                    <li class="page-item">
-                        <a href="#" class="page-link" onclick="loadCitiesPagination(1, @Model.PaginationVM.NumberOfEntitiesOnPage)">
-                            1
-                        </a>
-                    </li>
-
-                    if (Model.PaginationVM.PageNumber > 2)
-                    {
-                        <li class="page-item">
-                            <a href="#" class="page-link" onclick="loadCitiesPagination((@Model.PaginationVM.PageNumber - 1), @Model.PaginationVM.NumberOfEntitiesOnPage)">
-                                @(Model.PaginationVM.PageNumber - 1)
-                            </a>
-                        </li>
-                    }
-                }
-
-                <li class="active page-item">
-                    <a href="#" class="page-link">
-                        @Model.PaginationVM.PageNumber
-                        <span class="sr-only">(current)</span>
-                    </a>
-                </li>
-
-                if (Model.PaginationVM.PageNumber != Model.PaginationVM.NumberOfPages)
-                {
-                    if (Model.PaginationVM.PageNumber < (Model.PaginationVM.NumberOfPages - 1))
-                    {
-                        <li class="page-item">
-                            <a href="#" class="page-link" onclick="loadCitiesPagination((@Model.PaginationVM.PageNumber + 1), @Model.PaginationVM.NumberOfEntitiesOnPage)">
-                                @(Model.PaginationVM.PageNumber + 1)
-                            </a>
-                        </li>
-                    }
-
-                    <li class="page-item">
-                        <a href="#" class="page-link" onclick="loadCitiesPagination(@Model.PaginationVM.NumberOfPages, @Model.PaginationVM.NumberOfEntitiesOnPage)">
-                            @Model.PaginationVM.NumberOfPages
-                        </a>
-                    </li>
-                }
-
-                @if (Model.PaginationVM.PageNumber != Model.PaginationVM.NumberOfPages)
-                {
-                    <li class="page-item">
-                        <a href="#" aria-label="Next" class="page-link" onclick="loadCitiesPagination((@Model.PaginationVM.PageNumber + 1), @Model.PaginationVM.NumberOfEntitiesOnPage)">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                }
-                else
-                {
-                    <li class="page-item disabled">
-                        <a href="#" aria-label="Next" class="page-link">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                }
-            }
-        </ul>
+        @await Html.PartialAsync("_paginationPartial", Model.PaginationVM)
     </div>
 
 </div>

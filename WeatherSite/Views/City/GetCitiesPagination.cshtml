@@ -17,27 +17,15 @@
     </div>
 </div>
 
+<script src="~/js/pagination.js" asp-append-version="true"></script>
+
 @section Scripts
 {
     <script>
-
-        loadCitiesPagination(1, 25);
-
-        function loadCitiesPagination(pageNumber, numberOfCities) {
-
-            showBaseLoader('#cities-pagination-partial-div');
-
-            //$("#wyszukaj-pozycje-nr-strony-hidden-input").val(numerStrony);
-            //$("#wyszukaj-pozycje-ilosc-na-stronie-hidden-input").val(iloscNaStronie);
-
-            $.post('@Url.Action(nameof(CityController.GetCitiesPaginationPartial), MvcHelper.NameOfController<CityController>())',
-                {
-                    'pageNumber': pageNumber,
-                    'numberOfCities': numberOfCities
-                }, function (data) {
-
-                    $("#cities-pagination-partial-div").html(data);
-            });
-        }
+        pagination(
+            '#cities-pagination-partial-div',
+            '@Url.Action(nameof(CityController.GetCitiesPaginationPartial), MvcHelper.NameOfController<CityController>())',
+            1,
+            25);
     </script>
 }
