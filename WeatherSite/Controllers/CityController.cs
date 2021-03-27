@@ -22,12 +22,20 @@ namespace WeatherSite.Controllers
             return View();
         }
 
-        //TODO: make a proper manager (business logic layer) and some more validation
         [HttpGet]
-        public async Task<IActionResult> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
+        public async Task<IActionResult> GetCitiesPagination()
+        {
+            CitiesPaginationVM vm = new();
+
+            return View(vm);
+        }
+
+        //TODO: make a proper manager (business logic layer) and some more validation
+        [HttpPost]
+        public async Task<IActionResult> GetCitiesPaginationPartial(int pageNumber = 1, int numberOfCities = 25)
         {
             var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfCities);
-            CitiesPaginationVM vm = new()
+            CitiesPaginationPartialVM vm = new()
             {
                 Cities = citiesPagination.Cities,
                 PaginationVM = new()
@@ -38,7 +46,7 @@ namespace WeatherSite.Controllers
                 }
             };
 
-            return View(vm);
+            return PartialView(vm);
         }
     }
 }

@@ -21,6 +21,8 @@
     @*<script src="~/js/messages.js"></script>*@
 
     <link href="~/lib/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+    <script src="~/js/base-loader.js" asp-append-version="true"></script>
 </head>
 
 <body>
@@ -43,9 +45,7 @@
                 <li class="nav-item d-none d-sm-inline-block">
                     <a class="nav-link"
                        asp-controller="@(MvcHelper.NameOfController<CityController>())"
-                       asp-action="@(nameof(CityController.GetCitiesPagination))"
-                       asp-route-pageNumber=1
-                       asp-route-numberOfCities="25">
+                       asp-action="@(nameof(CityController.GetCitiesPagination))">
                         Available cities
                     </a>
                 </li>

@@ -27,7 +27,8 @@ namespace WeatherSite
         {
             services.Configure<ApiEndpoints>(Configuration.GetSection(nameof(ApiEndpoints)));
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddRazorPages().AddRazorRuntimeCompilation();
 
             services.AddHttpClient<WeatherForecastClient>();
             services.AddHttpClient<CityClient>();
