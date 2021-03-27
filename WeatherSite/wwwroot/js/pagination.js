@@ -19,3 +19,7 @@ function pagination(elementId, url, pageNumber, numberOfEntitiesOnPage) {
             $(elementId).html('<p>loading pagination: fails</p>');
         });
 }
+
+function getNumberOfEntitiesOnPageSelectedValue() {
+    return $('#number-of-entities-on-page-select').val();
+}

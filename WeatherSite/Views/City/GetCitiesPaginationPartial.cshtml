@@ -17,9 +17,17 @@
     <div class="card-body p-0">
         @if (Model != null && Model.Cities != null)
         {
+            var number = 1;
+
+            if (Model.PaginationVM.PageNumber > 1)
+            {
+                number += (Model.PaginationVM.PageNumber - 1) * Model.PaginationVM.NumberOfEntitiesOnPage;
+            }
+
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th style="width: 10px">#</th>
                         <th>
                             City name
                         </th>
@@ -33,12 +41,17 @@
                     {
                         <tr>
                             <td>
+                                @($"{number}.")
+                            </td>
+                            <td>
                                 @(city.Name)
                             </td>
                             <td>
                                 @(city.Country)
                             </td>
                         </tr>
+
+                        number++;
                     }
 
                 </tbody>
@@ -50,7 +63,8 @@
         }
     </div>
 
-    <div class="card-footer clearfix" style="display: flex; justify-content: center">
+    @*<div class="card-footer clearfix" style="display: flex; justify-content: center">*@
+    <div class="card-footer clearfix">
         @await Html.PartialAsync("_paginationPartial", Model.PaginationVM)
     </div>
 
