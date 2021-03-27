@@ -4,8 +4,8 @@
 @model PaginationVM
 
 <div class="row">
-    <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12">
-        <div class="input-group" data-toggle="tooltip" data-placement="top" data-animation="true" style="display: flex; justify-content: center">
+    <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12">
+        <div class="input-group" data-toggle="tooltip" data-placement="top" data-animation="true" style="display: flex; justify-content: left">
 
             <select id="number-of-entities-on-page-select" class="form-control-lg" title="Choose number of entities to show">
                 <option value="25">25</option>
@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div class="col-xl-10 col-lg-10 col-md-12 col-sm-12">
+    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
 
         <div style="display: flex; justify-content: center">
 
@@ -34,7 +34,10 @@
                     {
                         <li class="page-item">
                             <a href="#" aria-label="Previous" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', (@Model.PageNumber - 1), @Model.NumberOfEntitiesOnPage)">
-                                <span aria-hidden="true">&laquo;</span>
+                                <span aria-hidden="true">
+                                    @*&laquo;*@
+                                    <i class="fas fa-angle-double-left"></i>
+                                </span>
                             </a>
                         </li>
                     }
@@ -42,7 +45,10 @@
                     {
                         <li class="page-item disabled">
                             <a href="#" aria-label="Previous" class="page-link">
-                                <span aria-hidden="true">&laquo;</span>
+                                <span aria-hidden="true">
+                                    @*&laquo;*@
+                                    <i class="fas fa-angle-double-left"></i>
+                                </span>
                             </a>
                         </li>
                     }
@@ -94,7 +100,10 @@
                     {
                         <li class="page-item">
                             <a href="#" aria-label="Next" class="page-link" onclick="pagination('@Model.ElementId', '@Model.Url', (@Model.PageNumber + 1), @Model.NumberOfEntitiesOnPage)">
-                                <span aria-hidden="true">&raquo;</span>
+                                <span aria-hidden="true">
+                                    @*&raquo;*@
+                                    <i class="fas fa-angle-double-right"></i>
+                                </span>
                             </a>
                         </li>
                     }
@@ -102,7 +111,10 @@
                     {
                         <li class="page-item disabled">
                             <a href="#" aria-label="Next" class="page-link">
-                                <span aria-hidden="true">&raquo;</span>
+                                <span aria-hidden="true">
+                                    <i class="fas fa-angle-double-right"></i>
+                                    @*&raquo;*@
+                                </span>
                             </a>
                         </li>
                     }
@@ -111,8 +123,53 @@
         </div>
 
     </div>
+
+    <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12">
+
+        <div class="input-group input-group-lg">
+            <input id="page-number-user-input" type="text" class="form-control" placeholder="Page no.">
+            <span class="input-group-append">
+                <button id="show-page-given-by-user-btn"
+                        type="button"
+                        disabled
+                        class="btn btn-lg btn-outline-primary btn-block"
+                        onclick="pagination('@Model.ElementId', '@Model.Url', getPageNumberUserInputValue(), @Model.NumberOfEntitiesOnPage)">
+                    <i class="fas fa-caret-square-right"></i>
+                    Show
+                </button>
+            </span>
+        </div>
+    </div>
 </div>
 
+@*TODO: move it to its own js file and refactor it*@
 <script>
     $("#number-of-entities-on-page-select").val('@(Model.NumberOfEntitiesOnPage)');
+
+    $("#page-number-user-input").on("input", function () {
+
+        if ($(this).val().length > 0) {
+
+        if ($.isNumeric($(this).val())) {
+
+            if ($(this).val() <= 0) {
+                alert('given value must bigger than 0');
+            }
+            else if ($(this).val() > @(Model.NumberOfPages)) {
+                alert('given value cant be bigger than number of pages available');
+            }
+            else {
+                $('#show-page-given-by-user-btn').prop('disabled', false);
+                return;
+            }
+        }
+        else {
+            alert('given value must be a number');
+        }
+
+            $('#show-page-given-by-user-btn').prop('disabled', true);
+            $("#page-number-user-input").val('');
+            $("#page-number-user-input").focus();
+        }
+    });
 </script>

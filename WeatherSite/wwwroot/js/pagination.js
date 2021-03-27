@@ -23,3 +23,7 @@ function pagination(elementId, url, pageNumber, numberOfEntitiesOnPage) {
 function getNumberOfEntitiesOnPageSelectedValue() {
     return $('#number-of-entities-on-page-select').val();
 }
+
+function getPageNumberUserInputValue() {
+    return $("#page-number-user-input").val();
+}
