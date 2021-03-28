@@ -1,6 +1,6 @@
 # Simple Weather Site
 
-Setup:
+Setup (writing setup in progress):
 1. Get api key from: [openweathermap.org](https://openweathermap.org/) (getting this key may take up to few hours)
 2. Create user secrets in WeatherService project: `dotnet user-secrets init` 
 <br /> There should be this entry in WeatherService.csproj: 
