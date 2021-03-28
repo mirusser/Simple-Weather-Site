@@ -16,15 +16,11 @@ namespace WeatherService.Controllers
     public class WeatherForecastController : ControllerBase
     {
         //private readonly ILogger<WeatherForecastController> _logger;
-        private readonly WeatherClient _weatherClient;
 
         private readonly IQueryDispatcher _queryDispatcher;
 
-        public WeatherForecastController(
-            WeatherClient weatherClient,
-            IQueryDispatcher queryDispatcher)
+        public WeatherForecastController(IQueryDispatcher queryDispatcher)
         {
-            _weatherClient = weatherClient;
             _queryDispatcher = queryDispatcher;
         }
 
@@ -37,18 +33,11 @@ namespace WeatherService.Controllers
         }
 
         [HttpGet("{city}", Name = "GetCityByNameFromXmlResponse")]
-        public async Task<WeatherForecastDto> GetCityByNameFromXmlResponse(string city)
+        public async Task<ActionResult<WeatherForecastDto>> GetCityByNameFromXmlResponse([FromRoute] GetCityByNameFromXmlResponseQuery query)
         {
-            var current = await _weatherClient.GetCurrentWeatherInXmlByCityNameAsync(city);
+            var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 
-            WeatherForecastDto weatherForecast = new()
-            {
-                Summary = current.Weather.Value,
-                TemperatureC = (int)current.Temperature.Value,
-                Date = current.Lastupdate.Value
-            };
-
-            return weatherForecast;
+            return weatherForecastDto != null ? Ok(weatherForecastDto) : NotFound();
         }
 
         [HttpGet("{cityId}", Name = "GetByCityId")]

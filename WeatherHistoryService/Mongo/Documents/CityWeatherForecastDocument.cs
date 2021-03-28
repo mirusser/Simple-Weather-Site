@@ -24,9 +24,11 @@ namespace WeatherHistoryService.Mongo.Documents
         [Required(ErrorMessage = "City is required")]
         public string City { get; set; }
 
-        [Required(ErrorMessage = "Country is required")]
-        public string Country { get; set; }
+        [BsonElement("country code")]
+        [Required(ErrorMessage = "Country code is required")]
+        public string CountryCode { get; set; }
 
+        [BsonElement("search date")]
         [Required(ErrorMessage = "Search date is required")]
         public DateTime SearchDate { get; set; }
 

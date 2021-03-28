@@ -1,6 +1,9 @@
 using Convey;
 using Convey.CQRS.Commands;
+using Convey.CQRS.Events;
 using Convey.CQRS.Queries;
+using Convey.MessageBrokers.CQRS;
+using Convey.MessageBrokers.RabbitMQ;
 using Convey.Persistence.MongoDB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WeatherHistoryService.Mappings;
+using WeatherHistoryService.Messages.Events.External;
 using WeatherHistoryService.Mongo;
 using WeatherHistoryService.Mongo.Contracts.Repositories;
 using WeatherHistoryService.Mongo.Documents;
@@ -47,19 +52,21 @@ namespace WeatherHistoryService
             services.AddConvey()
                 //    .AddConsul()
                 .AddCommandHandlers()
-                // .AddEventHandlers()
+                .AddEventHandlers()
                 .AddQueryHandlers()
                 // .AddServiceBusEventDispatcher()
                 // .AddServiceBusCommandDispatcher()
                 .AddInMemoryCommandDispatcher()
-                // .AddInMemoryEventDispatcher()
+                .AddInMemoryEventDispatcher()
                 .AddInMemoryQueryDispatcher()
                 //    .AddRedis()
-                // .AddRabbitMq()
+                .AddRabbitMq()
                 .AddMongo()
                 .Build();
 
-            
+            //register autoMapper
+            services.AddAutoMapper(typeof(Maps));
+
             //register repos
             services.AddScoped<ICityWeatherForecastRepository, CityWeatherForecastRepository>();
             
@@ -89,6 +96,9 @@ namespace WeatherHistoryService
             {
                 endpoints.MapControllers();
             });
+
+            app.UseRabbitMq()
+                .SubscribeEvent<GotWeatherForecastEvent>();
         }
     }
 }

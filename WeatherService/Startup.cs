@@ -49,15 +49,15 @@ namespace WeatherService
             services.AddConvey()
                     //    .AddConsul()
                     .AddCommandHandlers()
-                    // .AddEventHandlers()
+                    .AddEventHandlers()
                     .AddQueryHandlers()
-                    // .AddServiceBusEventDispatcher()
-                    // .AddServiceBusCommandDispatcher()
+                    .AddServiceBusEventDispatcher()
+                    .AddServiceBusCommandDispatcher()
                     .AddInMemoryCommandDispatcher()
-                    // .AddInMemoryEventDispatcher()
+                    .AddInMemoryEventDispatcher()
                     .AddInMemoryQueryDispatcher()
-                    //    .AddRedis()
-                    // .AddRabbitMq()
+                     //    .AddRedis()
+                     .AddRabbitMq()
                     //.AddMongo()
                     .Build();
 
@@ -72,7 +72,6 @@ namespace WeatherService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -91,6 +90,7 @@ namespace WeatherService
                 endpoints.MapHealthChecks("/api/weatherforecast/health");
             });
 
+            app.UseRabbitMq();
         }
     }
 }
