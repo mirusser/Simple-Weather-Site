@@ -24,7 +24,6 @@ namespace CitiesService.Controllers
     [EnableCors("AllowAll")]
     public class CityController : ControllerBase
     {
-        private readonly ICityManager _cityManager;
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
 
