@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Convey.Types;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace WeatherHistoryService.Mongo.Documents
         public int TemperatureF { get; set; }
     }
 
-    public class CityWeatherForecastDocument
+    public class CityWeatherForecastDocument 
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

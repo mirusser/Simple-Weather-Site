@@ -16,6 +16,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WeatherHistoryService.Mongo;
+using WeatherHistoryService.Mongo.Contracts.Repositories;
+using WeatherHistoryService.Mongo.Documents;
+using WeatherHistoryService.Mongo.Repositories;
+using WeatherHistoryService.Services;
+using WeatherHistoryService.Services.Contracts;
 
 namespace WeatherHistoryService
 {
@@ -31,7 +36,7 @@ namespace WeatherHistoryService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<MongoSettings>(Configuration.GetSection("MongoConfiguration"));
+            services.Configure<MongoSettings>(Configuration.GetSection("mongo"));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -53,6 +58,13 @@ namespace WeatherHistoryService
                 // .AddRabbitMq()
                 .AddMongo()
                 .Build();
+
+            
+            //register repos
+            services.AddScoped<ICityWeatherForecastRepository, CityWeatherForecastRepository>();
+            
+            //register services
+            services.AddScoped<ICityWeatherForecastService, CityWeatherForecastService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
