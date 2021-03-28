@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Convey.CQRS.Queries;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WeatherService.Clients;
+using WeatherService.Messages.Queries;
+using WeatherService.Models.Dto;
 
 namespace WeatherService.Controllers
 {
@@ -12,39 +15,33 @@ namespace WeatherService.Controllers
     [Route("api/[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        //private readonly ILogger<WeatherForecastController> _logger;
         private readonly WeatherClient _weatherClient;
 
+        private readonly IQueryDispatcher _queryDispatcher;
+
         public WeatherForecastController(
-            ILogger<WeatherForecastController> logger,
-            WeatherClient weatherClient)
+            WeatherClient weatherClient,
+            IQueryDispatcher queryDispatcher)
         {
-            _logger = logger;
             _weatherClient = weatherClient;
+            _queryDispatcher = queryDispatcher;
         }
 
         [HttpGet("{city}", Name = "GetByCityName")]
-        public async Task<WeatherForecast> GetByCityName(string city)
+        public async Task<ActionResult<WeatherForecastDto>> GetByCityName([FromRoute] GetCityByNameQuery query)
         {
-            var forecast = await _weatherClient.GetCurrentWeatherByCityNameAsync(city);
-            // var forecast = await _weatherClient.GetCurrentWeaterMockAsync(city);
+            var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 
-            WeatherForecast weatherForecast = new()
-            {
-                Summary = forecast.weather[0].description,
-                TemperatureC = (int)forecast.main.temp,
-                Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime
-            };
-
-            return weatherForecast;
+            return weatherForecastDto != null ? Ok(weatherForecastDto) : NotFound();
         }
 
-        [HttpGet("{city}", Name = "GetInXmlByCityName")]
-        public async Task<WeatherForecast> GetInXmlByCityName(string city)
+        [HttpGet("{city}", Name = "GetCityByNameFromXmlResponse")]
+        public async Task<WeatherForecastDto> GetCityByNameFromXmlResponse(string city)
         {
             var current = await _weatherClient.GetCurrentWeatherInXmlByCityNameAsync(city);
 
-            WeatherForecast weatherForecast = new()
+            WeatherForecastDto weatherForecast = new()
             {
                 Summary = current.Weather.Value,
                 TemperatureC = (int)current.Temperature.Value,
@@ -55,19 +52,11 @@ namespace WeatherService.Controllers
         }
 
         [HttpGet("{cityId}", Name = "GetByCityId")]
-        public async Task<WeatherForecast> GetByCityId(decimal cityId)
+        public async Task<ActionResult<WeatherForecastDto>> GetByCityId([FromRoute] GetCityByIdQuery query)
         {
-            var forecast = await _weatherClient.GetCurrentWeatherByCityIdAsync(cityId);
-            // var forecast = await _weatherClient.GetCurrentWeaterMockAsync(city);
+            var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 
-            WeatherForecast weatherForecast = new()
-            {
-                Summary = forecast.weather[0].description,
-                TemperatureC = (int)forecast.main.temp,
-                Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime
-            };
-
-            return weatherForecast;
+            return weatherForecastDto != null ? Ok(weatherForecastDto) : NotFound();
         }
     }
 }

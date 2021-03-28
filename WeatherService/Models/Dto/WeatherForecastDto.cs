@@ -1,8 +1,8 @@
 using System;
 
-namespace WeatherService.Models
+namespace WeatherService.Models.Dto
 {
-    public class WeatherForecast
+    public class WeatherForecastDto
     {
         public DateTime Date { get; set; }
         public int TemperatureC { get; set; }

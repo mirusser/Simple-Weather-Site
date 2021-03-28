@@ -22,8 +22,8 @@ namespace WeatherHistoryService.Mongo.Repositories
             _settings = options.Value;
 
             var client = new MongoClient(_settings.ConnectionString);
-            var database = client.GetDatabase(_settings.database);
-            _cityWeatherForecastCollection = database.GetCollection<CityWeatherForecastDocument>(_settings.cityWeatherForecastsCollectionName);
+            var database = client.GetDatabase(_settings.Database);
+            _cityWeatherForecastCollection = database.GetCollection<CityWeatherForecastDocument>(_settings.CityWeatherForecastsCollectionName);
         }
 
         public async Task<CityWeatherForecastDocument> GetAsync(string id)

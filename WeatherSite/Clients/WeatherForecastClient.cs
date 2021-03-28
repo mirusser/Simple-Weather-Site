@@ -36,6 +36,7 @@ namespace WeatherSite.Clients
             catch (Exception ex)
             {
                 //TODO: do something with error here
+                var foo = ex;
             }
 
             return weatherForecast;
@@ -52,6 +53,7 @@ namespace WeatherSite.Clients
             catch (Exception ex)
             {
                 //TODO: do something with error here
+                var foo = ex;
             }
 
             return weatherForecast;

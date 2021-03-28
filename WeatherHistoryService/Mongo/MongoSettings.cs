@@ -8,8 +8,8 @@ namespace WeatherHistoryService.Mongo
     public class MongoSettings
     {
         public string ConnectionString { get; set; }
-        public string database { get; set; }
-        public string cityWeatherForecastsCollectionName { get; set; }
-        public bool seed { get; set; }
+        public string Database { get; set; }
+        public string CityWeatherForecastsCollectionName { get; set; }
+        public bool Seed { get; set; }
     }
 }
