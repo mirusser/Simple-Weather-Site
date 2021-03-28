@@ -7,3 +7,8 @@ Setup (writing setup in progress):
 <br /> `<UserSecretsId>some_guid</UserSecretsId>`
 4. You can look up all your stored secrets with this command: `dotnet user-secrets list`
 5. Set up your api key secret in WeatherService project: `dotnet user-secrets set "ServiceSettings:ApiKey" "your_api_key_here"`
+
+TODO: 
+- Implement proper exception handling in each microservice and weather site
+- In each microservice add proper logging (error, warning) using seq I think
+- Weather site: make proper user interface, add messages/alerts to user on what is going on (alerts on success/failure) and proper visualisatio of weather forecast (like proper images and visualisation of data)
