@@ -8,28 +8,48 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-
 <div class="row">
-    <div class="col-md-12">
-        <form asp-action="@(nameof(HomeController.Index))" asp-controller="@(MvcHelper.NameOfController<HomeController>())">
+    <div class="col-12">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">Get weather</h3>
 
-            <input asp-for="CitiesServiceEndpoint" type="hidden" />
-
-            <div class="form-group">
-                <span asp-validation-for="CityId" class="text-danger"></span>
-                <label asp-for="CityId" class="control-label"></label>
-                <select asp-for="CityId" class="select-city-ajax" style="width:100%">
-                </select>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="form-group">
-                <input type="submit" value="Get weather" class="btn btn-primary btn-block" />
+            <div class="card-body">
+                <form asp-action="@(nameof(HomeController.Index))" asp-controller="@(MvcHelper.NameOfController<HomeController>())">
+                    <input asp-for="CitiesServiceEndpoint" type="hidden" />
+
+                    <div class="form-group">
+                        <label>
+                            City
+                        </label>
+
+                        <select asp-for="CityId" id="select-city-ajax" class="form-control select2" style="width: 100%;" placeholder="Search city...">
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit"class="btn btn-primary btn-block" >
+                            <i class="fas fa-cloud-sun"></i>
+                            Get Weather
+                        </button>
+                    </div>
+                </form>
+
+                <div class="card-footer">
+                    Visit <a href="http://openweathermap.org/" target="_blank">
+                        openweathermap.org
+                    </a>
+                    for more info about API.
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -37,11 +57,23 @@
 {
     <div class="row">
         <div class="col-md-12">
-            <div class="form-group">
-                <label class="control-label">@Model.WeatherForecast.Date</label>
-                <label class="control-label">@Model.WeatherForecast.Summary</label>
-                <label class="control-label">@Model.WeatherForecast.TemperatureC</label>
-                <label class="control-label">@Model.WeatherForecast.TemperatureF</label>
+            <div class="card">
+                <div class="card-header">
+                    Weather for searched city:
+                    <strong>
+                        City name placeholder
+                    </strong>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="form-group">
+                        <label class="control-label">@Model.WeatherForecast.Date</label>
+                        <label class="control-label">@Model.WeatherForecast.Summary</label>
+                        <label class="control-label">@Model.WeatherForecast.TemperatureC</label>
+                        <label class="control-label">@Model.WeatherForecast.TemperatureF</label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -50,35 +82,24 @@
 @section Scripts{
     <script>
 
-        $('.select-city-ajax').select2({
+        $('#select-city-ajax').select2({
             placeholder: "Select city...",
             allowClear: true,
-            language: {
-                searching: function () {
-                    return "Searching...";
-                },
-                errorLoading: function () {
-                    return "Error...";
-                },
-                noResults: function () {
-                    return "Not found";
-                }
-            },
+            minimumInputLength: 2,
             ajax: {
                 delay: 550,
-                cache: false,
+                cache: true,
                 dataType: 'json',
                 url: function (params) {
                     return '@(Model.CitiesServiceEndpoint)' + params.term + '/10';
                 },
                 processResults: function (data) {
-                    console.log(data);
 
-                    var transformedData = $.map(data, function (obj) {
+                    var transformedData = $.map(data, function (item) {
 
-                        obj.id = obj.id;
-                        obj.text = obj.text || (obj.name + ' (' + obj.country + ')');
-                        return obj;
+                        item.id = item.id;
+                        item.text = item.text || (item.name + ' (' + item.country + ')');
+                        return item;
                     });
                     return {
                         results: transformedData
