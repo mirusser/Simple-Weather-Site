@@ -7,6 +7,7 @@ using Convey.MessageBrokers.RabbitMQ;
 using Convey.Persistence.MongoDB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WeatherHistoryService.Exceptions.Handler;
 using WeatherHistoryService.Mappings;
 using WeatherHistoryService.Messages.Events.External;
 using WeatherHistoryService.Mongo;
@@ -50,13 +52,16 @@ namespace WeatherHistoryService
             var mongoSettings = new MongoSettings();
             Configuration.GetSection("mongo").Bind(mongoSettings);
 
+
+            services.AddLogging();
+
             services.AddConvey()
                 //    .AddConsul()
                 .AddCommandHandlers()
                 .AddEventHandlers()
                 .AddQueryHandlers()
-                // .AddServiceBusEventDispatcher()
-                // .AddServiceBusCommandDispatcher()
+                .AddServiceBusEventDispatcher()
+                .AddServiceBusCommandDispatcher()
                 .AddInMemoryCommandDispatcher()
                 .AddInMemoryEventDispatcher()
                 .AddInMemoryQueryDispatcher()
@@ -65,6 +70,9 @@ namespace WeatherHistoryService
                 .AddMongo()
                 .AddMongoRepository<CityWeatherForecastDocument, Guid>(mongoSettings.CityWeatherForecastsCollectionName)
                 .Build();
+
+            //register heatlChecks
+            services.AddHealthChecks();
 
             //register autoMapper
             services.AddAutoMapper(typeof(Maps));
@@ -85,8 +93,8 @@ namespace WeatherHistoryService
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeatherHistoryService v1"));
             }
 
+            app.UseServiceExceptionHandler();
             app.UseHttpsRedirection();
-
             app.UseRouting();
 
             app.UseAuthorization();
@@ -94,6 +102,8 @@ namespace WeatherHistoryService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
+                endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
             });
 
             app.UseRabbitMq()
