@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,14 @@ namespace CitiesService.Exceptions
     public class ExceptionHandlerMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlerMiddleware> _logger;
 
-        public ExceptionHandlerMiddleware(RequestDelegate next)
+        public ExceptionHandlerMiddleware(
+            RequestDelegate next,
+            ILogger<ExceptionHandlerMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -29,7 +34,7 @@ namespace CitiesService.Exceptions
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var defaultErrorCode = "error";
             var exceptionType = exception.GetType();
@@ -40,6 +45,8 @@ namespace CitiesService.Exceptions
                 ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
                 _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
             };
+
+            _logger.LogError($"{System.Reflection.Assembly.GetEntryAssembly().GetName().Name}: Exception code: {errorCode} Exception message: {exception.Message}");
 
             var response = new { code = errorCode, message = exception.Message };
             var payload = JsonSerializer.Serialize(response);

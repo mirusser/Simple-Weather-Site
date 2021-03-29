@@ -53,12 +53,10 @@ namespace CitiesService.Logic.Managers
                     cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
 
                     cities = _mapper.Map<List<CityDto>>(cityInfoList);
-
-                    _logger.LogInformation($"Properly got cities by name: {cityName}");
                 }
                 else
                 {
-                    _logger.LogWarning($"Didn't find any city for given name: {cityName}");
+                    _logger.LogWarning($"{System.Reflection.Assembly.GetEntryAssembly().GetName().Name}: Didn't find any city for given name: {cityName}");
                 }
             }
 
