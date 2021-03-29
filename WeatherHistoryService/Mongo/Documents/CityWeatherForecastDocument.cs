@@ -15,11 +15,11 @@ namespace WeatherHistoryService.Mongo.Documents
         public int TemperatureF { get; set; }
     }
 
-    public class CityWeatherForecastDocument 
+    public class CityWeatherForecastDocument : IIdentifiable<Guid>
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        //[BsonRepresentation(BsonType.ObjectId)]
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "City is required")]
         public string City { get; set; }

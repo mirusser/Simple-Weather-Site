@@ -21,9 +21,7 @@ using System.Threading.Tasks;
 using WeatherHistoryService.Mappings;
 using WeatherHistoryService.Messages.Events.External;
 using WeatherHistoryService.Mongo;
-using WeatherHistoryService.Mongo.Contracts.Repositories;
 using WeatherHistoryService.Mongo.Documents;
-using WeatherHistoryService.Mongo.Repositories;
 using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
 
@@ -49,6 +47,9 @@ namespace WeatherHistoryService
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
             });
 
+            var mongoSettings = new MongoSettings();
+            Configuration.GetSection("mongo").Bind(mongoSettings);
+
             services.AddConvey()
                 //    .AddConsul()
                 .AddCommandHandlers()
@@ -62,13 +63,11 @@ namespace WeatherHistoryService
                 //    .AddRedis()
                 .AddRabbitMq()
                 .AddMongo()
+                .AddMongoRepository<CityWeatherForecastDocument, Guid>(mongoSettings.CityWeatherForecastsCollectionName)
                 .Build();
 
             //register autoMapper
             services.AddAutoMapper(typeof(Maps));
-
-            //register repos
-            services.AddScoped<ICityWeatherForecastRepository, CityWeatherForecastRepository>();
             
             //register services
             services.AddScoped<ICityWeatherForecastService, CityWeatherForecastService>();
