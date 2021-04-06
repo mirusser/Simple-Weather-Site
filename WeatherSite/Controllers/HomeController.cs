@@ -54,6 +54,17 @@ namespace WeatherSite.Controllers
             return View();
         }
 
+        public async Task<IActionResult> ErrorPartial(string code, string message)
+        {
+            var vm = new ErrorPartialVM()
+            {
+                Code = code,
+                Message = message
+            };
+
+            return PartialView(vm);
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

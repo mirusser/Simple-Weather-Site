@@ -16,7 +16,7 @@ namespace WeatherSite.Clients
         private readonly HttpClient _httpClient;
         private readonly ApiEndpoints _apiEndpoints;
         #endregion
-        
+
         public WeatherForecastClient(
             HttpClient httpClient,
             IOptions<ApiEndpoints> options)
@@ -27,34 +27,16 @@ namespace WeatherSite.Clients
 
         public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city)
         {
-            WeatherForecast weatherForecast = null;
-            try
-            {
-                var url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityName/{city}";
-                weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
-            }
-            catch (Exception ex)
-            {
-                //TODO: do something with error here
-                var foo = ex;
-            }
+            string url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityName/{city}";
+            WeatherForecast weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
 
             return weatherForecast;
         }
 
         public async Task<WeatherForecast> GetCurrentWeatherForCityByCityId(decimal cityId)
         {
-            WeatherForecast weatherForecast = null;
-            try
-            {
-                var url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityId/{cityId}";
-                weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
-            }
-            catch (Exception ex)
-            {
-                //TODO: do something with error here
-                var foo = ex;
-            }
+            string url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityId/{cityId}";
+            WeatherForecast weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
 
             return weatherForecast;
         }

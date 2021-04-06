@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WeatherSite.Clients;
+using WeatherSite.Exceptions.Handlers;
 using WeatherSite.Settings;
 
 namespace WeatherSite
@@ -47,6 +48,8 @@ namespace WeatherSite
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseSiteExceptionHandler();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

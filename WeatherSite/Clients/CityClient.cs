@@ -27,34 +27,16 @@ namespace WeatherSite.Clients
 
         public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
         {
-            List<City> cities = new();
-
-            try
-            {
-                var url = $"{_apiEndpoints.CitiesServiceApiUrl}{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
-                cities = await _httpClient.GetFromJsonAsync<List<City>>(url);
-            }
-            catch (Exception)
-            {
-                //TODO: do something with error here
-            }
+            string url = $"{_apiEndpoints.CitiesServiceApiUrl}{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
+            List<City>  cities = await _httpClient.GetFromJsonAsync<List<City>>(url);
 
             return cities;
         }
 
         public async Task<CitiesPagination> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
         {
-            CitiesPagination citiesPagination = new(default, default);
-
-            try
-            {
-                var url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
-                citiesPagination = await _httpClient.GetFromJsonAsync<CitiesPagination>(url);
-            }
-            catch (Exception)
-            {
-                //TODO: do something with error here
-            }
+            string url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
+            CitiesPagination citiesPagination = await _httpClient.GetFromJsonAsync<CitiesPagination>(url);
 
             return citiesPagination;
         }

@@ -12,7 +12,9 @@
     <div class="col-12">
         <div class="card card-default">
             <div class="card-header">
-                <h3 class="card-title">Get weather</h3>
+                <h3 class="card-title">
+                    Get weather forecast
+                </h3>
 
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -22,7 +24,7 @@
             </div>
 
             <div class="card-body">
-                <form asp-action="@(nameof(HomeController.Index))" asp-controller="@(MvcHelper.NameOfController<HomeController>())">
+                <form id="get-weather-forecast-form" asp-action="@(nameof(HomeController.Index))" asp-controller="@(MvcHelper.NameOfController<HomeController>())">
                     <input asp-for="CitiesServiceEndpoint" type="hidden" />
 
                     <div class="form-group">
@@ -34,8 +36,8 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <button type="submit"class="btn btn-primary btn-block" >
+                    <div id="get-weather-div" class="form-group" style="display: none">
+                        <button id="get-weather-btn" type="submit" class="btn btn-primary btn-block btn-lg">
                             <i class="fas fa-cloud-sun"></i>
                             Get Weather
                         </button>
@@ -48,6 +50,10 @@
                     </a>
                     for more info about API.
                 </div>
+            </div>
+
+            <div id="loading-div" class="overlay" style="display:none">
+                <i class="fas fa-2x fa-sync-alt fa-spin"></i>
             </div>
         </div>
     </div>
@@ -82,6 +88,15 @@
 @section Scripts{
     <script>
 
+        $('#get-weather-btn').on('click', function (e) {
+
+            e.preventDefault();
+
+            $('#loading-div').show();
+
+            $('#get-weather-forecast-form').submit();
+        });
+
         $('#select-city-ajax').select2({
             placeholder: "Select city...",
             allowClear: true,
@@ -95,6 +110,8 @@
                 },
                 processResults: function (data) {
 
+                    console.log(data);
+
                     var transformedData = $.map(data, function (item) {
 
                         item.id = item.id;
@@ -104,8 +121,27 @@
                     return {
                         results: transformedData
                     };
+                },
+                error: function (xhr, textStatus, errorThrown) {
+
+                    $(document).Toasts('create', {
+                        class: 'bg-danger',
+                        icon: 'fas fa-bomb fa-lg',
+                        title: 'Error message',
+                        body: 'Error occured while processing request: ' + textStatus,
+                    })
                 }
             }
+        });
+
+        $('#select-city-ajax').on('select2:select', function (e) {
+
+            $('#get-weather-div').show();
+        });
+
+        $('#select-city-ajax').on('select2:unselect', function (e) {
+
+            $('#get-weather-div').hide();
         });
     </script>
 }

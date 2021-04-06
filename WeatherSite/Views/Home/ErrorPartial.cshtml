@@ -1,0 +1,29 @@
+﻿
+@using WeatherSite.Models
+
+@model ErrorPartialVM
+
+<div class="row">
+    <div class="col-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-danger">
+                <i class="fas fa-exclamation-triangle "></i>
+            </span>
+
+            <div class="info-box-content">
+                <span class="info-box-text">
+                    <strong>
+                        Error:
+                    </strong>
+                    <span>
+                        @(Model.Code)
+                    </span>
+                </span>
+
+                <span class="info-box-text">
+                    @(Model.Message)
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

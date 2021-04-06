@@ -38,14 +38,14 @@ namespace WeatherSite.Controllers
             var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
             CitiesPaginationPartialVM vm = new()
             {
-                Cities = citiesPagination.Cities,
+                Cities = citiesPagination?.Cities,
                 PaginationVM = new()
                 {
                     ElementId = "#cities-pagination-partial-div",
                     Url = Url.Action(nameof(CityController.GetCitiesPaginationPartial), MvcHelper.NameOfController<CityController>()),
                     PageNumber = pageNumber,
                     NumberOfEntitiesOnPage = numberOfEntitiesOnPage,
-                    NumberOfPages = Convert.ToInt32(Math.Ceiling((decimal)citiesPagination.NumberOfAllCities / numberOfEntitiesOnPage))
+                    NumberOfPages = Convert.ToInt32(Math.Ceiling((decimal)citiesPagination?.NumberOfAllCities / numberOfEntitiesOnPage))
                 }
             };
 

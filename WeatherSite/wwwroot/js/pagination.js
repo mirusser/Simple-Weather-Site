@@ -1,4 +1,5 @@
 ﻿
+
 function pagination(elementId, url, pageNumber, numberOfEntitiesOnPage) {
 
     showBaseLoader(elementId);
@@ -14,9 +15,18 @@ function pagination(elementId, url, pageNumber, numberOfEntitiesOnPage) {
             console.log('loading pagination: success');
             $(elementId).html(data);
         })
-        .fail(function () {
+        .fail(function (data) {
+
             console.log('loading pagination: fails');
-            $(elementId).html('<p>loading pagination: fails</p>');
+            console.log(data);
+            console.log(data.responseText);
+
+            //$(elementId).html('<p>' + data.responseText + '</p> <p>loading pagination: fails</p>');
+
+            $.get('/Home/ErrorPartial/', { 'code': data.responseJSON.code, 'message': data.responseJSON.message }, function (response) {
+
+                $(elementId).html(response);
+            });
         });
 }
 
