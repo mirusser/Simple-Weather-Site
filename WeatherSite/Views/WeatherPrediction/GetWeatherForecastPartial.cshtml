@@ -1,0 +1,149 @@
+﻿
+@using WeatherSite.Controllers
+@using WeatherSite.Models.WeatherPrediction
+@using WeatherSite.Helpers
+
+@model GetWeatherForecastVM
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">
+                    Get weather forecast
+                </h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <form id="get-weather-forecast-form" 
+                      asp-action="@(nameof(WeatherPredictionController.GetWeatherForecastFromServicePartial))" 
+                      asp-controller="@(MvcHelper.NameOfController<HomeController>())"
+                      method="post">
+
+                    <input asp-for="CitiesServiceEndpoint" type="hidden" />
+
+                    <div class="form-group">
+                        <label>
+                            City
+                        </label>
+
+                        <select asp-for="CityId" id="select-city-ajax" class="form-control select2" style="width: 100%;" placeholder="Search city...">
+                        </select>
+                    </div>
+
+                    <div id="get-weather-div" class="form-group" style="display: none">
+                        <button id="get-weather-btn" type="submit" class="btn btn-primary btn-block btn-lg">
+                            <i class="fas fa-cloud-sun"></i>
+                            Get Weather
+                        </button>
+                    </div>
+                </form>
+
+                <div class="card-footer">
+                    Visit <a href="http://openweathermap.org/" target="_blank">
+                        openweathermap.org
+                    </a>
+                    for more info about API.
+                </div>
+            </div>
+
+            <div id="loading-div" class="overlay" style="display:none">
+                <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function getWeather() {
+
+        $('#loading-div').show();
+        $('#get-weather-forecast-from-service-partial').html('');
+
+        var data = $('#get-weather-forecast-form').serialize();
+
+        $.post('@(Url.Action(nameof(WeatherPredictionController.GetWeatherForecastFromServicePartial), MvcHelper.NameOfController<WeatherPredictionController>()))',
+            data,
+            function (response) {
+
+            $('#get-weather-forecast-from-service-partial').html(response);
+        })
+        .fail(function (data) {
+
+            $.get('@(Url.Action(nameof(HomeController.ErrorPartial), MvcHelper.NameOfController<HomeController>()))',
+                { 'code': data.responseJSON.code, 'message': data.responseJSON.message },
+                function (response) {
+
+                    $('#get-weather-forecast-from-service-partial').html(response);
+                }
+            );
+        })
+        .always(function () {
+
+            $('#loading-div').hide();
+        });
+    }
+
+    $('#get-weather-btn').on('click', function (e) {
+
+        e.preventDefault();
+
+        getWeather();
+    });
+
+    $('#select-city-ajax').select2({
+        placeholder: "Select city...",
+        allowClear: true,
+        minimumInputLength: 2,
+        ajax: {
+            delay: 550,
+            cache: true,
+            dataType: 'json',
+            url: function (params) {
+                return '@(Model.CitiesServiceEndpoint)' + params.term + '/10';
+            },
+            processResults: function (data) {
+
+                console.log(data);
+
+                var transformedData = $.map(data, function (item) {
+
+                    item.id = item.id;
+                    item.text = item.text || (item.name + ' (' + item.country + ')');
+                    return item;
+                });
+                return {
+                    results: transformedData
+                };
+            },
+            error: function (xhr, textStatus, errorThrown) {
+
+                $(document).Toasts('create', {
+                    class: 'bg-danger',
+                    icon: 'fas fa-bomb fa-lg',
+                    title: 'Error message',
+                    body: 'Error occured while processing request: ' + textStatus,
+                })
+            }
+        }
+    });
+
+    $('#select-city-ajax').on('select2:select', function (e) {
+
+        $('#get-weather-div').show();
+
+        getWeather();
+    });
+
+    $('#select-city-ajax').on('select2:unselect', function (e) {
+
+        $('#get-weather-div').hide();
+    });
+</script>

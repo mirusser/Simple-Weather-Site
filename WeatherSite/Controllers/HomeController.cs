@@ -17,39 +17,8 @@ namespace WeatherSite.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly WeatherForecastClient _weatherForecastClient;
-        private readonly ApiEndpoints _apiEndpoints;
-
-        public HomeController(
-            ILogger<HomeController> logger,
-            WeatherForecastClient weatherForecastClient,
-            IOptions<ApiEndpoints> options)
-        {
-            _logger = logger;
-            _weatherForecastClient = weatherForecastClient;
-            _apiEndpoints = options.Value;
-        }
-
         [HttpGet]
         public async Task<IActionResult> Index()
-        {
-            var vm = new HomeVM()
-            {
-                CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl
-            };
-
-            return View(vm);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Index(HomeVM homeVM)
-        {
-            homeVM.WeatherForecast = await _weatherForecastClient.GetCurrentWeatherForCityByCityId(homeVM.CityId);
-            return View(homeVM);
-        }
-
-        public IActionResult Privacy()
         {
             return View();
         }

@@ -1,0 +1,31 @@
+﻿
+@using WeatherSite.Controllers
+@using WeatherSite.Helpers
+
+@{
+    ViewData["Title"] = "Weather Forecast";
+}
+
+<div id="get-weather-forecast-partial"></div>
+
+<div id="get-weather-forecast-from-service-partial"></div>
+
+@section Scripts{
+    <script>
+
+        $.get('@(Url.Action(nameof(WeatherPredictionController.GetWeatherForecastPartial), MvcHelper.NameOfController<WeatherPredictionController>()))', function (response) {
+
+            $('#get-weather-forecast-partial').html(response);
+        })
+        .fail(function (data) {
+
+            $.get('@(Url.Action(nameof(HomeController.ErrorPartial), MvcHelper.NameOfController<HomeController>()))',
+                { 'code': data.responseJSON.code, 'message': data.responseJSON.message },
+                function (response) {
+
+                    $('#get-weather-forecast-partial').html(response);
+                }
+            );
+        });
+    </script>
+}

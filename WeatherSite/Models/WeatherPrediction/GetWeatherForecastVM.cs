@@ -6,10 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using WeatherSite.Clients.Models.Records;
 
-namespace WeatherSite.Models
+namespace WeatherSite.Models.WeatherPrediction
 {
-    //TODO: move it to proper location (directory)
-    public class HomeVM
+    public class GetWeatherForecastVM
     {
         public string CityName { get; set; }
 
@@ -19,7 +18,7 @@ namespace WeatherSite.Models
 
         public string CitiesServiceEndpoint { get; set; }
 
-        //TODO: make a proper view model of this property
+        //TODO: make a proper view model of this property maybe
         public WeatherForecast WeatherForecast { get; set; }
     }
 }

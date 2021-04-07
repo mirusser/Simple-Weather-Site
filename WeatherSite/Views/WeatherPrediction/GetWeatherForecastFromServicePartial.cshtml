@@ -1,0 +1,42 @@
+﻿
+@using WeatherSite.Controllers
+@using WeatherSite.Models.WeatherPrediction
+@using WeatherSite.Helpers
+
+@model GetWeatherForecastVM
+
+@if (Model != null && Model.WeatherForecast != null)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    Weather for searched city:
+                    <strong>
+                        City name placeholder
+                    </strong>
+
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="form-group">
+                        <label class="control-label">@Model.WeatherForecast.Date</label>
+                        <label class="control-label">@Model.WeatherForecast.Summary</label>
+                        <label class="control-label">@Model.WeatherForecast.TemperatureC</label>
+                        <label class="control-label">@Model.WeatherForecast.TemperatureF</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

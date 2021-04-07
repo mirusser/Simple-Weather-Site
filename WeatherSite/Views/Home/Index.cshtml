@@ -1,8 +1,6 @@
-﻿@using WeatherSite.Models
+﻿
 @using WeatherSite.Controllers
 @using WeatherSite.Helpers
-
-@model HomeVM
 
 @{
     ViewData["Title"] = "Home Page";
@@ -13,7 +11,7 @@
         <div class="card card-default">
             <div class="card-header">
                 <h3 class="card-title">
-                    Get weather forecast
+                    Home page
                 </h3>
 
                 <div class="card-tools">
@@ -24,124 +22,14 @@
             </div>
 
             <div class="card-body">
-                <form id="get-weather-forecast-form" asp-action="@(nameof(HomeController.Index))" asp-controller="@(MvcHelper.NameOfController<HomeController>())">
-                    <input asp-for="CitiesServiceEndpoint" type="hidden" />
 
-                    <div class="form-group">
-                        <label>
-                            City
-                        </label>
-
-                        <select asp-for="CityId" id="select-city-ajax" class="form-control select2" style="width: 100%;" placeholder="Search city...">
-                        </select>
-                    </div>
-
-                    <div id="get-weather-div" class="form-group" style="display: none">
-                        <button id="get-weather-btn" type="submit" class="btn btn-primary btn-block btn-lg">
-                            <i class="fas fa-cloud-sun"></i>
-                            Get Weather
-                        </button>
-                    </div>
-                </form>
-
-                <div class="card-footer">
-                    Visit <a href="http://openweathermap.org/" target="_blank">
-                        openweathermap.org
-                    </a>
-                    for more info about API.
+                <div class="form-group">
+                    <label>
+                        Lorem Ipsum
+                    </label>
                 </div>
             </div>
 
-            <div id="loading-div" class="overlay" style="display:none">
-                <i class="fas fa-2x fa-sync-alt fa-spin"></i>
-            </div>
         </div>
     </div>
 </div>
-
-@if (Model != null && Model.WeatherForecast != null)
-{
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    Weather for searched city:
-                    <strong>
-                        City name placeholder
-                    </strong>
-                </div>
-
-                <div class="card-body">
-
-                    <div class="form-group">
-                        <label class="control-label">@Model.WeatherForecast.Date</label>
-                        <label class="control-label">@Model.WeatherForecast.Summary</label>
-                        <label class="control-label">@Model.WeatherForecast.TemperatureC</label>
-                        <label class="control-label">@Model.WeatherForecast.TemperatureF</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-@section Scripts{
-    <script>
-
-        $('#get-weather-btn').on('click', function (e) {
-
-            e.preventDefault();
-
-            $('#loading-div').show();
-
-            $('#get-weather-forecast-form').submit();
-        });
-
-        $('#select-city-ajax').select2({
-            placeholder: "Select city...",
-            allowClear: true,
-            minimumInputLength: 2,
-            ajax: {
-                delay: 550,
-                cache: true,
-                dataType: 'json',
-                url: function (params) {
-                    return '@(Model.CitiesServiceEndpoint)' + params.term + '/10';
-                },
-                processResults: function (data) {
-
-                    console.log(data);
-
-                    var transformedData = $.map(data, function (item) {
-
-                        item.id = item.id;
-                        item.text = item.text || (item.name + ' (' + item.country + ')');
-                        return item;
-                    });
-                    return {
-                        results: transformedData
-                    };
-                },
-                error: function (xhr, textStatus, errorThrown) {
-
-                    $(document).Toasts('create', {
-                        class: 'bg-danger',
-                        icon: 'fas fa-bomb fa-lg',
-                        title: 'Error message',
-                        body: 'Error occured while processing request: ' + textStatus,
-                    })
-                }
-            }
-        });
-
-        $('#select-city-ajax').on('select2:select', function (e) {
-
-            $('#get-weather-div').show();
-        });
-
-        $('#select-city-ajax').on('select2:unselect', function (e) {
-
-            $('#get-weather-div').hide();
-        });
-    </script>
-}

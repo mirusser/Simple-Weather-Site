@@ -61,7 +61,7 @@ namespace WeatherSite
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=WeatherPrediction}/{action=Index}/{id?}");
             });
         }
     }
