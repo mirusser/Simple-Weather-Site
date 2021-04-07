@@ -12,4 +12,4 @@ TODO:
 - Implement proper exception handling in each microservice and weather site
 - In each microservice add proper logging (error, warning) using seq I think
 - Weather site: make proper user interface, add messages/alerts to user on what is going on (alerts on success/failure) and proper visualisation of weather forecast (like proper images and visualisation of data)
-- Implement Onion Architecture for at least WeahterSite (for microservices it would be overkill)
+- Implement Onion Architecture for at least WeatherSite (for microservices it would be overkill)
