@@ -20,7 +20,7 @@ using CitiesService.Messages.Commands;
 namespace CitiesService.Controllers
 {
     [ApiController]
-    [Route("api/city")]
+    [Route("api/[controller]")]
     [EnableCors("AllowAll")]
     public class CityController : ControllerBase
     {

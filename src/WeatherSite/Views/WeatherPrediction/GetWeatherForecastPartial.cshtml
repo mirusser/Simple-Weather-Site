@@ -107,11 +107,13 @@
             cache: true,
             dataType: 'json',
             url: function (params) {
-                return '@(Model.CitiesServiceEndpoint)' + params.term + '/10';
+                console.log('params: ' + params);
+                console.log('url: ' + '@(Model.CitiesServiceEndpoint)' + params.term + '/10');
+                return '@(Model.CitiesServiceEndpoint)' +  params.term + '/10';
             },
             processResults: function (data) {
 
-                console.log(data);
+                console.log('data: ' + data);
 
                 var transformedData = $.map(data, function (item) {
 

@@ -25,13 +25,13 @@ namespace WeatherSite.Clients
             _apiEndpoints = options.Value;
         }
 
-        public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city)
-        {
-            string url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityName/{city}";
-            WeatherForecast weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
+        //public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city)
+        //{
+        //    string url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityName/{city}";
+        //    WeatherForecast weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
 
-            return weatherForecast;
-        }
+        //    return weatherForecast;
+        //}
 
         public async Task<WeatherForecast> GetCurrentWeatherForCityByCityId(decimal cityId)
         {
