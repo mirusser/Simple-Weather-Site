@@ -37,13 +37,13 @@ namespace CitiesService.Logic.Managers
             _logger = logger;
         }
 
-        public async Task<List<CityDto>> GetCitiesByName(string cityName, int limit = 10)
+        public List<CityDto> GetCitiesByName(string cityName, int limit = 10)
         {
             List<CityDto> cities = new();
 
             if (!string.IsNullOrEmpty(cityName) && limit > 0)
             {
-                var cityInfos = await _cityInfoRepo.FindAll(
+                var cityInfos = _cityInfoRepo.FindAll(
                     c => c.Name.Contains(cityName),
                     takeNumberOfRows: limit);
 
@@ -63,20 +63,20 @@ namespace CitiesService.Logic.Managers
             return cities;
         }
 
-        public async Task<CitiesPaginationDto> GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1)
+        public CitiesPaginationDto GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1)
         {
-            var totalNumberOfCities = (await _cityInfoRepo.FindAll()).Count();
+            var totalNumberOfCities = _cityInfoRepo.FindAll().Count();
 
             CitiesPaginationDto citiesPaginationDto = new()
             {
                 NumberOfAllCities = totalNumberOfCities
             };
 
-            if (pageNumber >= 1 && numberOfCities > 1)
+            if (pageNumber >= 1 && numberOfCities >= 1)
             {
                 var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
 
-                var cityInfos = await _cityInfoRepo.FindAll(takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
+                var cityInfos = _cityInfoRepo.FindAll(takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
                 var cityDtoList = _mapper.Map<List<CityDto>>(cityInfos.ToList());
 
                 citiesPaginationDto.Cities = cityDtoList;
@@ -85,7 +85,7 @@ namespace CitiesService.Logic.Managers
             return citiesPaginationDto;
         }
 
-        public async Task<bool> DownloadCityFile()
+        public bool DownloadCityFile()
         {
             if (!File.Exists(_fileUrlsAndPaths.CompressedCityListFilePath))
             {
@@ -111,7 +111,7 @@ namespace CitiesService.Logic.Managers
 
             if (!anyCityExists)
             {
-                await DownloadCityFile();
+                DownloadCityFile();
 
                 if (File.Exists(_fileUrlsAndPaths.DecompressedCityListFilePath))
                 {

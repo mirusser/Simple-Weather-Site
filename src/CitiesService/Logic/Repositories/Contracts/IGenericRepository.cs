@@ -8,7 +8,7 @@ namespace CitiesService.Logic.Repositories.Contracts
 {
     public interface IGenericRepository<T> where T : class
     {
-        Task<IQueryable<T>> FindAll(
+        IQueryable<T> FindAll(
             Expression<Func<T, bool>> searchExpression = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
             int skipNumberOfRows = default,

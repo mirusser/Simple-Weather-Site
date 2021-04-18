@@ -5,7 +5,7 @@ using CitiesService.Logic.Managers;
 using CitiesService.Logic.Managers.Contracts;
 using CitiesService.Logic.Repositories;
 using CitiesService.Logic.Repositories.Contracts;
-using CitiesService.Mappings;
+using CitiesService.Logic.Mappings;
 using CitiesService.Settings;
 using Convey;
 using Convey.CQRS.Commands;
@@ -28,6 +28,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using CitiesService.Data.Models;
+using System.Text.Json;
+using CitiesService.Logic.HealthChecks;
 
 namespace CitiesService
 {
@@ -47,7 +51,10 @@ namespace CitiesService
             services.Configure<ConnectionStrings>(Configuration.GetSection(nameof(ConnectionStrings)));
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+
+            services.AddTransient<ApplicationDbContext>();
 
             services.AddControllers();
             services.AddCors(options =>
@@ -83,12 +90,16 @@ namespace CitiesService
             });
 
             services.AddHttpClient();
-            services.AddHealthChecks();
+
+            services.AddHealthChecks()
+                .AddDbContextCheck<ApplicationDbContext>()
+                .AddCheck<CustomHealthCheck>(name: "Custom Healthcheck"); ;
+
             services.AddAutoMapper(typeof(Maps));
 
-            services.AddScoped<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
+            services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
 
-            services.AddScoped<ICityManager, CityManager>();
+            services.AddTransient<ICityManager, CityManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -97,9 +108,12 @@ namespace CitiesService
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
             }
+
+            #region Swagger
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
+            #endregion
 
             app.UseServiceExceptionHandler();
             app.UseHttpsRedirection();
@@ -110,10 +124,32 @@ namespace CitiesService
 
             app.UseCors("AllowAll");
 
+            #region Healthchecks
+            app.UseHealthChecks("/health", new HealthCheckOptions
+            {
+                ResponseWriter = async (context, report) =>
+                {
+                    context.Response.ContentType = "application/json";
+                    var response = new HealthCheckReponse
+                    {
+                        Status = report.Status.ToString(),
+                        HealthCheckDuration = report.TotalDuration,
+                        HealthChecks = report.Entries.Select(x => new IndividualHealthCheckResponse
+                        {
+                            Component = x.Key,
+                            Status = x.Value.Status.ToString(),
+                            Description = x.Value.Description
+                        })
+                    };
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                }
+            });
+            #endregion
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health");
+                //endpoints.MapHealthChecks("/health");
                 endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
             });
 

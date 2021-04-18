@@ -11,23 +11,24 @@ namespace CitiesService.Logic.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly ApplicationDbContext context;
-        private readonly DbSet<T> db;
+        private readonly ApplicationDbContext _context;
+        private readonly DbSet<T> _db;
 
         public GenericRepository(ApplicationDbContext context)
         {
-            this.context = context;
-            db = this.context.Set<T>();
+            _context = context;
+            _db = _context.Set<T>();
         }
 
-        public async Task<IQueryable<T>> FindAll(
+        public IQueryable<T> FindAll(
             Expression<Func<T, bool>> searchExpression = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
             int skipNumberOfRows = default,
             int takeNumberOfRows = default,
             List<string> includes = null)
         {
-            IQueryable<T> query = db;
+
+            IQueryable<T> query = _db;
 
             if (searchExpression != null)
             {
@@ -62,7 +63,7 @@ namespace CitiesService.Logic.Repositories
 
         public async Task<T> Find(Expression<Func<T, bool>> searchExpression = null, List<string> includes = null)
         {
-            IQueryable<T> query = db;
+            IQueryable<T> query = _db;
 
             if (includes != null && includes.Any())
             {
@@ -77,40 +78,40 @@ namespace CitiesService.Logic.Repositories
 
         public async Task<bool> CheckIfExists(Expression<Func<T, bool>> searchExpression = null)
         {
-            IQueryable<T> query = db;
+            IQueryable<T> query = _db;
 
             return await query.AnyAsync(searchExpression);
         }
 
         public async Task<bool> Create(T entity)
         {
-            var entityEntry = await db.AddAsync(entity);
+            var entityEntry = await _db.AddAsync(entity);
 
             return entityEntry.State == EntityState.Added;
         }
 
         public async Task CreateRange(IEnumerable<T> entities)
         {
-            await db.AddRangeAsync(entities);
+            await _db.AddRangeAsync(entities);
         }
 
         public bool Delete(T entity)
         {
-            var entityEntry = db.Remove(entity);
+            var entityEntry = _db.Remove(entity);
 
             return entityEntry.State == EntityState.Deleted;
         }
 
         public bool Update(T entity)
         {
-            var entityEntry = db.Update(entity);
+            var entityEntry = _db.Update(entity);
 
             return entityEntry.State == EntityState.Modified;
         }
 
         public async Task<bool> Save()
         {
-            var numberOfRowsAffected = await context.SaveChangesAsync();
+            var numberOfRowsAffected = await _context.SaveChangesAsync();
 
             return numberOfRowsAffected > 0;
         }

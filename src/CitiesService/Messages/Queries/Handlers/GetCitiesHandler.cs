@@ -19,7 +19,7 @@ namespace CitiesService.Messages.Queries.Handlers
 
         public async Task<IEnumerable<CityDto>> HandleAsync(GetCitiesQuery query)
         {
-            var cities = await _cityManger.GetCitiesByName(query.CityName, query.Limit);
+            var cities = _cityManger.GetCitiesByName(query.CityName, query.Limit);
 
             return cities;
         }

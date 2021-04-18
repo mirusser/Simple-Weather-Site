@@ -19,7 +19,7 @@ namespace CitiesService.Messages.Queries.Handlers
 
         public async Task<CitiesPaginationDto> HandleAsync(GetCitiesPaginationQuery query)
         {
-            var citiesPaginationDto = await _cityManager.GetCitiesPagination(query.NumberOfCities, query.PageNumber);
+            var citiesPaginationDto = _cityManager.GetCitiesPagination(query.NumberOfCities, query.PageNumber);
 
             return citiesPaginationDto;
         }

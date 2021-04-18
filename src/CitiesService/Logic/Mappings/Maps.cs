@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CitiesService.Mappings
+namespace CitiesService.Logic.Mappings
 {
     public class Maps : Profile
     {

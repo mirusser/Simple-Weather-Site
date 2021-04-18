@@ -9,30 +9,23 @@ using System.Threading.Tasks;
 
 namespace CitiesService.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
-        private readonly ConnectionStrings _connectionStrings;
-
-        public ApplicationDbContext(IOptions<ConnectionStrings> options) : base ()
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
-            _connectionStrings = options.Value;
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(_connectionStrings.DefaultConnection);
-        }
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<CityInfo>()
+        //        .HasAlternateKey(c => c.CityId)
+        //        .HasName("AlternateKey_CityId");
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<CityInfo>()
-                .HasAlternateKey(c => c.CityId)
-                .HasName("AlternateKey_CityId");
-
-            modelBuilder.Entity<CityInfo>()
-                .HasIndex(c => c.CityId)
-                .IsUnique();
-        }
+        //    modelBuilder.Entity<CityInfo>()
+        //        .HasIndex(c => c.CityId)
+        //        .IsUnique();
+        //}
 
         public DbSet<CityInfo> CityInfos { get; set; }
     }
