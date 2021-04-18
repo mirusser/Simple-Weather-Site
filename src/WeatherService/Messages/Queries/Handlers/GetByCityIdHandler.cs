@@ -10,12 +10,12 @@ using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries.Handlers
 {
-    public class GetCityByIdHandler : IQueryHandler<GetCityByIdQuery, WeatherForecastDto>
+    public class GetByCityIdHandler : IQueryHandler<GetByCityIdQuery, WeatherForecastDto>
     {
         private readonly IBusPublisher _publisher;
         private readonly WeatherClient _weatherClient;
 
-        public GetCityByIdHandler(
+        public GetByCityIdHandler(
             WeatherClient weatherClient,
             IBusPublisher publisher)
         {
@@ -23,7 +23,7 @@ namespace WeatherService.Messages.Queries.Handlers
             _publisher = publisher;
         }
 
-        public async Task<WeatherForecastDto> HandleAsync(GetCityByIdQuery query)
+        public async Task<WeatherForecastDto> HandleAsync(GetByCityIdQuery query)
         {
             var forecast = await _weatherClient.GetCurrentWeatherByCityIdAsync(query.CityId);
             WeatherForecastDto weatherForecastDto = null;

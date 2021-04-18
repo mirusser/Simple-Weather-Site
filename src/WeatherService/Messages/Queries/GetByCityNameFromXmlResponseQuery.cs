@@ -7,8 +7,8 @@ using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries
 {
-    public class GetCityByIdQuery : IQuery<WeatherForecastDto>
+    public class GetByCityNameFromXmlResponseQuery : IQuery<WeatherForecastDto>
     {
-        public decimal CityId { get; set; }
+        public string City { get; set; }
     }
 }

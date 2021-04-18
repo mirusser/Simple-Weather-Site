@@ -7,7 +7,7 @@ using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries
 {
-    public class GetCityByNameQuery : IQuery<WeatherForecastDto>
+    public class GetByCityNameQuery : IQuery<WeatherForecastDto>
     {
         public string City { get; set; }
     }

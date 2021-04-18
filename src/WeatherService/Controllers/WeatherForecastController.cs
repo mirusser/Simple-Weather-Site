@@ -25,7 +25,7 @@ namespace WeatherService.Controllers
         }
 
         [HttpGet("{city}", Name = "GetByCityName")]
-        public async Task<ActionResult<WeatherForecastDto>> GetByCityName([FromRoute] GetCityByNameQuery query)
+        public async Task<ActionResult<WeatherForecastDto>> GetByCityName([FromRoute] GetByCityNameQuery query)
         {
             var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 
@@ -33,7 +33,7 @@ namespace WeatherService.Controllers
         }
 
         [HttpGet("{city}", Name = "GetCityByNameFromXmlResponse")]
-        public async Task<ActionResult<WeatherForecastDto>> GetCityByNameFromXmlResponse([FromRoute] GetCityByNameFromXmlResponseQuery query)
+        public async Task<ActionResult<WeatherForecastDto>> GetCityByNameFromXmlResponse([FromRoute] GetByCityNameFromXmlResponseQuery query)
         {
             var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 
@@ -41,7 +41,7 @@ namespace WeatherService.Controllers
         }
 
         [HttpGet("{cityId}", Name = "GetByCityId")]
-        public async Task<ActionResult<WeatherForecastDto>> GetByCityId([FromRoute] GetCityByIdQuery query)
+        public async Task<ActionResult<WeatherForecastDto>> GetByCityId([FromRoute] GetByCityIdQuery query)
         {
             var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 

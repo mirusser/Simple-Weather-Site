@@ -1,5 +1,4 @@
 ﻿using Convey.CQRS.Queries;
-using Convey.MessageBrokers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +8,12 @@ using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries.Handlers
 {
-    public class GetCityByNameHandler : IQueryHandler<GetCityByNameQuery, WeatherForecastDto>
+    public class GetByCityNameFromXmlResponseHandler : IQueryHandler<GetByCityNameFromXmlResponseQuery, WeatherForecastDto>
     {
         //private readonly IBusPublisher _publisher;
         private readonly WeatherClient _weatherClient;
 
-        public GetCityByNameHandler(
+        public GetByCityNameFromXmlResponseHandler(
             WeatherClient weatherClient)
         {
             _weatherClient = weatherClient;
@@ -22,11 +21,11 @@ namespace WeatherService.Messages.Queries.Handlers
         }
 
         //TODO: publish message/event on successfuly getting forecast
-        public async Task<WeatherForecastDto> HandleAsync(GetCityByNameQuery query)
+        public async Task<WeatherForecastDto> HandleAsync(GetByCityNameFromXmlResponseQuery query)
         {
-            var forecast = await _weatherClient.GetCurrentWeatherByCityNameAsync(query.City);
+            var current = await _weatherClient.GetCurrentWeatherInXmlByCityNameAsync(query.City);
 
-            if (forecast == null)
+            if (current == null)
             {
                 //TODO: logging
             }
@@ -34,11 +33,11 @@ namespace WeatherService.Messages.Queries.Handlers
             //TODO: add autoMapper
             WeatherForecastDto weatherForecast = new()
             {
-                City = forecast.name,
-                CountryCode = forecast.sys.country,
-                Summary = forecast.weather[0].description,
-                TemperatureC = (int)forecast.main.temp,
-                Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime
+                City = current.City.Name,
+                CountryCode = current.City.Country,
+                Summary = current.Weather.Value,
+                TemperatureC = (int)current.Temperature.Value,
+                Date = current.Lastupdate.Value
             };
 
             return weatherForecast;
