@@ -144,28 +144,73 @@
 
 @*TODO: move it to its own js file and refactor it*@
 <script>
+
     $("#number-of-entities-on-page-select").val('@(Model.NumberOfEntitiesOnPage)');
+
+    $('#page-number-user-input')[0].focus({ preventScroll: true });
+
+    //I leave this chunk of code in the comments below for nowa as a future referance
+    //if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+    //    $('#page-number-user-input').focus();
+    //}
+
+    //$(window).scroll(function () {
+    //    if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+    //    }
+    //});
+
+    $('#page-number-user-input').on('keypress', function (e) {
+
+        if (e.which === 13 && $(this).val().length > 0) {
+
+            pagination('@Model.ElementId', '@Model.Url', getPageNumberUserInputValue(), @Model.NumberOfEntitiesOnPage);
+        }
+    });
 
     $("#page-number-user-input").on("input", function () {
 
         if ($(this).val().length > 0) {
 
-        if ($.isNumeric($(this).val())) {
+            if ($.isNumeric($(this).val())) {
 
-            if ($(this).val() <= 0) {
-                alert('given value must bigger than 0');
-            }
-            else if ($(this).val() > @(Model.NumberOfPages)) {
-                alert('given value cant be bigger than number of pages available');
+                if ($(this).val() <= 0) {
+
+                    $(document).Toasts('create', {
+                        class: 'bg-warning',
+                        icon: 'fas fa-exclamation-triangle fa-lg',
+                        title: 'Warning message',
+                        body: 'Page number must bigger than 0',
+                        autohide: true,
+                        delay: 3000
+                    });
+                }
+                else if ($(this).val() > @(Model.NumberOfPages)) {
+
+                    $(document).Toasts('create', {
+                        class: 'bg-warning',
+                        icon: 'fas fa-exclamation-triangle fa-lg',
+                        title: 'Warning message',
+                        body: 'Page number can\'t be bigger than number of pages available',
+                        autohide: true,
+                        delay: 3000
+                    });
+                }
+                else {
+                    $('#show-page-given-by-user-btn').prop('disabled', false);
+                    return;
+                }
             }
             else {
-                $('#show-page-given-by-user-btn').prop('disabled', false);
-                return;
+
+                $(document).Toasts('create', {
+                    class: 'bg-warning',
+                    icon: 'fas fa-exclamation-triangle fa-lg',
+                    title: 'Warning message',
+                    body: 'Page number must be a number',
+                    autohide: true,
+                    delay: 3000
+                });
             }
-        }
-        else {
-            alert('given value must be a number');
-        }
 
             $('#show-page-given-by-user-btn').prop('disabled', true);
             $("#page-number-user-input").val('');
