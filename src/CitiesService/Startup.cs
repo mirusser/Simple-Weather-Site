@@ -97,6 +97,8 @@ namespace CitiesService
 
             services.AddAutoMapper(typeof(Maps));
 
+            services.AddMemoryCache();
+
             services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
 
             services.AddTransient<ICityManager, CityManager>();

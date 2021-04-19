@@ -6,11 +6,13 @@ using CitiesService.Logic.Helpers;
 using CitiesService.Logic.Managers.Contracts;
 using CitiesService.Logic.Repositories.Contracts;
 using CitiesService.Settings;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,39 +26,58 @@ namespace CitiesService.Logic.Managers
         private readonly IMapper _mapper;
         private readonly IGenericRepository<CityInfo> _cityInfoRepo;
         private readonly ILogger<CityManager> _logger;
+        private readonly IMemoryCache _memoryCache;
+        private readonly MemoryCacheEntryOptions _cacheExpiryOptions;
 
         public CityManager(
             IOptions<FileUrlsAndPaths> options,
             IMapper mapper,
             IGenericRepository<CityInfo> cityInfoRepo,
-            ILogger<CityManager> logger)
+            ILogger<CityManager> logger,
+            IMemoryCache memoryCache)
         {
             _fileUrlsAndPaths = options.Value;
             _mapper = mapper;
             _cityInfoRepo = cityInfoRepo;
             _logger = logger;
+            _memoryCache = memoryCache;
+
+
+            _cacheExpiryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+                Priority = CacheItemPriority.High,
+                SlidingExpiration = TimeSpan.FromMinutes(2)
+            };
         }
 
         public List<CityDto> GetCitiesByName(string cityName, int limit = 10)
         {
-            List<CityDto> cities = new();
+            var cacheKey = $"GetCitiesByName-{nameof(cityName)}-{cityName}-{nameof(limit)}-{limit}";
 
-            if (!string.IsNullOrEmpty(cityName) && limit > 0)
+            if (!_memoryCache.TryGetValue(cacheKey, out List<CityDto> cities))
             {
-                var cityInfos = _cityInfoRepo.FindAll(
-                    c => c.Name.Contains(cityName),
-                    takeNumberOfRows: limit);
+                if (cities == null) cities = new();
 
-                if (cityInfos != null && cityInfos.Any())
+                if (!string.IsNullOrEmpty(cityName) && limit > 0)
                 {
-                    var cityInfoList = cityInfos.ToList();
-                    cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
+                    var cityInfos = _cityInfoRepo.FindAll(
+                        c => c.Name.Contains(cityName),
+                        takeNumberOfRows: limit);
 
-                    cities = _mapper.Map<List<CityDto>>(cityInfoList);
-                }
-                else
-                {
-                    _logger.LogWarning($"{System.Reflection.Assembly.GetEntryAssembly().GetName().Name}: Didn't find any city for given name: {cityName}");
+                    if (cityInfos != null && cityInfos.Any())
+                    {
+                        var cityInfoList = cityInfos.ToList();
+                        cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
+
+                        cities = _mapper.Map<List<CityDto>>(cityInfoList);
+
+                        _memoryCache.Set(cacheKey, cities, _cacheExpiryOptions);
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"{System.Reflection.Assembly.GetEntryAssembly().GetName().Name}: Didn't find any city for given name: {cityName}");
+                    }
                 }
             }
 
@@ -65,21 +86,31 @@ namespace CitiesService.Logic.Managers
 
         public CitiesPaginationDto GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1)
         {
-            var totalNumberOfCities = _cityInfoRepo.FindAll().Count();
+            var cacheKey = $"GetCitiesPagination-{nameof(numberOfCities)}-{numberOfCities}-{nameof(pageNumber)}-{pageNumber}";
 
-            CitiesPaginationDto citiesPaginationDto = new()
+            if (!_memoryCache.TryGetValue(cacheKey, out CitiesPaginationDto citiesPaginationDto))
             {
-                NumberOfAllCities = totalNumberOfCities
-            };
+                var totalNumberOfCities = _cityInfoRepo.FindAll().Count();
 
-            if (pageNumber >= 1 && numberOfCities >= 1)
-            {
-                var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
+                if (citiesPaginationDto == null)
+                {
+                    citiesPaginationDto = new()
+                    {
+                        NumberOfAllCities = totalNumberOfCities
+                    };
+                }
 
-                var cityInfos = _cityInfoRepo.FindAll(takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
-                var cityDtoList = _mapper.Map<List<CityDto>>(cityInfos.ToList());
+                if (pageNumber >= 1 && numberOfCities >= 1)
+                {
+                    var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
 
-                citiesPaginationDto.Cities = cityDtoList;
+                    var cityInfos = _cityInfoRepo.FindAll(takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
+                    var cityDtoList = _mapper.Map<List<CityDto>>(cityInfos.ToList());
+
+                    citiesPaginationDto.Cities = cityDtoList;
+                }
+
+                _memoryCache.Set(cacheKey, citiesPaginationDto, _cacheExpiryOptions);
             }
 
             return citiesPaginationDto;
