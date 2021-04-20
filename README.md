@@ -16,7 +16,7 @@ Setup Redis on Windows 10:
 3. Restart just to make sure its running: `sudo service redis-server restart`
 4. Check version: `redis-cli -v`
 5. Start, stop: `sudo service redis-server start` `sudo service redis-server stop`
-6. To use redis: `redis-cli`
+6. To use redis (to verify Redis is running): `redis-cli`
 
 TODO: 
 - Implement proper exception handling in each microservice and weather site
