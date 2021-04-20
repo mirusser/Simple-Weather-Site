@@ -6,42 +6,48 @@ using CitiesService.Logic.Helpers;
 using CitiesService.Logic.Managers.Contracts;
 using CitiesService.Logic.Repositories.Contracts;
 using CitiesService.Settings;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CitiesService.Logic.Managers
 {
     public class CityManager : ICityManager
     {
-        private readonly FileUrlsAndPaths _fileUrlsAndPaths;
         private readonly IMapper _mapper;
         private readonly IGenericRepository<CityInfo> _cityInfoRepo;
         private readonly ILogger<CityManager> _logger;
         private readonly IMemoryCache _memoryCache;
+        private readonly IDistributedCache _distributedCache;
+
+        private readonly FileUrlsAndPaths _fileUrlsAndPaths;
         private readonly MemoryCacheEntryOptions _cacheExpiryOptions;
+        private readonly DistributedCacheEntryOptions _distributedCacheEntryOptions;
 
         public CityManager(
             IOptions<FileUrlsAndPaths> options,
             IMapper mapper,
             IGenericRepository<CityInfo> cityInfoRepo,
             ILogger<CityManager> logger,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache,
+            IDistributedCache distributedCache)
         {
             _fileUrlsAndPaths = options.Value;
             _mapper = mapper;
             _cityInfoRepo = cityInfoRepo;
             _logger = logger;
             _memoryCache = memoryCache;
-
+            _distributedCache = distributedCache;
 
             _cacheExpiryOptions = new MemoryCacheEntryOptions
             {
@@ -49,8 +55,13 @@ namespace CitiesService.Logic.Managers
                 Priority = CacheItemPriority.High,
                 SlidingExpiration = TimeSpan.FromMinutes(2)
             };
+
+            _distributedCacheEntryOptions = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
+                .SetSlidingExpiration(TimeSpan.FromMinutes(2));
         }
 
+        //uses in-memory caching
         public List<CityDto> GetCitiesByName(string cityName, int limit = 10)
         {
             var cacheKey = $"GetCitiesByName-{nameof(cityName)}-{cityName}-{nameof(limit)}-{limit}";
@@ -84,21 +95,23 @@ namespace CitiesService.Logic.Managers
             return cities;
         }
 
-        public CitiesPaginationDto GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1)
+        //uses redis caching
+        public async Task<CitiesPaginationDto> GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1)
         {
             var cacheKey = $"GetCitiesPagination-{nameof(numberOfCities)}-{numberOfCities}-{nameof(pageNumber)}-{pageNumber}";
+            string serializedCitiesPaginationDto;
+            var redisCitiesPaginationDto = await _distributedCache.GetAsync(cacheKey);
 
-            if (!_memoryCache.TryGetValue(cacheKey, out CitiesPaginationDto citiesPaginationDto))
+            CitiesPaginationDto citiesPaginationDto = new();
+
+            if (redisCitiesPaginationDto != null)
             {
-                var totalNumberOfCities = _cityInfoRepo.FindAll().Count();
-
-                if (citiesPaginationDto == null)
-                {
-                    citiesPaginationDto = new()
-                    {
-                        NumberOfAllCities = totalNumberOfCities
-                    };
-                }
+                serializedCitiesPaginationDto = Encoding.UTF8.GetString(redisCitiesPaginationDto);
+                citiesPaginationDto = JsonSerializer.Deserialize<CitiesPaginationDto>(serializedCitiesPaginationDto);
+            }
+            else
+            {
+                citiesPaginationDto.NumberOfAllCities = _cityInfoRepo.FindAll().Count();
 
                 if (pageNumber >= 1 && numberOfCities >= 1)
                 {
@@ -110,7 +123,9 @@ namespace CitiesService.Logic.Managers
                     citiesPaginationDto.Cities = cityDtoList;
                 }
 
-                _memoryCache.Set(cacheKey, citiesPaginationDto, _cacheExpiryOptions);
+                serializedCitiesPaginationDto = JsonSerializer.Serialize(citiesPaginationDto);
+                redisCitiesPaginationDto = Encoding.UTF8.GetBytes(serializedCitiesPaginationDto);
+                await _distributedCache.SetAsync(cacheKey, redisCitiesPaginationDto, _distributedCacheEntryOptions);
             }
 
             return citiesPaginationDto;
@@ -150,7 +165,7 @@ namespace CitiesService.Logic.Managers
 
                     using StreamReader streamReader = new(_fileUrlsAndPaths.DecompressedCityListFilePath);
                     string json = streamReader.ReadToEnd();
-                    citiesFromJson = JsonConvert.DeserializeObject<List<CityDto>>(json);
+                    citiesFromJson = JsonSerializer.Deserialize<List<CityDto>>(json);
 
                     var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
 

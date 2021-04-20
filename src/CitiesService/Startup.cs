@@ -97,7 +97,14 @@ namespace CitiesService
 
             services.AddAutoMapper(typeof(Maps));
 
+            #region Caching
             services.AddMemoryCache();
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "localhost:6379";
+            });
+            #endregion
 
             services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
 

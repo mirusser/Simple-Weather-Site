@@ -17,22 +17,22 @@ namespace CitiesService.Logic.HealthChecks
             _cityManager = cityManager;
         }
 
-        public Task<HealthCheckResult> CheckHealthAsync(
+        public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)
         {
             try
             {
-                var result = _cityManager.GetCitiesPagination(1, 1);
+                var result = await _cityManager.GetCitiesPagination(1, 1);
 
                 return result.Cities != null && result.Cities.Any() ?
-                    Task.FromResult(HealthCheckResult.Healthy("The 'CitiesService' is healthy")) :
+                    HealthCheckResult.Healthy("The 'CitiesService' is healthy") :
                     throw new Exception("There aren't any cities in the database");
 
             }
             catch (Exception ex)
             {
-                return Task.FromResult(HealthCheckResult.Unhealthy(ex.Message));
+                return HealthCheckResult.Unhealthy(ex.Message);
             }
         }
     }
