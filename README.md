@@ -13,7 +13,7 @@ Setup Redis on Windows 10:
 
 1. Get WSL up and running: [How to setup WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (chose any Linux distribution you like, I use Ubuntu)
 2. Install redis: `sudo apt-get install redis-server`
-3. Restart just to make sure its running: `sudo apt-get install redis-server`
+3. Restart just to make sure its running: `sudo service redis-server restart`
 4. Check version: `redis-cli -v`
 5. Start, stop: `sudo service redis-server start` `sudo service redis-server stop`
 6. To use redis: `redis-cli`
