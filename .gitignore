@@ -444,3 +444,4 @@ $RECYCLE.BIN/
 # Files that may clutter remote repo
 *.gz
 *.list.json
+/src/CitiesService/.vscode

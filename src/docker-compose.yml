@@ -1,0 +1,173 @@
+version: "3.5"
+
+services:
+  #consul:
+    #image: consul
+    #container_name: consul
+    #restart: unless-stopped
+    #ports:
+   #   - 8500:8500
+#    network_mode: host
+    #networks:
+    #  - conveyor
+    # volumes:
+    #   - consul:/consul/data
+
+#   fabio:
+#     image: fabiolb/fabio
+#     container_name: fabio
+#     restart: unless-stopped
+#     environment:
+#     - FABIO_REGISTRY_CONSUL_ADDR=consul:8500
+# #    network_mode: host
+#     networks:
+#       - conveyor
+#     ports:
+#     - 9998:9998
+#     - 9999:9999
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger
+    restart: unless-stopped
+    ports:
+      - 5775:5775/udp
+      - 5778:5778
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 9411:9411
+      - 14268:14268
+      - 16686:16686
+#    network_mode: host
+    networks:
+      - conveyor
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+#    network_mode: host
+    networks:
+      - conveyor
+    volumes:
+      - mongo:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - 5672:5672
+      - 15672:15672
+#    network_mode: host
+    networks:
+      - conveyor
+    # volumes: 
+    #   - rabbitmq:/var/lib/rabbitmq
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+#    network_mode: host
+    networks:
+      - conveyor
+    volumes: 
+      - redis:/data
+
+  seq:
+    image: datalust/seq
+    container_name: seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 5341:80
+    networks:
+      - conveyor
+    # volumes: 
+    #   - seq:/data
+
+  citiesservice:
+    image: citiesservice
+    container_name: citiesservice
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 56722:80
+    networks:
+      - conveyor
+
+  gateway:
+    image: gateway
+    container_name: gateway
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 56723:80
+    networks:
+      - conveyor
+
+  weatherhistoryservice:
+    image: weatherhistoryservice
+    container_name: weatherhistoryservice
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 56724:80
+    networks:
+      - conveyor      
+
+  weatherservice:
+    image: weatherservice
+    container_name: weatherservice
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - USER_SECRETS_ID=112e2a25-e8b3-4892-b2b2-98e58b7557ae
+    ports:
+      - 56725:80
+    networks:
+      - conveyor    
+    volumes:
+      - $APPDATA/Microsoft/UserSecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
+      #- $HOME/.microsoft/usersecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
+
+  weathersite:
+    image: weathersite
+    container_name: weathersite
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 56726:80
+    networks:
+      - conveyor  
+
+
+networks:
+  conveyor:
+    name: conveyor-network
+
+volumes:
+  # consul:
+  #   driver: local
+  # grafana:
+  #   driver: local
+  mongo:
+    driver: local
+  # prometheus:
+  #   driver: local
+  # rabbitmq:
+  #   driver: local
+  redis:
+    driver: local
+  # seq:
+  #   driver: local

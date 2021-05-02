@@ -119,12 +119,13 @@ namespace CitiesService
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseServiceExceptionHandler();
+
             #region Swagger
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
             #endregion
 
-            app.UseServiceExceptionHandler();
             app.UseHttpsRedirection();
             app.UseConvey();
             app.UseRouting();

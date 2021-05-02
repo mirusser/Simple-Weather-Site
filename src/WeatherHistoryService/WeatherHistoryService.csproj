@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>f46b20a1-3a42-4909-90af-bcf0936ac72c</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +18,7 @@
     <PackageReference Include="Convey.MessageBrokers.CQRS" Version="0.5.433" />
     <PackageReference Include="Convey.MessageBrokers.RabbitMQ" Version="0.5.433" />
     <PackageReference Include="Convey.Persistence.MongoDB" Version="0.5.433" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
   </ItemGroup>
 

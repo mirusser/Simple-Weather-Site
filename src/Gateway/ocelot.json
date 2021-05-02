@@ -2,11 +2,11 @@
   "Routes": [
     {
       "DownstreamPathTemplate": "/api/city/GetCitiesPagination/{numberOfCities}/{pageNumber}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44385
+          "Port": 56722
         }
       ],
       "UpstreamPathTemplate": "/gateway/city/GetCitiesPagination/{numberOfCities}/{pageNumber}",
@@ -14,11 +14,11 @@
     },
     {
       "DownstreamPathTemplate": "/api/city/{cityName}/{limit}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44385
+          "Port": 56722
         }
       ],
       "UpstreamPathTemplate": "/gateway/city/{cityName}/{limit}",
@@ -26,11 +26,11 @@
     },
     {
       "DownstreamPathTemplate": "/api/city/AddCityInfosToDatabase",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44385
+          "Port": 56722
         }
       ],
       "UpstreamPathTemplate": "/gateway/city/AddCityInfosToDatabase",
@@ -38,11 +38,11 @@
     },
     {
       "DownstreamPathTemplate": "/api/weatherforecast/GetByCityName/{city}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44386
+          "Port": 56725
         }
       ],
       "UpstreamPathTemplate": "/gateway/weatherforecast/GetByCityName/{city}",
@@ -50,11 +50,11 @@
     },
     {
       "DownstreamPathTemplate": "/api/weatherforecast/GetByCityId/{cityId}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44386
+          "Port": 56725
         }
       ],
       "UpstreamPathTemplate": "/gateway/weatherforecast/GetByCityId/{cityId}",
