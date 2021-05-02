@@ -97,7 +97,7 @@ services:
     container_name: citiesservice
     restart: unless-stopped
     environment:
-      - ACCEPT_EULA=Y
+      - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - 56722:80
     networks:
@@ -130,7 +130,7 @@ services:
     container_name: weatherservice
     restart: unless-stopped
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - 56725:80
     networks:

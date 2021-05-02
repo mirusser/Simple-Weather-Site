@@ -102,7 +102,7 @@ namespace CitiesService
 
             services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = "localhost:6379";
+                options.Configuration = Configuration.GetSection(nameof(ConnectionStrings)).GetValue<string>(nameof(ConnectionStrings.RedisConnection));
             });
             #endregion
 
