@@ -130,15 +130,11 @@ services:
     container_name: weatherservice
     restart: unless-stopped
     environment:
-      - ACCEPT_EULA=Y
-      - USER_SECRETS_ID=112e2a25-e8b3-4892-b2b2-98e58b7557ae
+      - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - 56725:80
     networks:
-      - conveyor    
-    volumes:
-      - $APPDATA/Microsoft/UserSecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
-      #- $HOME/.microsoft/usersecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
+      - conveyor 
 
   weathersite:
     image: weathersite
@@ -150,7 +146,6 @@ services:
       - 56726:80
     networks:
       - conveyor  
-
 
 networks:
   conveyor:

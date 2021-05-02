@@ -445,3 +445,6 @@ $RECYCLE.BIN/
 *.gz
 *.list.json
 /src/CitiesService/.vscode
+/src/CitiesService/appsettings.Development.json
+/src/WeatherService/appsettings.Development.json
+src/WeatherService/appsettings.Development.json
