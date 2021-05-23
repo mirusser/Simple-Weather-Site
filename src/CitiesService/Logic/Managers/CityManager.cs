@@ -107,7 +107,7 @@ namespace CitiesService.Logic.Managers
             if (redisCitiesPaginationDto != null)
             {
                 serializedCitiesPaginationDto = Encoding.UTF8.GetString(redisCitiesPaginationDto);
-                citiesPaginationDto = JsonSerializer.Deserialize<CitiesPaginationDto>(serializedCitiesPaginationDto);
+                citiesPaginationDto = JsonSerializer.Deserialize<CitiesPaginationDto>(serializedCitiesPaginationDto, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
             }
             else
             {
@@ -123,7 +123,7 @@ namespace CitiesService.Logic.Managers
                     citiesPaginationDto.Cities = cityDtoList;
                 }
 
-                serializedCitiesPaginationDto = JsonSerializer.Serialize(citiesPaginationDto);
+                serializedCitiesPaginationDto = JsonSerializer.Serialize(citiesPaginationDto, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
                 redisCitiesPaginationDto = Encoding.UTF8.GetBytes(serializedCitiesPaginationDto);
                 await _distributedCache.SetAsync(cacheKey, redisCitiesPaginationDto, _distributedCacheEntryOptions);
             }
@@ -165,7 +165,7 @@ namespace CitiesService.Logic.Managers
 
                     using StreamReader streamReader = new(_fileUrlsAndPaths.DecompressedCityListFilePath);
                     string json = streamReader.ReadToEnd();
-                    citiesFromJson = JsonSerializer.Deserialize<List<CityDto>>(json);
+                    citiesFromJson = System.Text.Json.JsonSerializer.Deserialize<List<CityDto>>(json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
                     var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
 

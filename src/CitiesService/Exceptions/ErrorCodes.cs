@@ -7,5 +7,6 @@ namespace CitiesService.Exceptions
 {
     public static class ErrorCodes
     {
+        public static string SqlException = "Database is not accessible";
     }
 }

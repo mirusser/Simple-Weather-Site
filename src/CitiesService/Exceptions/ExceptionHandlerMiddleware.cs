@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,7 @@ namespace CitiesService.Exceptions
             (HttpStatusCode statusCode, string errorCode) = exception switch
             {
                 Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, defaultErrorCode),
+                Exception when exceptionType == typeof(SqlException) => (HttpStatusCode.NotFound, ErrorCodes.SqlException),
                 ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
                 _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
             };
@@ -49,7 +51,7 @@ namespace CitiesService.Exceptions
             _logger.LogError($"{System.Reflection.Assembly.GetEntryAssembly().GetName().Name}: Exception code: {errorCode} Exception message: {exception.Message}");
 
             var response = new { code = errorCode, message = exception.Message };
-            var payload = JsonSerializer.Serialize(response);
+            var payload = JsonSerializer.Serialize(response, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;

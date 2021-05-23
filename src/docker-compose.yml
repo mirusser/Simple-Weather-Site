@@ -26,21 +26,21 @@ services:
 #     - 9998:9998
 #     - 9999:9999
 
-  jaeger:
-    image: jaegertracing/all-in-one
-    container_name: jaeger
-    restart: unless-stopped
-    ports:
-      - 5775:5775/udp
-      - 5778:5778
-      - 6831:6831/udp
-      - 6832:6832/udp
-      - 9411:9411
-      - 14268:14268
-      - 16686:16686
-#    network_mode: host
-    networks:
-      - conveyor
+#   jaeger:
+#     image: jaegertracing/all-in-one
+#     container_name: jaeger
+#     restart: unless-stopped
+#     ports:
+#       - 5775:5775/udp
+#       - 5778:5778
+#       - 6831:6831/udp
+#       - 6832:6832/udp
+#       - 9411:9411
+#       - 14268:14268
+#       - 16686:16686
+# #    network_mode: host
+#     networks:
+#       - conveyor
 
   mongo:
     image: mongo
@@ -92,60 +92,16 @@ services:
     # volumes: 
     #   - seq:/data
 
-  citiesservice:
-    image: citiesservice
-    container_name: citiesservice
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+  sqlserver:
+    image: microsoft/mssql-server-linux:latest
+    container_name: sqlserver
     ports:
-      - 56722:80
+      - "1434:1433"
+    environment:
+      - ACCEPT_EULA=Y 
+      - MSSQL_SA_PASSWORD=P@ssword!@#
     networks:
       - conveyor
-
-  gateway:
-    image: gateway
-    container_name: gateway
-    restart: unless-stopped
-    environment:
-      - ACCEPT_EULA=Y
-    ports:
-      - 56723:80
-    networks:
-      - conveyor
-
-  weatherhistoryservice:
-    image: weatherhistoryservice
-    container_name: weatherhistoryservice
-    restart: unless-stopped
-    environment:
-      - ACCEPT_EULA=Y
-    ports:
-      - 56724:80
-    networks:
-      - conveyor      
-
-  weatherservice:
-    image: weatherservice
-    container_name: weatherservice
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
-    ports:
-      - 56725:80
-    networks:
-      - conveyor 
-
-  weathersite:
-    image: weathersite
-    container_name: weathersite
-    restart: unless-stopped
-    environment:
-      - ACCEPT_EULA=Y
-    ports:
-      - 56726:80
-    networks:
-      - conveyor  
 
 networks:
   conveyor:
@@ -163,6 +119,8 @@ volumes:
   # rabbitmq:
   #   driver: local
   redis:
+    driver: local
+  sql_data_volume:
     driver: local
   # seq:
   #   driver: local

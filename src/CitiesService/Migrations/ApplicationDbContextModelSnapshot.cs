@@ -15,7 +15,7 @@ namespace CitiesService.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("CitiesService.Data.DatabaseModels.CityInfo", b =>
@@ -46,12 +46,6 @@ namespace CitiesService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasAlternateKey("CityId")
-                        .HasName("AlternateKey_CityId");
-
-                    b.HasIndex("CityId")
-                        .IsUnique();
 
                     b.ToTable("CityInfos");
                 });

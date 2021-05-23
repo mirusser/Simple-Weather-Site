@@ -452,3 +452,4 @@ src/CitiesService/appsettings.Development.json
 src/WeatherService/appsettings.Development.json
 /src/WeatherService/appsettings.Docker.json
 /src/CitiesService/appsettings.Docker.json
+/src/CitiesService/deploy

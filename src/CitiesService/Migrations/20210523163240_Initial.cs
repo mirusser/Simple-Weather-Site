@@ -15,7 +15,7 @@ namespace CitiesService.Migrations
                     CityId = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     State = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CountryCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Lon = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Lat = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
