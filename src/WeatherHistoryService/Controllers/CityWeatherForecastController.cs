@@ -18,12 +18,20 @@ namespace WeatherHistoryService.Controllers
             _cityWeatherForecastService = cityWeatherForecastService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var cityWeatherForecastList = await _cityWeatherForecastService.GetAll();
+
+            return cityWeatherForecastList != null ? Ok(cityWeatherForecastList) : NotFound();
+        }
+
         [HttpGet("{id:length(24)}", Name = "Get")]
         public async Task<IActionResult> Get(string id)
         {
-            var customer = await _cityWeatherForecastService.GetAsync(id);
+            var cityWeatherForecast = await _cityWeatherForecastService.GetAsync(id);
 
-            return customer != null ? Ok(customer) : NotFound();
+            return cityWeatherForecast != null ? Ok(cityWeatherForecast) : NotFound();
         }
 
         [HttpPost]

@@ -1,9 +1,11 @@
 ﻿using Convey.CQRS.Queries;
+using Convey.MessageBrokers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WeatherService.Clients;
+using WeatherService.Messages.Events;
 using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries
@@ -15,14 +17,15 @@ namespace WeatherService.Messages.Queries
 
     public class GetByCityNameHandler : IQueryHandler<GetByCityNameQuery, WeatherForecastDto>
     {
-        //private readonly IBusPublisher _publisher;
+        private readonly IBusPublisher _publisher;
         private readonly WeatherClient _weatherClient;
 
         public GetByCityNameHandler(
-            WeatherClient weatherClient)
+            WeatherClient weatherClient,
+            IBusPublisher publisher)
         {
             _weatherClient = weatherClient;
-            //_publisher = publisher;
+            _publisher = publisher;
         }
 
         //TODO: publish message/event on successfuly getting forecast
@@ -36,7 +39,7 @@ namespace WeatherService.Messages.Queries
             }
 
             //TODO: add autoMapper
-            WeatherForecastDto weatherForecast = new()
+            WeatherForecastDto weatherForecastDto = new()
             {
                 City = forecast.name,
                 CountryCode = forecast.sys.country,
@@ -45,7 +48,9 @@ namespace WeatherService.Messages.Queries
                 Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime
             };
 
-            return weatherForecast;
+            await _publisher.PublishAsync(new GotWeatherForecastEvent(weatherForecastDto));
+
+            return weatherForecastDto;
         }
     }
 }

@@ -107,9 +107,13 @@
             cache: true,
             dataType: 'json',
             url: function (params) {
-                console.log('params: ' + params);
-                console.log('url: ' + '@(Model.CitiesServiceEndpoint)' + params.term + '/10');
-                return '@(Model.CitiesServiceEndpoint)' +  params.term + '/10';
+                console.log('params: ');
+                console.log(params);
+
+                var url = '@(Model.CitiesServiceEndpoint)' + params.term + '/10/'
+                console.log('url: ' + url);
+
+                return url;
             },
             processResults: function (data) {
 

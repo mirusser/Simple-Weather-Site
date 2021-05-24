@@ -11,5 +11,7 @@ namespace WeatherSite.Models.City
 
         //TODO: make a proper view model of this property
         public List<Clients.Models.Records.City> Cities { get; set; }
+
+        public string Url { get; set; }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Convey.Persistence.MongoDB;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using WeatherHistoryService.Mongo.Documents;
 using WeatherHistoryService.Services.Contracts;
@@ -17,13 +19,19 @@ namespace WeatherHistoryService.Services
             _repository = repository;
         }
 
+        public async Task<IReadOnlyList<CityWeatherForecastDocument>> GetAll()
+        {
+            return await _repository.FindAsync(c => c.Id != null);
+        }
+
         public async Task<CityWeatherForecastDocument> GetAsync(string id)
         {
             CityWeatherForecastDocument cityWeatherForecastDocument = null;
 
             if (!string.IsNullOrEmpty(id))
             {
-                cityWeatherForecastDocument = await _repository.GetAsync(new Guid(id));
+                var guidId = new Guid(Convert.FromBase64String(id.Trim()));
+                cityWeatherForecastDocument = await _repository.GetAsync(guidId);
             }
 
             return cityWeatherForecastDocument;

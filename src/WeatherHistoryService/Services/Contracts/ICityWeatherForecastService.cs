@@ -8,6 +8,7 @@ namespace WeatherHistoryService.Services.Contracts
 {
     public interface ICityWeatherForecastService
     {
+        Task<IReadOnlyList<CityWeatherForecastDocument>> GetAll();
         Task<CityWeatherForecastDocument> GetAsync(string id);
         Task<CityWeatherForecastDocument> CreateAsync(CityWeatherForecastDocument cityWeatherForecast);
     }
