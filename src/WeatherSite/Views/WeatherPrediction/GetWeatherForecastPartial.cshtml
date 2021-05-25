@@ -110,7 +110,7 @@
                 console.log('params: ');
                 console.log(params);
 
-                var url = '@(Model.CitiesServiceEndpoint)' + params.term + '/10/'
+                var url = '@(Model.CitiesServiceLocalEndpoint)' + params.term + '/10/';
                 console.log('url: ' + url);
 
                 return url;

@@ -9,5 +9,6 @@ namespace WeatherSite.Settings
     {
         public string WeatherServiceApiUrl { get; set; }
         public string CitiesServiceApiUrl { get; set; }
+        public string CitiesServiceLocalApiUrl { get; set; }
     }
 }

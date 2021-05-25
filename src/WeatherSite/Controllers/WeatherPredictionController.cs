@@ -35,7 +35,8 @@ namespace WeatherSite.Controllers
         {
             var vm = new GetWeatherForecastVM()
             {
-                CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl
+                CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl,
+                CitiesServiceLocalEndpoint = _apiEndpoints.CitiesServiceLocalApiUrl
             };
 
             return PartialView(vm);

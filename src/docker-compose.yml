@@ -142,18 +142,18 @@ services:
       - conveyor
       - overlaynetwork  
 
-  # weathersite:
-  #   image: weathersite
-  #   container_name: weathersite
-  #   hostname: weathersite
-  #   restart: unless-stopped
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Docker
-  #   ports:
-  #     - 8081:80
-  #   networks:
-  #     - conveyor  
-  #     - overlaynetwork
+  weathersite:
+    image: weathersite
+    container_name: weathersite
+    hostname: weathersite
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8081:80
+    networks:
+      - conveyor  
+      - overlaynetwork
 
 networks:
   conveyor:
