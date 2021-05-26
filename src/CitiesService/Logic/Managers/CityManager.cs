@@ -74,6 +74,7 @@ namespace CitiesService.Logic.Managers
                 {
                     var cityInfos = _cityInfoRepo.FindAll(
                         c => c.Name.Contains(cityName),
+                        orderByExpression: x => x.OrderBy(c => c.Id),
                         takeNumberOfRows: limit);
 
                     if (cityInfos != null && cityInfos.Any())
@@ -111,13 +112,16 @@ namespace CitiesService.Logic.Managers
             }
             else
             {
-                citiesPaginationDto.NumberOfAllCities = _cityInfoRepo.FindAll().Count();
+                citiesPaginationDto.NumberOfAllCities = 
+                    _cityInfoRepo
+                    .FindAll(orderByExpression: x => x.OrderBy(c => c.Name))
+                    .Count();
 
                 if (pageNumber >= 1 && numberOfCities >= 1)
                 {
                     var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
 
-                    var cityInfos = _cityInfoRepo.FindAll(takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
+                    var cityInfos = _cityInfoRepo.FindAll(orderByExpression: x => x.OrderBy(c => c.Name), takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
                     var cityDtoList = _mapper.Map<List<CityDto>>(cityInfos.ToList());
 
                     citiesPaginationDto.Cities = cityDtoList;
@@ -165,7 +169,7 @@ namespace CitiesService.Logic.Managers
 
                     using StreamReader streamReader = new(_fileUrlsAndPaths.DecompressedCityListFilePath);
                     string json = streamReader.ReadToEnd();
-                    citiesFromJson = System.Text.Json.JsonSerializer.Deserialize<List<CityDto>>(json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    citiesFromJson = JsonSerializer.Deserialize<List<CityDto>>(json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
                     var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
 
