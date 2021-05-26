@@ -13,6 +13,7 @@ using Convey.CQRS.Events;
 using Convey.CQRS.Queries;
 using Convey.MessageBrokers.CQRS;
 using Convey.MessageBrokers.RabbitMQ;
+using Convey.Docs.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -51,7 +52,7 @@ namespace CitiesService
             services.Configure<ConnectionStrings>(Configuration.GetSection(nameof(ConnectionStrings)));
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+                options.UseSqlServer(Configuration.GetConnectionString(nameof(ConnectionStrings.DefaultConnection)),
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
             services.AddTransient<ApplicationDbContext>();
@@ -71,6 +72,7 @@ namespace CitiesService
 
             services.AddConvey()
                 //    .AddConsul()
+                .AddSwaggerDocs()
                 .AddCommandHandlers()
                 .AddEventHandlers()
                 .AddQueryHandlers()
@@ -83,11 +85,6 @@ namespace CitiesService
                 .AddRabbitMq()
                 //.AddMongo()
                 .Build();
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CitiesService", Version = "v1" });
-            });
 
             services.AddHttpClient();
 
@@ -122,8 +119,7 @@ namespace CitiesService
             app.UseServiceExceptionHandler();
 
             #region Swagger
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
+            app.UseSwaggerDocs();
             #endregion
 
             app.UseHttpsRedirection();

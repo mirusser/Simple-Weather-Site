@@ -48,7 +48,7 @@ namespace CitiesService.Exceptions
                 _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
             };
 
-            _logger.LogError($"{System.Reflection.Assembly.GetEntryAssembly().GetName().Name}: Exception code: {errorCode} Exception message: {exception.Message}");
+            _logger.LogError("CitiesService: Exception code: {ErrorCode} Exception message: {ExceptionMEssage}", new[] { errorCode, exception.Message });
 
             var response = new { code = errorCode, message = exception.Message };
             var payload = JsonSerializer.Serialize(response, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
