@@ -5,8 +5,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 56722
+          "Host": "citiesservice",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/city/GetCitiesPagination/{numberOfCities}/{pageNumber}",
@@ -17,8 +17,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 56722
+          "Host": "citiesservice",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/city/{cityName}/{limit}",
@@ -29,8 +29,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 56722
+          "Host": "citiesservice",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/city/AddCityInfosToDatabase",
@@ -41,8 +41,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 56725
+          "Host": "weatherservice",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/weatherforecast/GetByCityName/{city}",
@@ -53,8 +53,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 56725
+          "Host": "weatherservice",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/gateway/weatherforecast/GetByCityId/{cityId}",

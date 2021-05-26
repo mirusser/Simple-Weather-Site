@@ -103,6 +103,19 @@ services:
     networks:
       - conveyor
 
+  gateway:
+    image: gateway
+    container_name: gateway
+    hostname: gateway
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8085:80
+    networks:
+      - conveyor
+      - overlaynetwork
+    
   citiesservice:
     image: citiesservice
     container_name: citiesservice

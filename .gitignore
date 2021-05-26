@@ -455,3 +455,4 @@ src/WeatherService/appsettings.Development.json
 /src/WeatherSite/deploy
 /src/WeatherService/deploy
 /src/WeatherHistoryService/deploy
+/src/Gateway/deploy
