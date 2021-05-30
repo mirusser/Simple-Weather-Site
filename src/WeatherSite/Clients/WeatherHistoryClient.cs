@@ -34,7 +34,6 @@ namespace WeatherSite.Clients
         public async Task<WeatherHistoryForecastPagination> GetWeatherHistoryForecastPagination(int pageNumber = 1, int numberOfEntities = 25)
         {
             string url = $"{_apiEndpoints.WeatherHistoryServiceApiUrl}{HttpUtility.UrlEncode(numberOfEntities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
-            _logger.LogWarning(url);
             var citiesPagination = await _httpClient.GetFromJsonAsync<WeatherHistoryForecastPagination>(url);
 
             return citiesPagination;

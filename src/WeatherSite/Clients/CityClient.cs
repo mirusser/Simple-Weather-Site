@@ -43,7 +43,6 @@ namespace WeatherSite.Clients
         public async Task<CitiesPagination> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
         {
             string url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
-            _logger.LogWarning(url);
             var citiesPagination = await _httpClient.GetFromJsonAsync<CitiesPagination>(url);
 
             return citiesPagination;
