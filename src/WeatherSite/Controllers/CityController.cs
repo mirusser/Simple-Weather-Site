@@ -18,11 +18,6 @@ namespace WeatherSite.Controllers
             _cityClient = cityClient;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetCitiesPagination()
         {

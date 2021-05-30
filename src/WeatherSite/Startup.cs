@@ -33,6 +33,7 @@ namespace WeatherSite
 
             services.AddHttpClient<WeatherForecastClient>();
             services.AddHttpClient<CityClient>();
+            services.AddHttpClient<WeatherHistoryClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

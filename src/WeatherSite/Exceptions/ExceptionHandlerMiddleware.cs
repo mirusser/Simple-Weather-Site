@@ -37,15 +37,14 @@ namespace WeatherSite.Exceptions
 
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var defaultErrorCode = "error";
             var exceptionType = exception.GetType();
 
             (HttpStatusCode statusCode, string errorCode) = exception switch
             {
-                Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, defaultErrorCode),
+                Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, ErrorCodes.DefaultErrorCode),
                 Exception when exceptionType == typeof(HttpRequestException) => (HttpStatusCode.ServiceUnavailable, ErrorCodes.Service_Unavailable),
                 SiteException e when exceptionType == typeof(SiteException) => (HttpStatusCode.BadRequest, e.Code),
-                _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
+                _ => (HttpStatusCode.InternalServerError, ErrorCodes.DefaultErrorCode),
             };
 
             _logger.LogError("WeatherSite: Exception code: {ErrorCode}, Exception message: {ExceptionMessage}", new[] { errorCode, exception.Message });

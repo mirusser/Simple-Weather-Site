@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -41,11 +42,12 @@ namespace WeatherHistoryService.Exceptions
             (HttpStatusCode statusCode, string errorCode) = exception switch
             {
                 Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, ErrorCodes.DefaultErrorCode),
+                Exception when exceptionType == typeof(HttpRequestException) => (HttpStatusCode.ServiceUnavailable, ErrorCodes.Service_Unavailable),
                 ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
                 _ => (HttpStatusCode.InternalServerError, ErrorCodes.DefaultErrorCode),
             };
 
-            _logger.LogError($"{System.Reflection.Assembly.GetEntryAssembly().FullName}: Exception code: {errorCode} Exception message: {exception.Message}");
+            _logger.LogError("WeatherHistoryService: Exception code: {ErrorCode}, Exception message: {ExceptionMessage}", new[] { errorCode, exception.Message });
 
             var response = new { code = errorCode, message = exception.Message };
             var payload = JsonSerializer.Serialize(response);

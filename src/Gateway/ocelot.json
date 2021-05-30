@@ -59,6 +59,18 @@
       ],
       "UpstreamPathTemplate": "/gateway/weatherforecast/GetByCityId/{cityId}",
       "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/CityWeatherForecast/{numberOfEntities}/{pageNumber}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "weatherhistoryservice",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/CityWeatherForecast/{numberOfEntities}/{pageNumber}",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ]
 

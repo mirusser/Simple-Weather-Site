@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="deploy\**" />
+    <Content Remove="deploy\**" />
+    <EmbeddedResource Remove="deploy\**" />
+    <None Remove="deploy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="Convey" Version="0.5.433" />

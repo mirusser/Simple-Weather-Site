@@ -1,0 +1,31 @@
+﻿@using WeatherSite.Models.WeatherHistory
+@using WeatherSite.Controllers
+@using WeatherSite.Helpers
+
+@model WeatherHistoryVM
+
+@{
+    ViewData["Title"] = "Weather History";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div id="weather-history-pagination-partial-div">
+            @* Partial goes here *@
+        </div>
+    </div>
+</div>
+
+<script src="~/js/pagination.js" asp-append-version="true"></script>
+
+@section Scripts
+{
+    <script>
+        pagination(
+            '#weather-history-pagination-partial-div',
+            '@Url.Action(nameof(WeatherHistoryController.GetWeatherHistoryPaginationPartial), MvcHelper.NameOfController<WeatherHistoryController>())',
+            1,
+            25);
+    </script>
+}
+

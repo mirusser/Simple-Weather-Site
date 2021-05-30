@@ -1,0 +1,91 @@
+﻿
+@using WeatherSite.Models.WeatherHistory
+@using WeatherSite.Controllers
+@using WeatherSite.Helpers
+
+@model WeatherHistoryPaginationPartialVM
+
+<div class="card">
+    <div class="card-header" style="display: flex; justify-content: center">
+        <h1 class="card-title">
+            <strong>
+                Searched weather forecasts, page no. #@Model.PaginationVM.PageNumber
+            </strong>
+        </h1>
+    </div>
+
+    <div class="card-body p-0">
+        @if (Model != null && Model.CityWeatherForecastDocuments != null)
+        {
+            var number = 1;
+
+            if (Model.PaginationVM.PageNumber > 1)
+            {
+                number += (Model.PaginationVM.PageNumber - 1) * Model.PaginationVM.NumberOfEntitiesOnPage;
+            }
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th style="width: 10px">#</th>
+                        <th>
+                            City name
+                        </th>
+                        <th>
+                            Country
+                        </th>
+                         <th>
+                            Search date
+                        </th>
+                         <th>
+                            Temperature
+                        </th>
+                         <th>
+                            Summary
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var weatherHistoryForecast in Model.CityWeatherForecastDocuments)
+                    {
+                        <tr>
+                            <td>
+                                @($"{number}.")
+                            </td>
+                            <td>
+                                @(weatherHistoryForecast.City)
+                            </td>
+                            <td>
+                                @(weatherHistoryForecast.CountryCode)
+                            </td>
+                            <td>
+                                @(weatherHistoryForecast.SearchDate)
+                            </td>
+                            <td>
+                                @(weatherHistoryForecast.Temperature.TemperatureC)°C @(weatherHistoryForecast.Temperature.TemperatureF)°F
+                            </td>
+                            <td>
+                                @(weatherHistoryForecast.Summary)
+                            </td>
+                        </tr>
+
+                        number++;
+                    }
+
+                </tbody>
+            </table>
+        }
+        else
+        {
+            //TODO: display something better here
+            <span>
+                There aren't any weather history forecasts in the database.
+            </span>
+        }
+    </div>
+
+    <div class="card-footer clearfix">
+        @await Html.PartialAsync("_paginationPartial", Model.PaginationVM)
+    </div>
+
+</div>
