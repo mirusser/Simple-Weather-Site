@@ -27,6 +27,8 @@ namespace WeatherService.Controllers
         [HttpGet("{city}", Name = "GetByCityName")]
         public async Task<ActionResult<WeatherForecastDto>> GetByCityName([FromRoute] GetByCityNameQuery query)
         {
+            throw new NotImplementedException();
+
             var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 
             return weatherForecastDto != null ? Ok(weatherForecastDto) : NotFound();
