@@ -75,7 +75,7 @@ namespace EmailService
             app.UseConvey();
 
             app.UseRabbitMq()
-                .SubscribeEvent<SendErrorEmailRequestEvent>();
+                .SubscribeEvent<SendEmailRequestEvent>();
 
             app.UseEndpoints(endpoints =>
             {

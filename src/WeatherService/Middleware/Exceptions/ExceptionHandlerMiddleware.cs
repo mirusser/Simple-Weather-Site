@@ -56,7 +56,7 @@ namespace WeatherService.Middleware.Exceptions
 
             _logger.LogError("WeatherService: Exception code: {ErrorCode}, Exception message: {ExceptionMessage}", new[] { errorCode, exception.Message });
 
-            await _publisher.PublishAsync(new SendErrorEmailRequestEvent(new SendEmailAboutErrorDto() { AppName = "WeatherService", Exception = exception}));
+            await _publisher.PublishAsync(new SendEmailRequestEvent(new SendEmailDto() { Subject = $"Exception from WeatherService", Body = $"{exception.Message} {exception.StackTrace}"}));
 
             var response = new { code = errorCode, message = exception.Message };
             var payload = JsonSerializer.Serialize(response);

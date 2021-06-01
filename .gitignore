@@ -458,3 +458,4 @@ src/WeatherService/appsettings.Development.json
 /src/Gateway/deploy
 /src/EmailService/appsettings.Development.json
 /src/EmailService/deploy
+/src/EmailService/appsettings.Docker.json

@@ -27,7 +27,7 @@ namespace WeatherService.Controllers
         [HttpGet("{city}", Name = "GetByCityName")]
         public async Task<ActionResult<WeatherForecastDto>> GetByCityName([FromRoute] GetByCityNameQuery query)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException(); to test sending email about exception: TODO: delete later after tests
 
             var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
 

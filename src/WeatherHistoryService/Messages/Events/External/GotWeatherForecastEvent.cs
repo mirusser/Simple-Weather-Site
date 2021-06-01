@@ -13,7 +13,7 @@ using WeatherHistoryService.Services.Contracts;
 
 namespace WeatherHistoryService.Messages.Events.External
 {
-    [Message("weatherservice")]
+    [Message("serviceexchange")]
     public class GotWeatherForecastEvent : IEvent
     {
         public WeatherForecastDto WeatherForecastDto { get; set; }
