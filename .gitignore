@@ -457,3 +457,4 @@ src/WeatherService/appsettings.Development.json
 /src/WeatherHistoryService/deploy
 /src/Gateway/deploy
 /src/EmailService/appsettings.Development.json
+/src/EmailService/deploy

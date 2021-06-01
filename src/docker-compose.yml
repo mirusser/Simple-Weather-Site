@@ -168,6 +168,19 @@ services:
       - conveyor  
       - overlaynetwork
 
+  emailservice:
+    image: emailservice
+    container_name: emailservice
+    hostname: emailservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8087:80
+    networks:
+      - conveyor  
+      - overlaynetwork
+
 networks:
   conveyor:
     name: conveyor-network
