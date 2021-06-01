@@ -102,6 +102,8 @@ services:
       - MSSQL_SA_PASSWORD=P@ssword!@#
     networks:
       - conveyor
+    volumes:
+      - sqlserver:/var/opt/mssql 
 
   gateway:
     image: gateway
@@ -196,6 +198,8 @@ volumes:
   #   driver: local
   mongo:
     driver: local
+  sqlserver:
+      driver: local
   # prometheus:
   #   driver: local
   # rabbitmq:
