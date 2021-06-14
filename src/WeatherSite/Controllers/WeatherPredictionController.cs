@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WeatherSite.Clients;
 using WeatherSite.Models.WeatherPrediction;
@@ -12,14 +13,18 @@ namespace WeatherSite.Controllers
 {
     public class WeatherPredictionController : Controller
     {
-        private readonly WeatherForecastClient _weatherForecastClient;
         private readonly ApiEndpoints _apiEndpoints;
+
+        private readonly WeatherForecastClient _weatherForecastClient;
+        private readonly CityClient _cityClient;
 
         public WeatherPredictionController(
             WeatherForecastClient weatherForecastClient,
+            CityClient cityClient,
             IOptions<ApiEndpoints> options)
         {
             _weatherForecastClient = weatherForecastClient;
+            _cityClient = cityClient;
             _apiEndpoints = options.Value;
         }
 
@@ -46,7 +51,13 @@ namespace WeatherSite.Controllers
         [HttpPost]
         public async Task<IActionResult> GetWeatherForecastFromServicePartial(GetWeatherForecastVM weatherForecastVM)
         {
-            weatherForecastVM.WeatherForecast = await _weatherForecastClient.GetCurrentWeatherForCityByCityId(weatherForecastVM.CityId);
+            if (weatherForecastVM != null && weatherForecastVM.CityId != default)
+            {
+                weatherForecastVM.CityName = Regex.Replace(weatherForecastVM.CityName, @"\t|\n|\r", "").TrimStart();
+                weatherForecastVM.WeatherForecast = await _weatherForecastClient.GetCurrentWeatherForCityByCityId(weatherForecastVM.CityId);
+            }
+
+            //_cityClient.get
 
             return PartialView(weatherForecastVM);
         }

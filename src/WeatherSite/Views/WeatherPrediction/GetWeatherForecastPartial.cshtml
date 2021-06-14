@@ -21,19 +21,24 @@
             </div>
 
             <div class="card-body">
-                <form id="get-weather-forecast-form" 
-                      asp-action="@(nameof(WeatherPredictionController.GetWeatherForecastFromServicePartial))" 
+                <form id="get-weather-forecast-form"
+                      asp-action="@(nameof(WeatherPredictionController.GetWeatherForecastFromServicePartial))"
                       asp-controller="@(MvcHelper.NameOfController<HomeController>())"
                       method="post">
 
                     <input asp-for="CitiesServiceEndpoint" type="hidden" />
+                    <input id="city-name-input" asp-for="CityName" type="hidden" />
 
                     <div class="form-group">
                         <label>
                             City
                         </label>
 
-                        <select asp-for="CityId" id="select-city-ajax" class="form-control select2" style="width: 100%;" placeholder="Search city...">
+                        <select id="select-city-ajax"
+                                asp-for="CityId"
+                                class="form-control select2"
+                                style="width: 100%;"
+                                placeholder="Search city...">
                         </select>
                     </div>
 
@@ -65,6 +70,8 @@
     function getWeather() {
 
         $('#loading-div').show();
+
+        $('#city-name-input').val($('#select-city-ajax').text());
         $('#get-weather-forecast-from-service-partial').html('');
 
         var data = $('#get-weather-forecast-form').serialize();
@@ -73,7 +80,9 @@
             data,
             function (response) {
 
-            $('#get-weather-forecast-from-service-partial').html(response);
+                $('#get-weather-forecast-from-service-partial').html(response);
+                $('#select-city-ajax').val(null).trigger('change');
+                $('#select-city-ajax').text('');
         })
         .fail(function (data) {
 
@@ -107,24 +116,20 @@
             cache: true,
             dataType: 'json',
             url: function (params) {
-                console.log('params: ');
-                console.log(params);
 
                 var url = '@(Model.CitiesServiceLocalEndpoint)' + params.term + '/10/';
-                console.log('url: ' + url);
 
                 return url;
             },
             processResults: function (data) {
 
-                console.log('data: ' + data);
-
                 var transformedData = $.map(data, function (item) {
-
                     item.id = item.id;
                     item.text = item.text || (item.name + ' (' + item.country + ')');
+
                     return item;
                 });
+
                 return {
                     results: transformedData
                 };
