@@ -69,7 +69,85 @@
 
     $(function () {
 
-        $('#select-city-ajax').focus();
+        setTimeout(function () { $('#select-city-ajax').focus(); }, 200);
+
+        $.when(showBootstrapLoader()).done(function () {
+            removeBoostrapLoader();
+        });
+
+        $('#get-weather-btn').on('click', function (e) {
+
+            e.preventDefault();
+
+            getWeather();
+        });
+
+        $('#select-city-ajax').select2({
+            placeholder: "Select city...",
+            allowClear: true,
+            minimumInputLength: 2,
+            ajax: {
+                delay: 550,
+                cache: true,
+                dataType: 'json',
+                url: function (params) {
+
+                    var url = '@(Model.CitiesServiceLocalEndpoint)' + params.term + '/10/';
+
+                    return url;
+                },
+                processResults: function (data) {
+
+                    var transformedData = $.map(data, function (item) {
+                        item.id = item.id;
+                        item.text = item.text || (item.name + ' (' + item.country + ')');
+
+                        return item;
+                    });
+
+                    return {
+                        results: transformedData
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) {
+
+                    $(document).Toasts('create', {
+                        class: 'bg-danger',
+                        icon: 'fas fa-bomb fa-lg',
+                        title: 'Error message',
+                        body: 'Error occured while processing request: ' + textStatus,
+                    })
+                }
+            }
+        });
+
+        $('#select-city-ajax').on('select2:select', function (e) {
+
+            $('#get-weather-div').show();
+
+            showBootstrapLoader('Getting forecast');
+
+            $.when(getWeather()).done(function () {
+                removeBoostrapLoader();
+            });
+        });
+
+        $('#select-city-ajax').on('select2:unselect', function (e) {
+
+            $('#get-weather-div').hide();
+        });
+
+        // on first focus (bubbles up to document), open the menu
+        $(document).on('focus', '.select2-selection.select2-selection--single', function (e) {
+            $(this).closest(".select2-container").siblings('select:enabled').select2('open');
+        });
+
+        // steal focus during close - only capture once and stop propogation
+        $('select.select2').on('select2:closing', function (e) {
+            $(e.target).data("select2").$selection.one('focus focusin', function (e) {
+                e.stopPropagation();
+            });
+        });
     });
 
     function getWeather() {
@@ -88,6 +166,7 @@
                 $('#get-weather-forecast-from-service-partial').html(response);
                 $('#select-city-ajax').val(null).trigger('change');
                 $('#select-city-ajax').text('');
+                $(':focus').blur();
         })
         .fail(function (data) {
 
@@ -104,74 +183,4 @@
             $('#loading-div').hide();
         });
     }
-
-    $('#get-weather-btn').on('click', function (e) {
-
-        e.preventDefault();
-
-        getWeather();
-    });
-
-    $('#select-city-ajax').select2({
-        placeholder: "Select city...",
-        allowClear: true,
-        minimumInputLength: 2,
-        ajax: {
-            delay: 550,
-            cache: true,
-            dataType: 'json',
-            url: function (params) {
-
-                var url = '@(Model.CitiesServiceLocalEndpoint)' + params.term + '/10/';
-
-                return url;
-            },
-            processResults: function (data) {
-
-                var transformedData = $.map(data, function (item) {
-                    item.id = item.id;
-                    item.text = item.text || (item.name + ' (' + item.country + ')');
-
-                    return item;
-                });
-
-                return {
-                    results: transformedData
-                };
-            },
-            error: function (xhr, textStatus, errorThrown) {
-
-                $(document).Toasts('create', {
-                    class: 'bg-danger',
-                    icon: 'fas fa-bomb fa-lg',
-                    title: 'Error message',
-                    body: 'Error occured while processing request: ' + textStatus,
-                })
-            }
-        }
-    });
-
-    $('#select-city-ajax').on('select2:select', function (e) {
-
-        $('#get-weather-div').show();
-
-        getWeather();
-    });
-
-    $('#select-city-ajax').on('select2:unselect', function (e) {
-
-        $('#get-weather-div').hide();
-    });
-
-    // on first focus (bubbles up to document), open the menu
-    $(document).on('focus', '.select2-selection.select2-selection--single', function (e) {
-        $(this).closest(".select2-container").siblings('select:enabled').select2('open');
-    });
-
-    // steal focus during close - only capture once and stop propogation
-    $('select.select2').on('select2:closing', function (e) {
-        $(e.target).data("select2").$selection.one('focus focusin', function (e) {
-            e.stopPropagation();
-        });
-    });
 </script>
