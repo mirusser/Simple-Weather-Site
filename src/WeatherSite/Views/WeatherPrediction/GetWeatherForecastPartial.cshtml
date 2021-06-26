@@ -9,15 +9,20 @@
     <div class="col-12">
         <div class="card card-default">
             <div class="card-header">
-                <h3 class="card-title">
-                    Get weather forecast
-                </h3>
+                <div class="d-flex justify-content-center">
+                    <h3 class="card-title">
+                        <i class="fas fa-cloud-sun"></i>
+                        <strong>
+                            Get weather forecast
+                        </strong>
+                    </h3>
+                </div>
 
-                <div class="card-tools">
+                @*<div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                         <i class="fas fa-minus"></i>
                     </button>
-                </div>
+                </div>*@
             </div>
 
             <div class="card-body">
@@ -31,7 +36,7 @@
 
                     <div class="form-group">
                         <label>
-                            City
+                            City:
                         </label>
 
                         <select id="select-city-ajax"
@@ -58,7 +63,7 @@
                 </div>
             </div>
 
-            <div id="loading-div" class="overlay" style="display:none">
+            <div id="get-weather-forecast-loading-div" class="overlay" style="display:none">
                 <i class="fas fa-2x fa-sync-alt fa-spin"></i>
             </div>
         </div>
@@ -146,8 +151,6 @@
 
     function getWeahterWithLoader() {
 
-        $('#get-weather-div').show();
-
         showBootstrapLoader('Getting forecast');
 
         //doesn't work as it really should sadly, I leave it here for future reference
@@ -160,8 +163,7 @@
 
         showBootstrapLoader('Getting forecast');
 
-        $('#get-weather-div').show();
-        $('#loading-div').show();
+        $('#get-weather-forecast-loading-div').show();
 
         $('#city-name-input').val($('#select-city-ajax').text());
         $('#get-weather-forecast-from-service-partial').html('');
@@ -190,7 +192,7 @@
         })
         .always(function () {
 
-            $('#loading-div').hide();
+            $('#get-weather-forecast-loading-div').hide();
             removeBoostrapLoader();
         });
     }

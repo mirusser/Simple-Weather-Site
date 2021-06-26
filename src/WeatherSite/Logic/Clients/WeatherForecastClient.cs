@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using WeatherSite.Clients.Models.Records;
+using WeatherSite.Logic.ExtensionMethods;
 using WeatherSite.Settings;
 
 namespace WeatherSite.Clients

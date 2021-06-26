@@ -2,6 +2,7 @@
 @using WeatherSite.Controllers
 @using WeatherSite.Models.WeatherPrediction
 @using WeatherSite.Helpers
+@using WeatherSite.Logic.ExtensionMethods
 
 @model GetWeatherForecastVM
 
@@ -11,9 +12,8 @@
         <div class="col-md-12">
             <div class="card bg-gradient-light">
                 <div class="card-header border-0">
-                    <i class="fas fa-city"></i>
                     <strong>
-                        @(Model.CityName)
+                        Current weather
                     </strong>
 
                     <div class="card-tools">
@@ -33,6 +33,15 @@
                         <div class="inner">
 
                             <div class="d-flex justify-content-center">
+                                <h4>
+                                    <strong>
+                                        <i class="fas fa-city"></i>
+                                        @(Model.CityName)
+                                    </strong>
+                                </h4>
+                            </div>
+
+                            <div class="d-flex justify-content-center">
 
                                 <h3>
                                     @Model.WeatherForecast.TemperatureC
@@ -43,7 +52,7 @@
 
                             <div class="d-flex justify-content-center">
                                 <p>
-                                    @Model.WeatherForecast.Summary
+                                    @Model.WeatherForecast.Summary.FirstCharToUpper()
                                 </p>
                             </div>
                         </div>
