@@ -83,7 +83,7 @@
         });
 
         $('#select-city-ajax').select2({
-            placeholder: "Enter city name...",
+            placeholder: "Enter city name here...",
             allowClear: true,
             minimumInputLength: 2,
             ajax: {
@@ -123,13 +123,7 @@
 
         $('#select-city-ajax').on('select2:select', function (e) {
 
-            $('#get-weather-div').show();
-
-            showBootstrapLoader('Getting forecast');
-
-            $.when(getWeather()).done(function () {
-                removeBoostrapLoader();
-            });
+            getWeather();
         });
 
         $('#select-city-ajax').on('select2:unselect', function (e) {
@@ -150,8 +144,23 @@
         });
     });
 
+    function getWeahterWithLoader() {
+
+        $('#get-weather-div').show();
+
+        showBootstrapLoader('Getting forecast');
+
+        //doesn't work as it really should sadly, I leave it here for future reference
+        $.when(getWeather()).done(function () {
+            removeBoostrapLoader();
+        });
+    }
+
     function getWeather() {
 
+        showBootstrapLoader('Getting forecast');
+
+        $('#get-weather-div').show();
         $('#loading-div').show();
 
         $('#city-name-input').val($('#select-city-ajax').text());
@@ -167,6 +176,7 @@
                 $('#select-city-ajax').val(null).trigger('change');
                 $('#select-city-ajax').text('');
                 $(':focus').blur();
+
         })
         .fail(function (data) {
 
@@ -181,6 +191,7 @@
         .always(function () {
 
             $('#loading-div').hide();
+            removeBoostrapLoader();
         });
     }
 </script>

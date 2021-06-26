@@ -24,6 +24,7 @@ function showBootstrapLoader(title) {
 }
 
 function removeBoostrapLoader() {
+
     setTimeout(function () {
         $('.loading-toast').remove();
     }, 500);
