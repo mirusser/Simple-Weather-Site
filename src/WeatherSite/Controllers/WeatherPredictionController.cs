@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WeatherSite.Clients;
+using WeatherSite.Logic.Clients;
 using WeatherSite.Models.WeatherPrediction;
 using WeatherSite.Settings;
 
@@ -18,9 +19,11 @@ namespace WeatherSite.Controllers
         private readonly WeatherForecastClient _weatherForecastClient;
         private readonly CityClient _cityClient;
 
+
         public WeatherPredictionController(
             WeatherForecastClient weatherForecastClient,
             CityClient cityClient,
+            IconClient iconClient,
             IOptions<ApiEndpoints> options)
         {
             _weatherForecastClient = weatherForecastClient;
@@ -56,8 +59,6 @@ namespace WeatherSite.Controllers
                 weatherForecastVM.CityName = Regex.Replace(weatherForecastVM.CityName, @"\t|\n|\r", "").TrimStart();
                 weatherForecastVM.WeatherForecast = await _weatherForecastClient.GetCurrentWeatherForCityByCityId(weatherForecastVM.CityId);
             }
-
-            //_cityClient.get
 
             return PartialView(weatherForecastVM);
         }

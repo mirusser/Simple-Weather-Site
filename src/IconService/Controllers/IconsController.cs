@@ -25,8 +25,8 @@ namespace IconService.Controllers
             _commandDispatcher = commandDispatcher;
         }
 
-        [HttpPost]
-        public async Task<IconDto> GetIcon(GetIconQuery query)
+        [HttpGet("{Description}/{DayIcon}", Name = "GetByCityName")]
+        public async Task<IconDto> GetIcon([FromRoute] GetIconQuery query)
         {
             return await _queryDispatcher.QueryAsync(query);
         }

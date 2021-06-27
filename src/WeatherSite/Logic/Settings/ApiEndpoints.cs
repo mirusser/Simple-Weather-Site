@@ -11,5 +11,6 @@ namespace WeatherSite.Settings
         public string CitiesServiceApiUrl { get; set; }
         public string CitiesServiceLocalApiUrl { get; set; }
         public string WeatherHistoryServiceApiUrl { get; set; }
+        public string IconServiceApiUrl { get; set; }
     }
 }

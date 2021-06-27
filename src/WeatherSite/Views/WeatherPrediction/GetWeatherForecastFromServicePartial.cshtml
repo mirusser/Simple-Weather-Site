@@ -42,8 +42,8 @@
                             </div>
 
                             <div class="d-flex justify-content-center">
-
                                 <h3>
+                                    <img id="weather-icon" src="" title="@Model.WeatherForecast.Summary.FirstCharToUpper()" width="50" height="50">
                                     @Model.WeatherForecast.TemperatureC
                                     @*@Model.WeatherForecast.TemperatureF*@
                                     <sup style="font-size: 20px">°C</sup>
@@ -52,10 +52,13 @@
 
                             <div class="d-flex justify-content-center">
                                 <p>
-                                    @Model.WeatherForecast.Summary.FirstCharToUpper()
+                                    <strong>
+                                        @Model.WeatherForecast.Summary.FirstCharToUpper()
+                                    </strong>
                                 </p>
                             </div>
                         </div>
+
                         <div class="icon">
                             <i class="fas fa-temperature-low"></i>
                         </div>
@@ -69,4 +72,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+
+        $(function () {
+            $.post(
+                '@(Url.Action(nameof(IconController.Get), MvcHelper.NameOfController<IconController>()))',
+                {
+                    description: '@Model.WeatherForecast.Summary',
+                    dayIcon: true
+                },
+                function (response) {
+
+                    $('#weather-icon').attr('src', `data:image/png;base64,${response}`);
+                }
+            );
+        });
+    </script>
 }

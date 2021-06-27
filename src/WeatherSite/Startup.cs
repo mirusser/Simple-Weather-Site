@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WeatherSite.Clients;
 using WeatherSite.Exceptions.Handlers;
+using WeatherSite.Logic.Clients;
 using WeatherSite.Settings;
 
 namespace WeatherSite
@@ -34,6 +35,7 @@ namespace WeatherSite
             services.AddHttpClient<WeatherForecastClient>();
             services.AddHttpClient<CityClient>();
             services.AddHttpClient<WeatherHistoryClient>();
+            services.AddHttpClient<IconClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
