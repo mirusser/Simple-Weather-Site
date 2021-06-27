@@ -1,4 +1,5 @@
 ﻿using Convey.Types;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
@@ -8,18 +9,21 @@ using System.Threading.Tasks;
 
 namespace IconService.Mongo.Documents
 {
-    public class IconDocument : IIdentifiable<Guid>
+    public class IconDocument : IIdentifiable<string>
     {
-        [BsonId]
-        public Guid Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
-        [Required(ErrorMessage = "Name is required")]
+        [BsonElement("Name")]
+        [BsonRepresentation(BsonType.String)]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "Description is required")]
+        [BsonElement("Description")]
+        [BsonRepresentation(BsonType.String)]
         public string Description { get; set; }
 
-        [Required(ErrorMessage = "DayIcon is required")]
+        [BsonElement("DayIcon")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool DayIcon { get; set; }
     }
 }

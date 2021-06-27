@@ -15,7 +15,14 @@ namespace IconService.Mappings
             CreateMap<IconDto, IconDocument>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                .ForMember(dest => dest.DayIcon, opt => opt.MapFrom(src => src.DayIcon));
+                .ForMember(dest => dest.DayIcon, opt => opt.MapFrom(src => src.DayIcon))
+                .ReverseMap();
+
+            CreateMap<IconDocument, CreateIconDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.DayIcon, opt => opt.MapFrom(src => src.DayIcon))
+                .ReverseMap();
         }
     }
 }

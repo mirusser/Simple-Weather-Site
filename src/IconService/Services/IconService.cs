@@ -9,9 +9,9 @@ namespace IconService.Services
 {
     public class IconService : IIconService
     {
-        private readonly IMongoRepository<IconDocument, Guid> _repository;
+        private readonly IMongoRepository<IconDocument, string> _repository;
 
-        public IconService(IMongoRepository<IconDocument, Guid> repository)
+        public IconService(IMongoRepository<IconDocument, string> repository)
         {
             _repository = repository;
         }

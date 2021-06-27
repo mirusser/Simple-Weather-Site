@@ -6,6 +6,7 @@ using IconService.Mappings;
 using IconService.Mongo;
 using IconService.Mongo.Documents;
 using IconService.Services;
+using IconService.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -34,6 +35,7 @@ namespace IconService
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<MongoSettings>(Configuration.GetSection("mongo"));
+            services.Configure<ServiceSettings>(Configuration.GetSection(nameof(ServiceSettings)));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -50,7 +52,7 @@ namespace IconService
                 .AddInMemoryCommandDispatcher()
                 .AddInMemoryQueryDispatcher()
                 .AddMongo()
-                .AddMongoRepository<IconDocument, Guid>(mongoSettings.IconsCollectionName)
+                .AddMongoRepository<IconDocument, string>(mongoSettings.IconsCollectionName)
                 .Build();
 
 
