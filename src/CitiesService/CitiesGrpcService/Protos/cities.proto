@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option csharp_namespace = "CitiesGrpcService";
+
+package cities;
+
+service Cities {
+  rpc GetCitiesPagination (CitiesPaginationRequest) returns (CitiesPaginationReply);
+  rpc GetCitiesPaginationInfo (CitiesPaginationInfoRequest) returns (CitiesPaginationInfo);
+  rpc GetCitiesStream (CitiesStreamRequest) returns (stream City);
+}
+
+message CitiesPaginationRequest {
+  int32 number_of_cities = 1;
+  int32 page_number = 2;
+}
+
+message CitiesPaginationInfoRequest {
+
+}
+
+message CitiesStreamRequest {
+    int32 number_of_cities = 1;
+    int32 page_number = 2;
+}
+
+message Coord {
+    double Lon = 1;
+    double Lat = 2;
+}
+
+message City {
+    double Id = 1;
+    string Name = 2;
+    string State = 3;
+    string Country = 4;
+    Coord Coord = 5;
+}
+
+message CitiesPaginationReply {
+    int32 number_of_all_cities = 1;
+    repeated City cities = 2;
+}
+
+message CitiesPaginationInfo {
+    int32 number_of_all_cities = 1;
+}
