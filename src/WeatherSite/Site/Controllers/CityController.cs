@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CitiesGrpcService;
+using GrpcCitiesClient;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +14,12 @@ namespace WeatherSite.Controllers
     public class CityController : Controller
     {
         private readonly CityClient _cityClient;
+        private readonly ICitiesClient _citiesClient;
 
-        public CityController(CityClient cityClient)
+        public CityController(CityClient cityClient, ICitiesClient citiesClient)
         {
             _cityClient = cityClient;
+            _citiesClient = citiesClient;
         }
 
         [HttpGet]
@@ -31,6 +35,14 @@ namespace WeatherSite.Controllers
         public async Task<IActionResult> GetCitiesPaginationPartial(int pageNumber = 1, int numberOfEntitiesOnPage = 25)
         {
             var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
+
+            //var foo = new List<City>();
+
+            //await foreach (var cityReply in _citiesClient.GetCitiesStream(pageNumber, numberOfEntitiesOnPage))
+            //{
+            //    foo.Add(cityReply);
+            //}
+
             CitiesPaginationPartialVM vm = new()
             {
                 Cities = citiesPagination?.Cities,

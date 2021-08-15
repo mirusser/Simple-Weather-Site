@@ -463,3 +463,4 @@ src/WeatherService/appsettings.Development.json
 /src/CitiesService/CitiesService/.vscode
 /src/CitiesService/CitiesService/deploy
 /src/CitiesService/CitiesService/appsettings.Development.json
+/src/WeatherSite/Site/deploy

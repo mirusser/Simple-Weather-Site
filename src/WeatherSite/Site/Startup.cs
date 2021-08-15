@@ -1,3 +1,4 @@
+using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -36,6 +37,8 @@ namespace WeatherSite
             services.AddHttpClient<CityClient>();
             services.AddHttpClient<WeatherHistoryClient>();
             services.AddHttpClient<IconClient>();
+
+            services.AddGrpcCitiesClient(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
