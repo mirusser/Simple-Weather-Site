@@ -460,3 +460,6 @@ src/WeatherService/appsettings.Development.json
 /src/EmailService/deploy
 /src/EmailService/appsettings.Docker.json
 /src/IconService/appsettings.Development.json
+/src/CitiesService/CitiesService/.vscode
+/src/CitiesService/CitiesService/deploy
+/src/CitiesService/CitiesService/appsettings.Development.json
