@@ -93,17 +93,18 @@ services:
     #   - seq:/data
 
   sqlserver:
-    image: microsoft/mssql-server-linux:latest
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    user: root
     container_name: sqlserver
     ports:
       - "1434:1433"
     environment:
-      - ACCEPT_EULA=Y 
+      - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=P@ssword!@#
-    networks:
-      - conveyor
     volumes:
       - sqlserver:/var/opt/mssql 
+    networks:
+      - conveyor
 
   gateway:
     image: gateway
