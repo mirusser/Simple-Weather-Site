@@ -1,8 +1,8 @@
 
-@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\deploy"
-md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService"
-cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService"
-dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\deploy"
+@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesService\deploy"
+md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesService"
+cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesService"
+dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesService\deploy"
 docker build -t citiesservice .
 
 @RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherService\deploy"
