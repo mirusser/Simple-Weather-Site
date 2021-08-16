@@ -5,6 +5,6 @@ namespace GrpcCitiesClient
 {
     public interface ICitiesClient
     {
-        IAsyncEnumerable<City> GetCitiesStream(int pageNumber = 1, int numberOfCities = 25);
+        IAsyncEnumerable<CityReply> GetCitiesStream(int pageNumber = 1, int numberOfCities = 25);
     }
 }

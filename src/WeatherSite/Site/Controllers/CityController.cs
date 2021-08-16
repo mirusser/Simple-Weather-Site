@@ -35,13 +35,17 @@ namespace WeatherSite.Controllers
         public async Task<IActionResult> GetCitiesPaginationPartial(int pageNumber = 1, int numberOfEntitiesOnPage = 25)
         {
             var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
+            //var x = 1;
+            //var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
 
-            //var foo = new List<City>();
+            //x = 2;
+            //var foo = new List<CityReply>();
 
             //await foreach (var cityReply in _citiesClient.GetCitiesStream(pageNumber, numberOfEntitiesOnPage))
             //{
             //    foo.Add(cityReply);
             //}
+            //x = 3;
 
             CitiesPaginationPartialVM vm = new()
             {

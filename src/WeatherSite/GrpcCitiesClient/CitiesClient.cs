@@ -18,7 +18,7 @@ namespace GrpcCitiesClient
             _client = grpcClientFactory.CreateClient<Cities.CitiesClient>("Cities");
         }
 
-        public async IAsyncEnumerable<City> GetCitiesStream(int pageNumber = 1, int numberOfCities = 25)
+        public async IAsyncEnumerable<CityReply> GetCitiesStream(int pageNumber = 1, int numberOfCities = 25)
         {
             var request = new CitiesStreamRequest()
             {
