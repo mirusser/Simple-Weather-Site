@@ -36,40 +36,15 @@ namespace CitiesGrpcService
         //TODO: add automapper
         public override async Task GetCitiesStream(
             CitiesStreamRequest request,
-            IServerStreamWriter<City> responseStream,
+            IServerStreamWriter<CityReply> responseStream,
             ServerCallContext context)
         {
-            try
-            {
-                var citiesPaginationDto = await _cityManager.GetCitiesPagination(request.NumberOfCities, request.PageNumber);
+            var getCitiesInfoPagination = await _cityManager.GetCitiesInfoPagination(request.NumberOfCities, request.PageNumber);
+            var cities = _mapper.Map<List<CityReply>>(getCitiesInfoPagination.CityInfos.ToList());
 
-                List<City> cities = 
-                    citiesPaginationDto
-                    .Cities
-                    .Select(
-                        x => new City() 
-                        {
-                            Id = (double)x.Id,
-                            Name = x.Name,
-                            State = x.State,
-                            Country = x.Country,
-                            Coord = new Coord()
-                            {
-                                Lat = (double)x.Coord.Lat,
-                                Lon = (double)x.Coord.Lon
-                            }
-                        })
-                    .ToList();
-                //var cities = _mapper.Map<List<City>>(citiesPaginationDto.Cities);
-
-                foreach (var city in cities)
-                {
-                    await responseStream.WriteAsync(city);
-                }
-            }
-            catch (Exception ex)
+            foreach (var city in cities)
             {
-                var x = ex;
+                await responseStream.WriteAsync(city);
             }
         }
     }

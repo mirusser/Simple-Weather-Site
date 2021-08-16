@@ -29,6 +29,8 @@ namespace CitiesGrpcService
             services.AddGrpc();
             services.AddApplicationLayer();
             services.AddPersistenceInfrastructure(Configuration);
+
+            services.AddAutoMapper(typeof(Mappings.Maps));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

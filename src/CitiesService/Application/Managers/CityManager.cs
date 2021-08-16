@@ -88,23 +88,35 @@ namespace Application.Managers
             return cities;
         }
 
+        public async Task<CitiesPaginationDto> GetCitiesPaginationDto(int numberOfCities = 25, int pageNumber = 1)
+        {
+            var cityInfoPaginationDto = await GetCitiesInfoPagination(numberOfCities, pageNumber);
+            CitiesPaginationDto citiesPaginationDto = new()
+            {
+                Cities = _mapper.Map<List<CityDto>>(cityInfoPaginationDto.CityInfos.ToList()),
+                NumberOfAllCities = cityInfoPaginationDto.NumberOfAllCities
+            };
+
+            return citiesPaginationDto;
+        }
+
         //uses redis caching
-        public async Task<CitiesPaginationDto> GetCitiesPagination(int numberOfCities = 25, int pageNumber = 1)
+        public async Task<CityInfoPaginationDto> GetCitiesInfoPagination(int numberOfCities = 25, int pageNumber = 1)
         {
             var cacheKey = $"GetCitiesPagination-{nameof(numberOfCities)}-{numberOfCities}-{nameof(pageNumber)}-{pageNumber}";
-            string serializedCitiesPaginationDto;
+            string serializedCitiesInfoPagination;
             var redisCitiesPaginationDto = await _distributedCache.GetAsync(cacheKey);
 
-            CitiesPaginationDto citiesPaginationDto = new();
+            CityInfoPaginationDto result = new();
 
             if (redisCitiesPaginationDto != null)
             {
-                serializedCitiesPaginationDto = Encoding.UTF8.GetString(redisCitiesPaginationDto);
-                citiesPaginationDto = JsonSerializer.Deserialize<CitiesPaginationDto>(serializedCitiesPaginationDto, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                serializedCitiesInfoPagination = Encoding.UTF8.GetString(redisCitiesPaginationDto);
+                result = JsonSerializer.Deserialize<CityInfoPaginationDto>(serializedCitiesInfoPagination, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
             }
             else
             {
-                citiesPaginationDto.NumberOfAllCities = 
+                result.NumberOfAllCities =
                     _cityInfoRepo
                     .FindAll(orderByExpression: x => x.OrderBy(c => c.Name))
                     .Count();
@@ -113,18 +125,22 @@ namespace Application.Managers
                 {
                     var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
 
-                    var cityInfos = _cityInfoRepo.FindAll(orderByExpression: x => x.OrderBy(c => c.Name), takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip);
-                    var cityDtoList = _mapper.Map<List<CityDto>>(cityInfos.ToList());
-
-                    citiesPaginationDto.Cities = cityDtoList;
+                    result.CityInfos = 
+                        _cityInfoRepo
+                        .FindAll(orderByExpression: x => x.OrderBy(c => c.Name), takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip)
+                        .ToList();
                 }
 
-                serializedCitiesPaginationDto = JsonSerializer.Serialize(citiesPaginationDto, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                redisCitiesPaginationDto = Encoding.UTF8.GetBytes(serializedCitiesPaginationDto);
+                serializedCitiesInfoPagination = 
+                    JsonSerializer
+                    .Serialize(
+                        result, 
+                        new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                redisCitiesPaginationDto = Encoding.UTF8.GetBytes(serializedCitiesInfoPagination);
                 await _distributedCache.SetAsync(cacheKey, redisCitiesPaginationDto, _distributedCacheEntryOptions);
             }
 
-            return citiesPaginationDto;
+            return result;
         }
 
         public bool DownloadCityFile()

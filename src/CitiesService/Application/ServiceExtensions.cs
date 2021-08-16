@@ -22,8 +22,6 @@ namespace Application
     {
         public static void AddApplicationLayer(this IServiceCollection services)
         {
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
             services.AddConvey()
                 //    .AddConsul()
                 .AddSwaggerDocs()
@@ -43,6 +41,11 @@ namespace Application
             #region Managers
             services.AddTransient<ICityManager, CityManager>();
             #endregion
+        }
+
+        public static void AddApplicationLayerAutomapper(this IServiceCollection services)
+        {
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
         }
 
         public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app)

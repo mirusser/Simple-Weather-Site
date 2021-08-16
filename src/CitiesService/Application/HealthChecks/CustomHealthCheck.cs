@@ -23,7 +23,7 @@ namespace Application.HealthChecks
         {
             try
             {
-                var result = await _cityManager.GetCitiesPagination(1, 1);
+                var result = await _cityManager.GetCitiesPaginationDto(1, 1);
 
                 return result.Cities != null && result.Cities.Any() ?
                     HealthCheckResult.Healthy("The 'CitiesService' is healthy") :

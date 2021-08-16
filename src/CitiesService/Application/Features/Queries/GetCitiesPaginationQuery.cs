@@ -25,7 +25,7 @@ namespace Application.Features.Queries
 
         public async Task<CitiesPaginationDto> HandleAsync(GetCitiesPaginationQuery query)
         {
-            var citiesPaginationDto = await _cityManager.GetCitiesPagination(query.NumberOfCities, query.PageNumber);
+            var citiesPaginationDto = await _cityManager.GetCitiesPaginationDto(query.NumberOfCities, query.PageNumber);
 
             return citiesPaginationDto;
         }

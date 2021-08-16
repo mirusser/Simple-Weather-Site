@@ -44,6 +44,7 @@ namespace CitiesService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplicationLayer();
+            services.AddApplicationLayerAutomapper();
             services.AddPersistenceInfrastructure(Configuration);
 
             services.AddControllers();

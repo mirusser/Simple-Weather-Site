@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Dto;
 using AutoMapper;
+using Domain.Entities;
 
 namespace CitiesGrpcService.Mappings
 {
@@ -11,13 +12,13 @@ namespace CitiesGrpcService.Mappings
     {
         public Maps()
         {
-            CreateMap<CityDto, City>()
+            CreateMap<CityInfo, CityReply>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => (double)src.Id))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.State, opt => opt.MapFrom(src => src.State))
-                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country))
-                .ForMember(dest => dest.Coord.Lon, opt => opt.MapFrom(src => (double)src.Coord.Lon))
-                .ForMember(dest => dest.Coord.Lat, opt => opt.MapFrom(src => (double)src.Coord.Lat));
+                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.State))
+                .ForPath(dest => dest.Coord.Lon, opt => opt.MapFrom(src => (double)src.Lon))
+                .ForPath(dest => dest.Coord.Lat, opt => opt.MapFrom(src => (double)src.Lat));
         }
     }
 }
