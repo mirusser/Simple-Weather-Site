@@ -6,7 +6,7 @@ package cities;
 
 service Cities {
   rpc GetCitiesPagination (CitiesPaginationRequest) returns (CitiesPaginationReply);
-  rpc GetCitiesPaginationInfo (CitiesPaginationInfoRequest) returns (CitiesPaginationInfo);
+  rpc GetCitiesPaginationInfo (CitiesPaginationInfoRequest) returns (CitiesPaginationInfoReply);
   rpc GetCitiesStream (CitiesStreamRequest) returns (stream CityReply);
 }
 
@@ -42,6 +42,6 @@ message CitiesPaginationReply {
     repeated CityReply cities = 2;
 }
 
-message CitiesPaginationInfo {
+message CitiesPaginationInfoReply {
     int32 number_of_all_cities = 1;
 }

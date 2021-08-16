@@ -19,6 +19,9 @@ namespace CitiesGrpcService.Mappings
                 .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.State))
                 .ForPath(dest => dest.Coord.Lon, opt => opt.MapFrom(src => (double)src.Lon))
                 .ForPath(dest => dest.Coord.Lat, opt => opt.MapFrom(src => (double)src.Lat));
+
+            CreateMap<CityInfoPaginationDto, CitiesPaginationReply>();
+
         }
     }
 }

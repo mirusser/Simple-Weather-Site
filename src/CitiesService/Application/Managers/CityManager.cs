@@ -143,6 +143,11 @@ namespace Application.Managers
             return result;
         }
 
+        public async Task<int> GetCountOfAllCities()
+        {
+            return await _cityInfoRepo.FindAll().CountAsync();
+        }
+
         public bool DownloadCityFile()
         {
             if (!File.Exists(_fileUrlsAndPaths.CompressedCityListFilePath))

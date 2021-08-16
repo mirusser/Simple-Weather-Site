@@ -33,5 +33,18 @@ namespace GrpcCitiesClient
                 yield return cityReply;
             }
         }
+
+        public async Task<CitiesPaginationReply> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
+        {
+            var request = new CitiesPaginationRequest()
+            {
+                PageNumber = pageNumber,
+                NumberOfCities = numberOfCities
+            };
+
+           var response = await _client.GetCitiesPaginationAsync(request);
+
+            return response;
+        }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using CitiesGrpcService;
 using Application.Interfaces.Managers;
 using AutoMapper;
+using Google.Protobuf.Collections;
 
 namespace CitiesGrpcService
 {
@@ -23,14 +24,22 @@ namespace CitiesGrpcService
             _mapper = mapper;
         }
 
-        public override Task<CitiesPaginationInfo> GetCitiesPaginationInfo(CitiesPaginationInfoRequest request, ServerCallContext context)
+        public override async Task<CitiesPaginationInfoReply> GetCitiesPaginationInfo(CitiesPaginationInfoRequest request, ServerCallContext context)
         {
-            return base.GetCitiesPaginationInfo(request, context);
+            var countOfAllCities = await _cityManager.GetCountOfAllCities();
+            var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities };
+
+            return citiesPaginationInfoReply;
         }
 
-        public override Task<CitiesPaginationReply> GetCitiesPagination(CitiesPaginationRequest request, ServerCallContext context)
+        public override async Task<CitiesPaginationReply> GetCitiesPagination(CitiesPaginationRequest request, ServerCallContext context)
         {
-            return base.GetCitiesPagination(request, context);
+            var getCitiesInfoPagination = await _cityManager.GetCitiesInfoPagination(request.NumberOfCities, request.PageNumber);
+
+            var citiesPaginationReply = _mapper.Map<CitiesPaginationReply>(getCitiesInfoPagination);
+            citiesPaginationReply.Cities.AddRange(_mapper.Map<RepeatedField<CityReply>>(getCitiesInfoPagination.CityInfos.ToList()));
+
+            return citiesPaginationReply;
         }
 
         //TODO: add automapper

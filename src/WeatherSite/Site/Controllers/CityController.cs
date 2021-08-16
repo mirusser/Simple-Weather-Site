@@ -34,29 +34,30 @@ namespace WeatherSite.Controllers
         [HttpPost]
         public async Task<IActionResult> GetCitiesPaginationPartial(int pageNumber = 1, int numberOfEntitiesOnPage = 25)
         {
-            var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
-            //var x = 1;
+            // using REST
+            //var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage); 
+
+            //using gRPC (unary)
+            var citiesPaginationReply = await _citiesClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
+
+            //using gRPC (stream from server)
             //var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
-
-            //x = 2;
             //var foo = new List<CityReply>();
-
             //await foreach (var cityReply in _citiesClient.GetCitiesStream(pageNumber, numberOfEntitiesOnPage))
             //{
             //    foo.Add(cityReply);
             //}
-            //x = 3;
 
             CitiesPaginationPartialVM vm = new()
             {
-                Cities = citiesPagination?.Cities,
+                Cities = citiesPaginationReply?.Cities?.ToList(),
                 PaginationVM = new()
                 {
                     ElementId = "#cities-pagination-partial-div",
                     Url = Url.Action(nameof(CityController.GetCitiesPaginationPartial), MvcHelper.NameOfController<CityController>()),
                     PageNumber = pageNumber,
                     NumberOfEntitiesOnPage = numberOfEntitiesOnPage,
-                    NumberOfPages = Convert.ToInt32(Math.Ceiling((decimal)citiesPagination?.NumberOfAllCities / numberOfEntitiesOnPage))
+                    NumberOfPages = Convert.ToInt32(Math.Ceiling((decimal)citiesPaginationReply?.NumberOfAllCities / numberOfEntitiesOnPage))
                 }
             };
 
