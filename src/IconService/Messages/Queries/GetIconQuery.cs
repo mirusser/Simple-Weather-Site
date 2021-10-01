@@ -16,8 +16,7 @@ namespace IconService.Messages.Queries
 {
     public class GetIconQuery : IQuery<IconDto>
     {
-        public string Description { get; set; }
-        public bool DayIcon { get; set; }
+        public string Icon { get; set; }
     }
 
     public class GetIconQueryHandler : IQueryHandler<GetIconQuery, IconDto>
@@ -41,7 +40,7 @@ namespace IconService.Messages.Queries
             IconDto iconDto = null;
 
             var iconDocument =
-                await _iconService.GetAsync(query.Description, query.DayIcon);
+                await _iconService.GetAsync(query.Icon);
 
             if (iconDocument != null)
             {

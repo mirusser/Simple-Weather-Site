@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Net.ClientFactory;
 using CitiesGrpcService;
+using Grpc.Net.Client.Configuration;
 
 namespace GrpcCitiesClient
 {
@@ -15,6 +16,19 @@ namespace GrpcCitiesClient
 
         public CitiesClient(GrpcClientFactory grpcClientFactory)
         {
+            var defaultMethodConfig = new MethodConfig
+            {
+                Names = { MethodName.Default },
+                RetryPolicy = new RetryPolicy
+                {
+                    MaxAttempts = 5,
+                    InitialBackoff = TimeSpan.FromSeconds(1),
+                    MaxBackoff = TimeSpan.FromSeconds(5),
+                    BackoffMultiplier = 1.5,
+                    RetryableStatusCodes = { StatusCode.Unavailable }
+                }
+            };
+
             _client = grpcClientFactory.CreateClient<Cities.CitiesClient>("Cities");
         }
 

@@ -13,9 +13,11 @@ namespace WeatherSite.Logic.Clients
     public class IconClient
     {
         #region Properties
+
         private readonly HttpClient _httpClient;
         private readonly ApiEndpoints _apiEndpoints;
-        #endregion
+
+        #endregion Properties
 
         public IconClient(
             HttpClient httpClient,
@@ -25,9 +27,9 @@ namespace WeatherSite.Logic.Clients
             _apiEndpoints = options.Value;
         }
 
-        public async Task<IconDto> GetIcon(string description, bool dayIcon = true)
-        { 
-            string url = $"{_apiEndpoints.IconServiceApiUrl}GetIcon/{Uri.EscapeDataString(description)}/{dayIcon}";
+        public async Task<IconDto> GetIcon(string icon)
+        {
+            string url = $"{_apiEndpoints.IconServiceApiUrl}GetIcon/{Uri.EscapeDataString(icon)}";
             IconDto iconDto = await _httpClient.GetFromJsonAsync<IconDto>(url);
 
             return iconDto;

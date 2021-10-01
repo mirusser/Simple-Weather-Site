@@ -22,6 +22,10 @@ namespace IconService.Mongo.Documents
         [BsonRepresentation(BsonType.String)]
         public string Description { get; set; }
 
+        [BsonElement("Icon")]
+        [BsonRepresentation(BsonType.String)]
+        public string Icon { get; set; }
+
         [BsonElement("DayIcon")]
         [BsonRepresentation(BsonType.Boolean)]
         public bool DayIcon { get; set; }

@@ -11,7 +11,8 @@ namespace IconService.Models.Dto
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Icon { get; set; }
         public bool DayIcon { get; set; }
-        public byte[] FileContent { get; set;}
+        public byte[] FileContent { get; set; }
     }
 }

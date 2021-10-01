@@ -79,8 +79,7 @@
             $.post(
                 '@(Url.Action(nameof(IconController.Get), MvcHelper.NameOfController<IconController>()))',
                 {
-                    description: '@Model.WeatherForecast.Summary',
-                    dayIcon: true
+                    icon: '@(Model.WeatherForecast.Icon)',
                 },
                 function (response) {
 

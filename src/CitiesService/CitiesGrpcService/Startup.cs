@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Application;
 using Infrastructure.Persistence;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CitiesGrpcService
 {
@@ -27,6 +29,16 @@ namespace CitiesGrpcService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
+
+            //Configure to user cors, needs: Grpc.AspNetCore.Web package
+            //services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            //{
+            //    builder.AllowAnyOrigin()
+            //           .AllowAnyMethod()
+            //           .AllowAnyHeader()
+            //           .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+            //}));
+
             services.AddApplicationLayer();
             services.AddPersistenceInfrastructure(Configuration);
 
@@ -43,8 +55,15 @@ namespace CitiesGrpcService
 
             app.UseRouting();
 
+            //Configure to user cors, needs: Grpc.AspNetCore.Web package
+            //app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true }); // Must be added between UseRouting and UseEndpoints
+            //app.UseCors();
+
             app.UseEndpoints(endpoints =>
             {
+                //To use cors
+                //endpoints.MapGrpcService<GreeterService>().RequireCors("AllowAll");
+
                 endpoints.MapGrpcService<GreeterService>();
                 endpoints.MapGrpcService<CitiesService>();
 

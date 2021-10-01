@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="deploy\**" />
+    <Content Remove="deploy\**" />
+    <EmbeddedResource Remove="deploy\**" />
+    <None Remove="deploy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Convey" Version="0.5.433" />
     <PackageReference Include="Convey.CQRS.Commands" Version="0.5.433" />
     <PackageReference Include="Convey.CQRS.Events" Version="0.5.433" />

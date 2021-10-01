@@ -46,7 +46,8 @@ namespace WeatherService.Messages.Queries
                     CountryCode = forecast.sys.country,
                     Summary = forecast.weather[0].description,
                     TemperatureC = (int)forecast.main.temp,
-                    Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime
+                    Date = DateTimeOffset.FromUnixTimeSeconds(forecast.dt).DateTime,
+                    Icon = forecast.weather[0].icon
                 };
 
                 await _publisher.PublishAsync(new GotWeatherForecastEvent(weatherForecastDto));

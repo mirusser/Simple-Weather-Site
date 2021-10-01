@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using CitiesGrpcService;
 using System.Net.Http;
+using Grpc.Net.Client;
+using Grpc.Net.Client.Configuration;
+using Grpc.Core;
 
 namespace GrpcCitiesClient
 {
@@ -14,11 +17,29 @@ namespace GrpcCitiesClient
     {
         public static void AddGrpcCitiesClient(this IServiceCollection services, IConfiguration configuration)
         {
+            var defaultMethodConfig = new MethodConfig
+            {
+                Names = { MethodName.Default },
+                RetryPolicy = new RetryPolicy
+                {
+                    MaxAttempts = 5,
+                    InitialBackoff = TimeSpan.FromSeconds(1),
+                    MaxBackoff = TimeSpan.FromSeconds(5),
+                    BackoffMultiplier = 1.5,
+                    RetryableStatusCodes = { StatusCode.Unavailable }
+                }
+            };
+
             services.AddGrpcClient<Cities.CitiesClient>("Cities", o =>
             {
                 o.Address = new Uri("https://localhost:5031");
             })
-            //.EnableCallContextPropagation() 
+            .ConfigureChannel(o =>
+            {
+                //o.cre
+                o.ServiceConfig = new ServiceConfig { MethodConfigs = { defaultMethodConfig } };
+            })
+            //.EnableCallContextPropagation(o => o.SuppressContextNotFoundErrors = true)
             .ConfigurePrimaryHttpMessageHandler(() =>
             {
                 var handler = new HttpClientHandler();

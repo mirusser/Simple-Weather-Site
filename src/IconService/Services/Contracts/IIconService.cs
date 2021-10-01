@@ -7,7 +7,9 @@ namespace IconService.Services
     public interface IIconService
     {
         Task<IReadOnlyList<IconDocument>> GetAll();
-        Task<IconDocument> GetAsync(string description, bool dayIcon = true);
+
+        Task<IconDocument> GetAsync(string icon);
+
         Task<List<IconDocument>> CreateAsync(List<IconDocument> iconDocuments);
     }
 }

@@ -42,7 +42,6 @@ namespace CitiesGrpcService
             return citiesPaginationReply;
         }
 
-        //TODO: add automapper
         public override async Task GetCitiesStream(
             CitiesStreamRequest request,
             IServerStreamWriter<CityReply> responseStream,

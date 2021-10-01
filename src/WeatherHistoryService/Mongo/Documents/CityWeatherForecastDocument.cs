@@ -34,5 +34,9 @@ namespace WeatherHistoryService.Mongo.Documents
 
         public Temperature Temperature { get; set; }
         public string Summary { get; set; }
+
+        [BsonElement("Icon")]
+        [BsonRepresentation(BsonType.String)]
+        public string Icon { get; set; }
     }
 }

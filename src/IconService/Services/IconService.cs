@@ -21,9 +21,9 @@ namespace IconService.Services
             return await _repository.FindAsync(i => i.Id != null);
         }
 
-        public async Task<IconDocument> GetAsync(string description, bool dayIcon = true)
+        public async Task<IconDocument> GetAsync(string icon)
         {
-            return await _repository.GetAsync(i => i.Description == description && i.DayIcon == dayIcon);
+            return await _repository.GetAsync(i => i.Icon == icon);
         }
 
         public async Task<List<IconDocument>> CreateAsync(List<IconDocument> iconDocuments)

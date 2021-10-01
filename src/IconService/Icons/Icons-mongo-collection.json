@@ -4,124 +4,142 @@
   },
   "Name": "01d@2x.png",
   "Description": "clear sky",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "01d"
 },{
   "_id": {
     "$oid": "60d88455b1a4d841a6a7ca6f"
   },
   "Name": "02d@2x.png",
   "Description": "few clouds",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "02d"
 },{
   "_id": {
     "$oid": "60d88466b1a4d841a6a7ca70"
   },
   "Name": "03d@2x.png",
   "Description": "scattered clouds",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "03d"
 },{
   "_id": {
     "$oid": "60d88471b1a4d841a6a7ca71"
   },
   "Name": "04d@2x.png",
   "Description": "broken clouds",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "04d"
 },{
   "_id": {
     "$oid": "60d8847bb1a4d841a6a7ca72"
   },
   "Name": "09d@2x.png",
   "Description": "shower rain",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "09d"
 },{
   "_id": {
     "$oid": "60d88483b1a4d841a6a7ca73"
   },
   "Name": "10d@2x.png",
   "Description": "rain",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "10d"
 },{
   "_id": {
     "$oid": "60d8848eb1a4d841a6a7ca74"
   },
   "Name": "11d@2x.png",
   "Description": "thunderstorm",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "11d"
 },{
   "_id": {
     "$oid": "60d88497b1a4d841a6a7ca75"
   },
   "Name": "13d@2x.png",
   "Description": "snow",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "01d"
 },{
   "_id": {
     "$oid": "60d8849fb1a4d841a6a7ca76"
   },
   "Name": "50d@2x.png",
   "Description": "mist",
-  "DayIcon": true
+  "DayIcon": true,
+  "Icon": "50d"
 },{
   "_id": {
     "$oid": "60d884e5b1a4d841a6a7ca77"
   },
   "Name": "01n@2x.png",
   "Description": "clear sky",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "01n"
 },{
   "_id": {
     "$oid": "60d884f4b1a4d841a6a7ca78"
   },
   "Name": "02n@2x.png",
   "Description": "few clouds",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "02n"
 },{
   "_id": {
     "$oid": "60d884ffb1a4d841a6a7ca79"
   },
   "Name": "03n@2x.png",
   "Description": "scattered clouds",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "03n"
 },{
   "_id": {
     "$oid": "60d88508b1a4d841a6a7ca7a"
   },
   "Name": "04n@2x.png",
   "Description": "broken clouds",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "04n"
 },{
   "_id": {
     "$oid": "60d88511b1a4d841a6a7ca7b"
   },
   "Name": "09n@2x.png",
   "Description": "shower rain",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "09n"
 },{
   "_id": {
     "$oid": "60d8851db1a4d841a6a7ca7c"
   },
   "Name": "10n@2x.png",
   "Description": "rain",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "10n"
 },{
   "_id": {
     "$oid": "60d88526b1a4d841a6a7ca7d"
   },
   "Name": "11n@2x.png",
   "Description": "thunderstorm",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "11n"
 },{
   "_id": {
     "$oid": "60d88530b1a4d841a6a7ca7e"
   },
   "Name": "13n@2x.png",
   "Description": "snow",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "13n"
 },{
   "_id": {
     "$oid": "60d88538b1a4d841a6a7ca7f"
   },
   "Name": "50n@2x.png",
   "Description": "mist",
-  "DayIcon": false
+  "DayIcon": false,
+  "Icon": "50n"
 }]
