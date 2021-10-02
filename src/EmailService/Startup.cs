@@ -75,6 +75,7 @@ namespace EmailService
             {
                 endpoints.MapControllers();
                 endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
+                endpoints.MapGet("", ctx => ctx.Response.WriteAsync($"ToolboxModular in {env.EnvironmentName} mode"));
             });
         }
     }

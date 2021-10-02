@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using AutoMapper;
+using EmailService.Features.Commands;
 using MassTransit;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using MQModels.Email;
 
@@ -11,16 +10,28 @@ namespace EmailService.Listeners
 {
     public class SendEmailListener : IConsumer<SendEmail>
     {
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
         private readonly ILogger<SendEmailListener> _logger;
 
-        public SendEmailListener(ILogger<SendEmailListener> logger)
+        public SendEmailListener(
+            IMediator mediator,
+            IMapper mapper,
+            ILogger<SendEmailListener> logger)
         {
+            _mediator = mediator;
+            _mapper = mapper;
             _logger = logger;
         }
 
         public async Task Consume(ConsumeContext<SendEmail> context)
         {
             _logger.LogInformation("Got 'SendEmail' to consume");
+
+            var sendEmailCommand = _mapper.Map<SendEmailCommand>(context.Message);
+            var response = await _mediator.Send(sendEmailCommand);
+
+            //TODO: maybe do something with response here
         }
     }
 }

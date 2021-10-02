@@ -3,6 +3,7 @@ using AutoMapper;
 using EmailService.Features.Commands;
 using MimeKit;
 using Models.Internal;
+using MQModels.Email;
 
 namespace EmailService.Mappings
 {
@@ -18,6 +19,8 @@ namespace EmailService.Mappings
                 .ForMember(dest => dest.SendingDate, opt => opt.MapFrom(_ => DateTime.Now));
 
             CreateMap<MailRequest, SendEmailCommand>().ReverseMap();
+            //CreateMap<SendEmail, MailRequest>().ReverseMap();
+            CreateMap<SendEmailCommand, MailRequest>().ReverseMap();
         }
     }
 }
