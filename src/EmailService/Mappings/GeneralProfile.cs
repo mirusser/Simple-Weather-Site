@@ -18,8 +18,7 @@ namespace EmailService.Mappings
                 .ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Subject))
                 .ForMember(dest => dest.SendingDate, opt => opt.MapFrom(_ => DateTime.Now));
 
-            CreateMap<MailRequest, SendEmailCommand>().ReverseMap();
-            //CreateMap<SendEmail, MailRequest>().ReverseMap();
+            CreateMap<SendEmail, SendEmailCommand>().ReverseMap();
             CreateMap<SendEmailCommand, MailRequest>().ReverseMap();
         }
     }

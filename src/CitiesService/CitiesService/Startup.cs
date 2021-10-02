@@ -1,49 +1,34 @@
+using System.Linq;
+using System.Text.Json;
+using Application;
+using Application.HealthChecks;
 using CitiesService.Exceptions.Handlers;
-using Convey;
-using Convey.CQRS.Commands;
-using Convey.CQRS.Events;
-using Convey.CQRS.Queries;
-using Convey.MessageBrokers.CQRS;
-using Convey.MessageBrokers.RabbitMQ;
-using Convey.Docs.Swagger;
+using Domain.Models;
+using Infrastructure.Persistence;
+using Infrastructure.Persistence.Contexts;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using System.Text.Json;
-using Infrastructure.Persistence;
-using Infrastructure.Persistence.Contexts;
-using Application;
-using Application.HealthChecks;
-using Domain.Models;
 
 namespace CitiesService
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationLayer();
+            services.AddApplicationLayer(Configuration);
             services.AddApplicationLayerAutomapper();
             services.AddPersistenceInfrastructure(Configuration);
 
@@ -87,6 +72,7 @@ namespace CitiesService
             app.UseCors("AllowAll");
 
             #region Healthchecks
+
             app.UseHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>
@@ -106,7 +92,8 @@ namespace CitiesService
                     await context.Response.WriteAsync(JsonSerializer.Serialize(response));
                 }
             });
-            #endregion
+
+            #endregion Healthchecks
 
             app.UseEndpoints(endpoints =>
             {

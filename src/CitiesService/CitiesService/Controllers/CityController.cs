@@ -1,19 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.IO;
-using System.IO.Compression;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Cors;
-using Convey.CQRS.Queries;
-using Convey.CQRS.Commands;
 using Application.Dto;
-using Application.Features.Queries;
 using Application.Features.Commands;
+using Application.Features.Queries;
+using Convey.CQRS.Commands;
+using Convey.CQRS.Queries;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CitiesService.Controllers
 {
@@ -34,13 +29,14 @@ namespace CitiesService.Controllers
         }
 
         #region These are normal ways of handling queries and commands
+
         //[HttpGet("{cityName}/{limit}", Name = "GetCitiesByName")]
         //public async Task<ActionResult<List<CityDto>>> GetCitiesByName(string cityName, int limit = 10)
         //{
         //    var cities = await _cityManager.GetCitiesByName(cityName, limit);
 
-        //    return cities != null && cities.Any() ? 
-        //        Ok(cities) : 
+        //    return cities != null && cities.Any() ?
+        //        Ok(cities) :
         //        NoContent();
         //}
 
@@ -54,9 +50,11 @@ namespace CitiesService.Controllers
 
         //    return Ok();
         //}
-        #endregion
+
+        #endregion These are normal ways of handling queries and commands
 
         #region Convey ways of handling queries and commands
+
         [HttpGet("{cityName}/{limit}", Name = "GetCitiesByName")]
         public async Task<ActionResult<List<CityDto>>> GetCitiesByName([FromRoute] GetCitiesQuery query)
         {
@@ -73,7 +71,7 @@ namespace CitiesService.Controllers
         {
             var citiesPagination = await _queryDispatcher.QueryAsync(query);
 
-            return citiesPagination != null?
+            return citiesPagination != null ?
                 Ok(citiesPagination) :
                 NoContent();
         }
@@ -86,7 +84,7 @@ namespace CitiesService.Controllers
 
             return Ok();
         }
-        #endregion
 
+        #endregion Convey ways of handling queries and commands
     }
 }

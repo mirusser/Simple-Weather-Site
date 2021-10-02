@@ -29,9 +29,9 @@ namespace EmailService.Listeners
             _logger.LogInformation("Got 'SendEmail' to consume");
 
             var sendEmailCommand = _mapper.Map<SendEmailCommand>(context.Message);
-            var response = await _mediator.Send(sendEmailCommand);
 
             //TODO: maybe do something with response here
+            var response = await _mediator.Send(sendEmailCommand);
         }
     }
 }

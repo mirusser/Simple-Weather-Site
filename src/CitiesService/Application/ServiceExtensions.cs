@@ -13,15 +13,33 @@ using Convey.CQRS.Queries;
 using Convey.Docs.Swagger;
 using Convey.MessageBrokers.CQRS;
 using Convey.MessageBrokers.RabbitMQ;
+using Domain.Settings;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MQModels.Email;
 
 namespace Application
 {
     public static class ServiceExtensions
     {
-        public static void AddApplicationLayer(this IServiceCollection services)
+        public static void AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddMassTransit(config =>
+            {
+                RabbitMQSettings rabbitMQSettings = new();
+                configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+
+                config.SetKebabCaseEndpointNameFormatter();
+                config.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(rabbitMQSettings.Host);
+                    cfg.ConfigureEndpoints(ctx);
+                });
+            });
+            services.AddMassTransitHostedService(waitUntilStarted: true);
+
             services.AddConvey()
                 //    .AddConsul()
                 .AddSwaggerDocs()
@@ -39,8 +57,10 @@ namespace Application
                 .Build();
 
             #region Managers
+
             services.AddTransient<ICityManager, CityManager>();
-            #endregion
+
+            #endregion Managers
         }
 
         public static void AddApplicationLayerAutomapper(this IServiceCollection services)
