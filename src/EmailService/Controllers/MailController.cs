@@ -1,10 +1,7 @@
-﻿using EmailService.Models;
-using EmailService.Services;
+﻿using System.Threading.Tasks;
+using EmailService.Features.Commands;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace EmailService.Controllers
 {
@@ -12,25 +9,17 @@ namespace EmailService.Controllers
     [Route("api/[controller]")]
     public class MailController : ControllerBase
     {
-        private readonly IMailService _mailService;
+        private readonly IMediator _mediator;
 
-        public MailController(IMailService mailService)
+        public MailController(IMediator mediator)
         {
-            _mailService = mailService;
+            _mediator = mediator;
         }
 
-        [HttpPost("send")]
-        public async Task<IActionResult> SendMail([FromForm] MailRequest request)
+        [HttpPost]
+        public async Task<IActionResult> SendEmail(SendEmailCommand command)
         {
-            try
-            {
-                await _mailService.SendEmailAsync(request);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return Ok(await _mediator.Send(command));
         }
     }
 }

@@ -6,22 +6,31 @@
 
   <ItemGroup>
     <Compile Remove="deploy\**" />
+    <Compile Remove="Models\**" />
     <Content Remove="deploy\**" />
+    <Content Remove="Models\**" />
     <EmbeddedResource Remove="deploy\**" />
+    <EmbeddedResource Remove="Models\**" />
     <None Remove="deploy\**" />
+    <None Remove="Models\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Convey" Version="0.5.443" />
-    <PackageReference Include="Convey.CQRS.Commands" Version="0.5.443" />
-    <PackageReference Include="Convey.CQRS.Events" Version="0.5.443" />
-    <PackageReference Include="Convey.CQRS.Queries" Version="0.5.443" />
-    <PackageReference Include="Convey.MessageBrokers" Version="0.5.443" />
-    <PackageReference Include="Convey.MessageBrokers.CQRS" Version="0.5.443" />
-    <PackageReference Include="Convey.MessageBrokers.RabbitMQ" Version="0.5.443" />
-    <PackageReference Include="MailKit" Version="2.12.0" />
-    <PackageReference Include="MimeKit" Version="2.12.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="MailKit" Version="2.15.0" />
+    <PackageReference Include="MassTransit" Version="7.2.2" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.2.2" />
+    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.2.2" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.2.2" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="MimeKit" Version="2.15.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MQModels\MQModels.csproj" />
+    <ProjectReference Include="Models\Models.csproj" />
   </ItemGroup>
 
 </Project>
