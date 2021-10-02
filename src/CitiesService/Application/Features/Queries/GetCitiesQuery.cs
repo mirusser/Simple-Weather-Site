@@ -1,25 +1,19 @@
-﻿using Application.Dto;
-using Application.Interfaces.Managers;
-using Convey.CQRS.Queries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Application.Dto;
+using Application.Interfaces.Managers;
+using MediatR;
 
 namespace Application.Features.Queries
 {
-    public class GetCitiesQuery : IQuery<IEnumerable<CityDto>>
+    public class GetCitiesQuery : IRequest<IEnumerable<CityDto>>
     {
-        public string CityName { get; set; }
-        public int Limit { get; set; }
-
-        public GetCitiesQuery()
-        {
-            Limit = 10;
-        }
+        public string CityName { get; set; } = null!;
+        public int Limit { get; set; } = 10;
     }
 
-    public class GetCitiesHandler : IQueryHandler<GetCitiesQuery, IEnumerable<CityDto>>
+    public class GetCitiesHandler : IRequestHandler<GetCitiesQuery, IEnumerable<CityDto>>
     {
         private readonly ICityManager _cityManger;
 
@@ -28,11 +22,16 @@ namespace Application.Features.Queries
             _cityManger = cityManger;
         }
 
-        public async Task<IEnumerable<CityDto>> HandleAsync(GetCitiesQuery query)
+        public async Task<IEnumerable<CityDto>> Handle(GetCitiesQuery request, CancellationToken cancellationToken)
         {
-            var cities = await _cityManger.GetCitiesByName(query.CityName, query.Limit);
+            if (string.IsNullOrEmpty(request.CityName) || string.IsNullOrEmpty(request.CityName.TrimStart()))
+                return new List<CityDto>();
 
-            return cities;
+            request.CityName = request.CityName.TrimStart();
+
+            var cities = await _cityManger.GetCitiesByName(request.CityName, request.Limit);
+
+            return cities ?? new();
         }
     }
 }

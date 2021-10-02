@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace CitiesService
 {
@@ -33,6 +34,11 @@ namespace CitiesService
             services.AddPersistenceInfrastructure(Configuration);
 
             services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CitiesService", Version = "v1" });
+            });
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
@@ -61,6 +67,8 @@ namespace CitiesService
             }
 
             app.UseServiceExceptionHandler();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
 
             app.UseApplicationLayer();
 

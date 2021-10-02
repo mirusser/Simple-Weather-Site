@@ -2,25 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="Convey" Version="0.5.491" />
-    <PackageReference Include="Convey.CQRS.Commands" Version="0.5.491" />
-    <PackageReference Include="Convey.CQRS.Queries" Version="0.5.491" />
-    <PackageReference Include="Convey.Docs.Swagger" Version="0.5.491" />
-    <PackageReference Include="Convey.Logging" Version="0.5.477" />
-    <PackageReference Include="Convey.MessageBrokers" Version="0.5.491" />
-    <PackageReference Include="Convey.MessageBrokers.CQRS" Version="0.5.491" />
-    <PackageReference Include="Convey.MessageBrokers.RabbitMQ" Version="0.5.491" />
     <PackageReference Include="MassTransit" Version="7.2.2" />
     <PackageReference Include="MassTransit.AspNetCore" Version="7.2.2" />
     <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.2.2" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.2.2" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="5.0.10" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="5.0.10" />
@@ -34,5 +29,4 @@
   <ItemGroup>
     <Folder Include="Managers\Contracts\" />
   </ItemGroup>
-
 </Project>

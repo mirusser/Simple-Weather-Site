@@ -1,4 +1,12 @@
-﻿using Application.Dto;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Application.Dto;
 using Application.Interfaces.Managers;
 using Application.Interfaces.Repositories;
 using Application.Logic.Helpers;
@@ -9,15 +17,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Application.Managers
 {
@@ -60,40 +59,42 @@ namespace Application.Managers
         //uses in-memory caching
         public async Task<List<CityDto>> GetCitiesByName(string cityName, int limit = 10)
         {
+            var cities = new List<CityDto>();
+
             var cacheKey = $"GetCitiesByName-{nameof(cityName)}-{cityName}-{nameof(limit)}-{limit}";
 
-            if (!_memoryCache.TryGetValue(cacheKey, out List<CityDto> cities))
+            if (_memoryCache.TryGetValue(cacheKey, out cities) && cities is not null)
+                return cities;
+
+            if (limit <= 0)
+                return new List<CityDto>();
+
+            var cityInfos = _cityInfoRepo.FindAll(
+                c => c.Name.Contains(cityName),
+                orderByExpression: x => x.OrderBy(c => c.Id),
+                takeNumberOfRows: limit);
+
+            if (cityInfos != null && cityInfos.Any())
             {
-                if (cities == null) cities = new();
+                var cityInfoList = await cityInfos.ToListAsync();
+                cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
 
-                if (!string.IsNullOrEmpty(cityName) && limit > 0)
-                {
-                    var cityInfos = _cityInfoRepo.FindAll(
-                        c => c.Name.Contains(cityName),
-                        orderByExpression: x => x.OrderBy(c => c.Id),
-                        takeNumberOfRows: limit);
+                cities = _mapper.Map<List<CityDto>>(cityInfoList);
 
-                    if (cityInfos != null && cityInfos.Any())
-                    {
-                        var cityInfoList = await cityInfos.ToListAsync();
-                        cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
-
-                        cities = _mapper.Map<List<CityDto>>(cityInfoList);
-
-                        _memoryCache.Set(cacheKey, cities, _cacheExpiryOptions);
-                    }
-                }
+                _memoryCache.Set(cacheKey, cities, _cacheExpiryOptions);
             }
 
-            return cities;
+            return cities ?? new();
         }
 
         public async Task<CitiesPaginationDto> GetCitiesPaginationDto(int numberOfCities = 25, int pageNumber = 1)
         {
             var cityInfoPaginationDto = await GetCitiesInfoPagination(numberOfCities, pageNumber);
+            var cities = cityInfoPaginationDto.CityInfos != null ? _mapper.Map<List<CityDto>>(cityInfoPaginationDto.CityInfos) : new List<CityDto>();
+
             CitiesPaginationDto citiesPaginationDto = new()
             {
-                Cities = _mapper.Map<List<CityDto>>(cityInfoPaginationDto.CityInfos.ToList()),
+                Cities = cities,
                 NumberOfAllCities = cityInfoPaginationDto.NumberOfAllCities
             };
 
@@ -113,6 +114,8 @@ namespace Application.Managers
             {
                 serializedCitiesInfoPagination = Encoding.UTF8.GetString(redisCitiesPaginationDto);
                 result = JsonSerializer.Deserialize<CityInfoPaginationDto>(serializedCitiesInfoPagination, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                result ??= new();
             }
             else
             {
@@ -125,16 +128,16 @@ namespace Application.Managers
                 {
                     var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
 
-                    result.CityInfos = 
+                    result.CityInfos =
                         _cityInfoRepo
                         .FindAll(orderByExpression: x => x.OrderBy(c => c.Name), takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip)
                         .ToList();
                 }
 
-                serializedCitiesInfoPagination = 
+                serializedCitiesInfoPagination =
                     JsonSerializer
                     .Serialize(
-                        result, 
+                        result,
                         new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
                 redisCitiesPaginationDto = Encoding.UTF8.GetBytes(serializedCitiesInfoPagination);
                 await _distributedCache.SetAsync(cacheKey, redisCitiesPaginationDto, _distributedCacheEntryOptions);
@@ -178,11 +181,10 @@ namespace Application.Managers
 
                 if (File.Exists(_fileUrlsAndPaths.DecompressedCityListFilePath))
                 {
-                    List<CityDto> citiesFromJson = new();
-
                     using StreamReader streamReader = new(_fileUrlsAndPaths.DecompressedCityListFilePath);
                     string json = streamReader.ReadToEnd();
-                    citiesFromJson = JsonSerializer.Deserialize<List<CityDto>>(json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    List<CityDto> citiesFromJson = JsonSerializer.Deserialize<List<CityDto>>(json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    citiesFromJson ??= new();
 
                     var cityInfos = _mapper.Map<List<CityInfo>>(citiesFromJson);
 

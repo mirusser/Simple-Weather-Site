@@ -95,11 +95,11 @@
                 delay: 550,
                 cache: true,
                 dataType: 'json',
-                url: function (params) {
-
-                    var url = '@(Model.CitiesServiceLocalEndpoint)' + params.term + '/10/';
-
-                    return url;
+                url: '@(Model.CitiesServiceLocalEndpoint)GetCitiesByName',
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: function (term) {
+                    return (JSON.stringify({ cityName: term.term, limit: 10 }))
                 },
                 processResults: function (data) {
 

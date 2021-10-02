@@ -1,12 +1,8 @@
-using Convey.Logging;
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Serilog;
 
 namespace CitiesService
 {
@@ -21,8 +17,24 @@ namespace CitiesService
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>()
-                        .UseLogging();
+                    webBuilder.UseStartup<Startup>();
                 });
+
+        private static void CreateLogger()
+        {
+            //Read configuration from appSettings
+            var config = new ConfigurationBuilder()
+                .AddJsonFile(
+                    path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
+                    optional: false,
+                    reloadOnChange: true)
+                .Build();
+
+            //Initialize Logger (Serilog)
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(config)
+                .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
+                .CreateLogger();
+        }
     }
 }

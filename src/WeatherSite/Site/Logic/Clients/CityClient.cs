@@ -17,9 +17,11 @@ namespace WeatherSite.Clients
     public class CityClient
     {
         #region Properties
+
         private readonly HttpClient _httpClient;
         private readonly ApiEndpoints _apiEndpoints;
-        #endregion
+
+        #endregion Properties
 
         public CityClient(
             HttpClient httpClient,
@@ -31,11 +33,24 @@ namespace WeatherSite.Clients
 
         public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
         {
-            string url = $"{_apiEndpoints.CitiesServiceApiUrl}{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
-            List<City> cities =
-                await _httpClient.GetFromJsonAsync<List<City>>(url);
+            //string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
 
-            return cities;
+            string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName";
+
+            var getCitiesQuery = new
+            {
+                cityName,
+                limit
+            };
+
+            var jsonContent = JsonContent.Create(getCitiesQuery);
+
+            HttpResponseMessage response = await _httpClient.PostAsync(url, jsonContent);
+
+            var content = await response.Content.ReadAsStringAsync();
+            var cities = JsonSerializer.Deserialize<List<City>>(content);
+
+            return cities ?? new();
         }
 
         public async Task<CitiesPagination?> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)

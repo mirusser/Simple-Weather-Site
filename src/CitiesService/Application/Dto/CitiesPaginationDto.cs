@@ -7,7 +7,7 @@ namespace Application.Dto
 {
     public class CitiesPaginationDto
     {
-        public List<CityDto> Cities { get; set; }
+        public List<CityDto> Cities { get; set; } = new List<CityDto>();
         public int NumberOfAllCities { get; set; }
     }
 }

@@ -1,24 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using Application.Interfaces.Managers;
 using Application.Managers;
-using Convey;
-using Convey.CQRS.Commands;
-using Convey.CQRS.Events;
-using Convey.CQRS.Queries;
-using Convey.Docs.Swagger;
-using Convey.MessageBrokers.CQRS;
-using Convey.MessageBrokers.RabbitMQ;
 using Domain.Settings;
 using MassTransit;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MQModels.Email;
 
 namespace Application
 {
@@ -26,10 +14,14 @@ namespace Application
     {
         public static void AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddMediatR(Assembly.GetExecutingAssembly());
+
             services.AddMassTransit(config =>
             {
                 RabbitMQSettings rabbitMQSettings = new();
-                configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+                configuration
+                    .GetSection(nameof(RabbitMQSettings))
+                    .Bind(rabbitMQSettings);
 
                 config.SetKebabCaseEndpointNameFormatter();
                 config.UsingRabbitMq((ctx, cfg) =>
@@ -39,22 +31,6 @@ namespace Application
                 });
             });
             services.AddMassTransitHostedService(waitUntilStarted: true);
-
-            services.AddConvey()
-                //    .AddConsul()
-                .AddSwaggerDocs()
-                .AddCommandHandlers()
-                .AddEventHandlers()
-                .AddQueryHandlers()
-                .AddServiceBusEventDispatcher()
-                .AddServiceBusCommandDispatcher()
-                .AddInMemoryCommandDispatcher()
-                // .AddInMemoryEventDispatcher()
-                .AddInMemoryQueryDispatcher()
-                //    .AddRedis()
-                .AddRabbitMq()
-                //.AddMongo()
-                .Build();
 
             #region Managers
 
@@ -70,14 +46,6 @@ namespace Application
 
         public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app)
         {
-            app.UseSwaggerDocs();
-            app.UseConvey();
-            //using (var scope = app.ApplicationServices.CreateScope())
-            //{
-            //    var initializer = scope.ServiceProvider.GetRequiredService<IStartupInitializer>();
-            //    Task.Run(() => initializer.InitializeAsync()).GetAwaiter().GetResult();
-            //}
-
             return app;
         }
     }

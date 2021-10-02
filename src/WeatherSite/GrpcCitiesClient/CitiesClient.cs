@@ -29,7 +29,7 @@ namespace GrpcCitiesClient
                 }
             };
 
-            _client = grpcClientFactory.CreateClient<Cities.CitiesClient>("Cities");
+            _client = grpcClientFactory.CreateClient<Cities.CitiesClient>(nameof(Cities));
         }
 
         public async IAsyncEnumerable<CityReply> GetCitiesStream(int pageNumber = 1, int numberOfCities = 25)
@@ -56,7 +56,7 @@ namespace GrpcCitiesClient
                 NumberOfCities = numberOfCities
             };
 
-           var response = await _client.GetCitiesPaginationAsync(request);
+            var response = await _client.GetCitiesPaginationAsync(request);
 
             return response;
         }

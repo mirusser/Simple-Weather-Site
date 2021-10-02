@@ -1,20 +1,18 @@
-﻿using Application.Dto;
-using Application.Interfaces.Managers;
-using Convey.CQRS.Queries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Application.Dto;
+using Application.Interfaces.Managers;
+using MediatR;
 
 namespace Application.Features.Queries
 {
-    public class GetCitiesPaginationQuery : IQuery<CitiesPaginationDto>
+    public class GetCitiesPaginationQuery : IRequest<CitiesPaginationDto>
     {
         public int NumberOfCities { get; set; }
         public int PageNumber { get; set; }
     }
 
-    public class GetCitiesPaginationHandler : IQueryHandler<GetCitiesPaginationQuery, CitiesPaginationDto>
+    public class GetCitiesPaginationHandler : IRequestHandler<GetCitiesPaginationQuery, CitiesPaginationDto>
     {
         private readonly ICityManager _cityManager;
 
@@ -23,11 +21,11 @@ namespace Application.Features.Queries
             _cityManager = cityManager;
         }
 
-        public async Task<CitiesPaginationDto> HandleAsync(GetCitiesPaginationQuery query)
+        public async Task<CitiesPaginationDto> Handle(GetCitiesPaginationQuery request, CancellationToken cancellationToken)
         {
-            var citiesPaginationDto = await _cityManager.GetCitiesPaginationDto(query.NumberOfCities, query.PageNumber);
+            var citiesPaginationDto = await _cityManager.GetCitiesPaginationDto(request.NumberOfCities, request.PageNumber);
 
-            return citiesPaginationDto;
+            return citiesPaginationDto ?? new();
         }
     }
 }

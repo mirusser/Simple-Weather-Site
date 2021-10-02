@@ -1,88 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Dto;
 using Application.Features.Commands;
 using Application.Features.Queries;
-using Convey.CQRS.Commands;
-using Convey.CQRS.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CitiesService.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [EnableCors("AllowAll")]
     public class CityController : ControllerBase
     {
-        private readonly ICommandDispatcher _commandDispatcher;
-        private readonly IQueryDispatcher _queryDispatcher;
+        private readonly IMediator _mediator;
 
-        public CityController(
-            ICommandDispatcher commandDispatcher,
-            IQueryDispatcher queryDispatcher)
+        public CityController(IMediator mediator)
         {
-            _commandDispatcher = commandDispatcher;
-            _queryDispatcher = queryDispatcher;
+            _mediator = mediator;
         }
-
-        #region These are normal ways of handling queries and commands
-
-        //[HttpGet("{cityName}/{limit}", Name = "GetCitiesByName")]
-        //public async Task<ActionResult<List<CityDto>>> GetCitiesByName(string cityName, int limit = 10)
-        //{
-        //    var cities = await _cityManager.GetCitiesByName(cityName, limit);
-
-        //    return cities != null && cities.Any() ?
-        //        Ok(cities) :
-        //        NoContent();
-        //}
-
-        //[HttpGet]
-        //[Route("AddCityInfosToDatabase")]
-        //public async Task<IActionResult> AddCityInfosToDatabase()
-        //{
-        //    var result = await _cityManager.SaveCitiesFromFileToDatabase();
-
-        //    //TODO: return proper result depending on saving cities to database
-
-        //    return Ok();
-        //}
-
-        #endregion These are normal ways of handling queries and commands
 
         #region Convey ways of handling queries and commands
 
-        [HttpGet("{cityName}/{limit}", Name = "GetCitiesByName")]
-        public async Task<ActionResult<List<CityDto>>> GetCitiesByName([FromRoute] GetCitiesQuery query)
+        [HttpPost]
+        public async Task<ActionResult<List<CityDto>>> GetCitiesByName(GetCitiesQuery query)
         {
-            var cities = await _queryDispatcher.QueryAsync(query);
-
-            return cities != null && cities.Any() ?
-                Ok(cities) :
-                NoContent();
-        }
-
-        [HttpGet]
-        [Route("GetCitiesPagination/{numberOfCities}/{pageNumber}")]
-        public async Task<ActionResult<CitiesPaginationDto>> GetCitiesPagination([FromRoute] GetCitiesPaginationQuery query)
-        {
-            var citiesPagination = await _queryDispatcher.QueryAsync(query);
-
-            return citiesPagination != null ?
-                Ok(citiesPagination) :
-                NoContent();
+            return Ok(await _mediator.Send(query));
         }
 
         [HttpPost]
-        [Route("AddCityInfosToDatabase")]
-        public async Task<IActionResult> AddCityInfosToDatabase(AddCitiesToDatabaseOrder order)
+        public async Task<ActionResult<CitiesPaginationDto>> GetCitiesPagination(GetCitiesPaginationQuery query)
         {
-            await _commandDispatcher.SendAsync(order);
+            return Ok(await _mediator.Send(query));
+        }
 
-            return Ok();
+        [HttpPost]
+        public async Task<IActionResult> AddCityInfosToDatabase(AddCitiesToDatabaseCommand command)
+        {
+            return Ok(await _mediator.Send(command));
         }
 
         #endregion Convey ways of handling queries and commands
