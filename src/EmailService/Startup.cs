@@ -1,5 +1,6 @@
 using System.Reflection;
 using EmailService.Listeners;
+using EmailService.Middlewares;
 using EmailService.Services;
 using MassTransit;
 using MediatR;
@@ -25,6 +26,7 @@ namespace EmailService
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<ExceptionHandler>();
             services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
 
             services.AddMediatR(Assembly.GetExecutingAssembly());
@@ -62,6 +64,7 @@ namespace EmailService
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware<ExceptionHandler>();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EmailService v1"));
 
@@ -75,7 +78,7 @@ namespace EmailService
             {
                 endpoints.MapControllers();
                 endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
-                endpoints.MapGet("", ctx => ctx.Response.WriteAsync($"ToolboxModular in {env.EnvironmentName} mode"));
+                endpoints.MapGet("", ctx => ctx.Response.WriteAsync($"EmailService in {env.EnvironmentName} mode"));
             });
         }
     }
