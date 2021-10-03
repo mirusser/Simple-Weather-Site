@@ -20,7 +20,7 @@ namespace WeatherHistoryService.Services
 
         public IMongoCollection<TMongoDocument> Create(string? collectionName = null)
         {
-            collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : _settings.CollectionName;
+            collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : typeof(TMongoDocument).Name;
             var client = new MongoClient(_settings.ConnectionString);
             var database = client.GetDatabase(_settings.Database);
 
