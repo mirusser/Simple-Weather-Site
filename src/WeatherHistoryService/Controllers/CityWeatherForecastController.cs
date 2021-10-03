@@ -11,7 +11,7 @@ using WeatherHistoryService.Services.Contracts;
 
 namespace WeatherHistoryService.Controllers
 {
-    //TODO: refactor so all endpoints use commands and queries
+    //TODO: refactor so all endpoints use mediatr
     [ApiController]
     [Route("api/[controller]")]
     public class CityWeatherForecastController : ControllerBase

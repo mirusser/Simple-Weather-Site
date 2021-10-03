@@ -10,8 +10,11 @@ namespace WeatherHistoryService.Services.Contracts
     public interface ICityWeatherForecastService
     {
         Task<IReadOnlyList<CityWeatherForecastDocument>> GetAll();
+
         Task<CityWeatherForecastPaginationDto> GetCityWeatherForecastPagination(int numberOfEntities = 25, int pageNumber = 1);
-        Task<CityWeatherForecastDocument> GetAsync(string id);
-        Task<CityWeatherForecastDocument> CreateAsync(CityWeatherForecastDocument cityWeatherForecast);
+
+        Task<CityWeatherForecastDocument?> GetAsync(string id);
+
+        Task<CityWeatherForecastDocument?> CreateAsync(CityWeatherForecastDocument? cityWeatherForecast);
     }
 }

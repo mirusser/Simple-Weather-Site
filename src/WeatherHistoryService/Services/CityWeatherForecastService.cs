@@ -1,10 +1,9 @@
-﻿using Convey.Persistence.MongoDB;
-using MongoDB.Bson;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using WeatherHistoryService.Models.Dto;
 using WeatherHistoryService.Mongo.Documents;
 using WeatherHistoryService.Services.Contracts;
@@ -13,31 +12,30 @@ namespace WeatherHistoryService.Services
 {
     public class CityWeatherForecastService : ICityWeatherForecastService
     {
-        private readonly IMongoRepository<CityWeatherForecastDocument, Guid> _repository;
+        private readonly IMongoCollection<CityWeatherForecastDocument> _cityWeatherForecastCollection;
 
-        public CityWeatherForecastService(IMongoRepository<CityWeatherForecastDocument, Guid> repository)
+        public CityWeatherForecastService(IMongoCollectionFactory<CityWeatherForecastDocument> mongoCollectionFactory)
         {
-            _repository = repository;
+            _cityWeatherForecastCollection = mongoCollectionFactory.Create();
         }
 
         public async Task<IReadOnlyList<CityWeatherForecastDocument>> GetAll()
-        {
-            return await _repository.FindAsync(c => c.Id != null);
-        }
+            => await _cityWeatherForecastCollection.Find(_ => true).ToListAsync();
 
         public async Task<CityWeatherForecastPaginationDto> GetCityWeatherForecastPagination(
-            int numberOfEntities = 25, 
+            int numberOfEntities = 25,
             int pageNumber = 1)
         {
             CityWeatherForecastPaginationDto cityWeatherForecastPaginationDto = new();
 
-            cityWeatherForecastPaginationDto.NumberOfAllEntities = (await _repository.FindAsync(c => c.Id != default)).Count;
+            cityWeatherForecastPaginationDto.NumberOfAllEntities = (int)await _cityWeatherForecastCollection.CountDocumentsAsync(c => c.Id != default);
 
             if (pageNumber >= 1 && numberOfEntities >= 1)
             {
                 var howManyToSkip = pageNumber > 1 ? numberOfEntities * (pageNumber - 1) : 0;
 
-                var cityWeatherForecastDocuments = (await _repository.FindAsync(c => c.Id != default)).OrderByDescending(c => c.SearchDate).Skip(howManyToSkip).Take(numberOfEntities);
+                var cityWeatherForecastDocuments =
+                    _cityWeatherForecastCollection.AsQueryable().Where(c => c.Id != default).OrderByDescending(c => c.SearchDate).Skip(howManyToSkip).Take(numberOfEntities);
 
                 cityWeatherForecastPaginationDto.WeatherForecastDocuments = cityWeatherForecastDocuments.ToList();
             }
@@ -45,24 +43,24 @@ namespace WeatherHistoryService.Services
             return cityWeatherForecastPaginationDto;
         }
 
-        public async Task<CityWeatherForecastDocument> GetAsync(string id)
+        public async Task<CityWeatherForecastDocument?> GetAsync(string id)
         {
-            CityWeatherForecastDocument cityWeatherForecastDocument = null;
+            CityWeatherForecastDocument? cityWeatherForecastDocument = null;
 
-            if (!string.IsNullOrEmpty(id))
+            if (ObjectId.TryParse(id, out ObjectId objectId))
             {
-                var guidId = new Guid(Convert.FromBase64String(id.Trim()));
-                cityWeatherForecastDocument = await _repository.GetAsync(guidId);
+                cityWeatherForecastDocument =
+                    await _cityWeatherForecastCollection.Find(c => c.Id == objectId).SingleOrDefaultAsync();
             }
 
             return cityWeatherForecastDocument;
         }
 
-        public async Task<CityWeatherForecastDocument> CreateAsync(CityWeatherForecastDocument cityWeatherForecast)
+        public async Task<CityWeatherForecastDocument?> CreateAsync(CityWeatherForecastDocument? cityWeatherForecast)
         {
-            if (cityWeatherForecast != null)
+            if (cityWeatherForecast is not null)
             {
-                await _repository.AddAsync(cityWeatherForecast);
+                await _cityWeatherForecastCollection.InsertOneAsync(cityWeatherForecast);
             }
 
             return cityWeatherForecast;
