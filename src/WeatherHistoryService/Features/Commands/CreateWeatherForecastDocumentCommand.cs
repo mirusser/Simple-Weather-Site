@@ -2,7 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using MassTransit;
 using MediatR;
+using MQModels.WeatherHistory;
 using WeatherHistoryService.Models.Dto;
 using WeatherHistoryService.Mongo.Documents;
 using WeatherHistoryService.Services.Contracts;
@@ -28,19 +30,24 @@ namespace WeatherHistoryService.Features.Commands
     {
         private readonly ICityWeatherForecastService _cityWeatherForecastService;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public CreateWeatherForecastDocumentHandler(
             ICityWeatherForecastService cityWeatherForecastService,
-            IMapper mapper)
+            IMapper mapper,
+            IPublishEndpoint publishEndpoint)
         {
             _cityWeatherForecastService = cityWeatherForecastService;
             _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<CityWeatherForecastDocument> Handle(CreateWeatherForecastDocumentCommand request, CancellationToken cancellationToken)
         {
             var cityWeatherForecastDocument = _mapper.Map<CityWeatherForecastDocument>(request);
             var cityWeatherForecast = await _cityWeatherForecastService.CreateAsync(cityWeatherForecastDocument);
+
+            await _publishEndpoint.Publish<CreatedCityWeatherForecastSearch>(new());
 
             return cityWeatherForecast;
         }

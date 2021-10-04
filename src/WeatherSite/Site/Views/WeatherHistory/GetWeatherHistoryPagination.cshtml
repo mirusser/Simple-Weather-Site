@@ -17,6 +17,7 @@
 </div>
 
 <script src="~/js/pagination.js" asp-append-version="true"></script>
+<script src="~/lib/signalr/dist/browser/signalr.js" asp-append-version="true"></script>
 
 @section Scripts
 {
@@ -26,6 +27,34 @@
             '@Url.Action(nameof(WeatherHistoryController.GetWeatherHistoryPaginationPartial), MvcHelper.NameOfController<WeatherHistoryController>())',
             1,
             25);
+
+        var connectionUrl = "https://localhost:5671/WeatherHistoryHub"; //TODO: add to settings
+        var hubConnection = new signalR.HubConnectionBuilder().withUrl(connectionUrl).build();
+
+        hubConnection.start().then(function () {
+            console.log('connection opened');
+        });
+
+        //TODO: dont use hardcoded string
+        hubConnection.on("RefreshPageMessage", function () {
+
+            console.log("got message: RefreshPageMessage");
+            location.reload();
+        });
+
+        hubConnection.onclose(function (event) {
+
+            console.log("signalr connection lost")
+        });
+
+        //manual connection closing
+        //if (hubConnection && hubConnection.state !== "Connected") {
+
+        //    console.log("stopping connection");
+
+        //    hubConnection.stop().then(function () {
+        //        console.log("connection stopped")
+        //    });
+        //}
     </script>
 }
-

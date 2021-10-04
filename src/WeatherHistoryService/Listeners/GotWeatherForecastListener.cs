@@ -13,15 +13,18 @@ namespace WeatherHistoryService.Listeners
         private readonly ICityWeatherForecastService _cityWeatherForecastService;
         private readonly IMapper _mapper;
         private readonly ILogger<GotWeatherForecastListener> _logger;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public GotWeatherForecastListener(
             ICityWeatherForecastService cityWeatherForecastService,
             IMapper mapper,
-            ILogger<GotWeatherForecastListener> logger)
+            ILogger<GotWeatherForecastListener> logger,
+            IPublishEndpoint publishEndpoint)
         {
             _cityWeatherForecastService = cityWeatherForecastService;
             _mapper = mapper;
             _logger = logger;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task Consume(ConsumeContext<IGotWeatherForecast> context)
@@ -30,6 +33,8 @@ namespace WeatherHistoryService.Listeners
             {
                 var cityWeatherForecastDocument = _mapper.Map<CityWeatherForecastDocument>(context.Message);
                 await _cityWeatherForecastService.CreateAsync(cityWeatherForecastDocument);
+
+                await _publishEndpoint.Publish<CreatedCityWeatherForecastSearch>(new());
             }
             else
             {
