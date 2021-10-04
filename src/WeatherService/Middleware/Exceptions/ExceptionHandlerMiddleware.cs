@@ -1,14 +1,11 @@
-﻿using Convey.MessageBrokers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
-using WeatherService.Messages.Events;
-using WeatherService.Models.Dto;
+using MassTransit;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using MQModels.Email;
 
 namespace WeatherService.Middleware.Exceptions
 {
@@ -16,21 +13,18 @@ namespace WeatherService.Middleware.Exceptions
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlerMiddleware> _logger;
-        private readonly IBusPublisher _publisher;
 
         public ExceptionHandlerMiddleware(
             RequestDelegate next,
-            ILogger<ExceptionHandlerMiddleware> logger,
-            IBusPublisher publisher)
+            ILogger<ExceptionHandlerMiddleware> logger)
         {
             _next = next;
             _logger = logger;
-            _publisher = publisher;
         }
 
         public RequestDelegate Next => _next;
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, IPublishEndpoint publishEndpoint)
         {
             try
             {
@@ -38,11 +32,11 @@ namespace WeatherService.Middleware.Exceptions
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, ex);
+                await HandleExceptionAsync(context, ex, publishEndpoint);
             }
         }
 
-        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception, IPublishEndpoint publishEndpoint)
         {
             var defaultErrorCode = "error";
             var exceptionType = exception.GetType();
@@ -56,7 +50,12 @@ namespace WeatherService.Middleware.Exceptions
 
             _logger.LogError("WeatherService: Exception code: {ErrorCode}, Exception message: {ExceptionMessage}", new[] { errorCode, exception.Message });
 
-            await _publisher.PublishAsync(new SendEmailRequestEvent(new SendEmailDto() { Subject = $"Exception from WeatherService", Body = $"{exception.Message} {exception.StackTrace}"}));
+            var sendEmail = new SendEmail()
+            {
+                Subject = "Exception",
+                Body = exception.InnerException != null ? exception.InnerException.ToString() : exception.Message
+            };
+            await publishEndpoint.Publish(sendEmail);
 
             var response = new { code = errorCode, message = exception.Message };
             var payload = JsonSerializer.Serialize(response);

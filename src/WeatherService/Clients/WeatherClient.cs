@@ -13,11 +13,16 @@ namespace WeatherService.Clients
     public class WeatherClient
     {
         #region Properties
+
         private readonly HttpClient _httpClient;
         private readonly ServiceSettings _serviceSettings;
-        #endregion
+
+        #endregion Properties
+
+        //TODO move records from here bro
 
         #region Records
+
         public record Coord(decimal lon, decimal lat); //coordinates - longitude, latitude
         public record Weather(int id, string main, string description, string icon);
         public record Main(decimal temp, decimal feels_like, decimal temp_min, decimal temp_max, int pressure, int humidity);
@@ -37,7 +42,8 @@ namespace WeatherService.Clients
             int id,
             string name,
             int cod);
-        #endregion
+
+        #endregion Records
 
         public WeatherClient(
             HttpClient httpClient,
@@ -73,7 +79,6 @@ namespace WeatherService.Clients
             }
 
             return currentWeather;
-
         }
 
         public async Task<Forecast> GetCurrentWeatherByCityNameAsync(string city)

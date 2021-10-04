@@ -1,54 +1,49 @@
-﻿using Convey.CQRS.Queries;
-using Convey.MessageBrokers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
+using MassTransit;
+using MediatR;
+using MQModels.WeatherHistory;
 using WeatherService.Clients;
-using WeatherService.Messages.Events;
 using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries
 {
-    public class GetByCityNameFromXmlResponseQuery : IQuery<WeatherForecastDto>
+    public class GetByCityNameFromXmlResponseQuery : IRequest<WeatherForecastDto>
     {
         public string City { get; set; }
     }
 
-    public class GetByCityNameFromXmlResponseHandler : IQueryHandler<GetByCityNameFromXmlResponseQuery, WeatherForecastDto>
+    public class GetByCityNameFromXmlResponseHandler : IRequestHandler<GetByCityNameFromXmlResponseQuery, WeatherForecastDto>
     {
-        private readonly IBusPublisher _publisher;
         private readonly WeatherClient _weatherClient;
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IMapper _mapper;
 
         public GetByCityNameFromXmlResponseHandler(
             WeatherClient weatherClient,
-             IBusPublisher publisher)
+            IPublishEndpoint publishEndpoint,
+            IMapper mapper)
         {
             _weatherClient = weatherClient;
-            _publisher = publisher;
+            _publishEndpoint = publishEndpoint;
+            _mapper = mapper;
         }
 
-        //TODO: publish message/event on successfuly getting forecast
-        public async Task<WeatherForecastDto> HandleAsync(GetByCityNameFromXmlResponseQuery query)
+        public async Task<WeatherForecastDto> Handle(GetByCityNameFromXmlResponseQuery request, CancellationToken cancellationToken)
         {
-            var current = await _weatherClient.GetCurrentWeatherInXmlByCityNameAsync(query.City);
+            var current = await _weatherClient.GetCurrentWeatherInXmlByCityNameAsync(request.City);
 
             if (current == null)
             {
                 //TODO: logging
+                return new();
             }
 
-            //TODO: add autoMapper
-            WeatherForecastDto weatherForecastDto = new()
-            {
-                City = current.City.Name,
-                CountryCode = current.City.Country,
-                Summary = current.Weather.Value,
-                TemperatureC = (int)current.Temperature.Value,
-                Date = current.Lastupdate.Value
-            };
+            var weatherForecastDto = _mapper.Map<WeatherForecastDto>(current);
+            var gotWeatherForecast = _mapper.Map<IGotWeatherForecast>(weatherForecastDto);
 
-            await _publisher.PublishAsync(new GotWeatherForecastEvent(weatherForecastDto));
+            await _publishEndpoint.Publish(gotWeatherForecast);
 
             return weatherForecastDto;
         }

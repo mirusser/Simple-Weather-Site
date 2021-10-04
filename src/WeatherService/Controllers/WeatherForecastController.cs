@@ -1,11 +1,6 @@
-﻿using Convey.CQRS.Queries;
+﻿using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WeatherService.Clients;
 using WeatherService.Messages.Queries;
 using WeatherService.Models.Dto;
 
@@ -15,39 +10,29 @@ namespace WeatherService.Controllers
     [Route("api/[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
-        //private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IMediator _mediator;
 
-        private readonly IQueryDispatcher _queryDispatcher;
-
-        public WeatherForecastController(IQueryDispatcher queryDispatcher)
+        public WeatherForecastController(IMediator mediator)
         {
-            _queryDispatcher = queryDispatcher;
+            _mediator = mediator;
         }
 
-        [HttpGet("{city}", Name = "GetByCityName")]
-        public async Task<ActionResult<WeatherForecastDto>> GetByCityName([FromRoute] GetByCityNameQuery query)
+        [HttpPost]
+        public async Task<IActionResult> GetByCityName(GetByCityNameQuery query)
         {
-            //throw new NotImplementedException(); to test sending email about exception: TODO: delete later after tests
-
-            var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
-
-            return weatherForecastDto != null ? Ok(weatherForecastDto) : NotFound();
+            return Ok(await _mediator.Send(query));
         }
 
-        [HttpGet("{city}", Name = "GetCityByNameFromXmlResponse")]
-        public async Task<ActionResult<WeatherForecastDto>> GetCityByNameFromXmlResponse([FromRoute] GetByCityNameFromXmlResponseQuery query)
+        [HttpPost]
+        public async Task<ActionResult<WeatherForecastDto>> GetCityByNameFromXmlResponse(GetByCityNameFromXmlResponseQuery query)
         {
-            var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
-
-            return weatherForecastDto != null ? Ok(weatherForecastDto) : NotFound();
+            return Ok(await _mediator.Send(query));
         }
 
-        [HttpGet("{cityId}", Name = "GetByCityId")]
-        public async Task<ActionResult<WeatherForecastDto>> GetByCityId([FromRoute] GetByCityIdQuery query)
+        [HttpPost]
+        public async Task<ActionResult<WeatherForecastDto>> GetByCityId(GetByCityIdQuery query)
         {
-            var weatherForecastDto = await _queryDispatcher.QueryAsync(query);
-
-            return weatherForecastDto != null ? Ok(weatherForecastDto) : NotFound();
+            return Ok(await _mediator.Send(query));
         }
     }
 }
