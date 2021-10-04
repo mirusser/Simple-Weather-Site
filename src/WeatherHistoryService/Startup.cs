@@ -56,8 +56,6 @@ namespace WeatherHistoryService
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
             });
 
-            services.AddLogging();
-
             services.AddHealthChecks();
 
             //register services
