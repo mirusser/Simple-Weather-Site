@@ -14,10 +14,9 @@ namespace WeatherHistoryService.Mongo.Documents
 
     public class CityWeatherForecastDocument
     {
-        //[BsonId(IdGenerator = typeof(ObjectIdGenerator))]
-        [BsonId]
+        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonRepresentation(BsonType.ObjectId)]
-        public ObjectId Id { get; set; }
+        public string Id { get; set; } = null!;
 
         [Required(ErrorMessage = "City is required")]
         public string City { get; set; } = null!;
@@ -30,7 +29,7 @@ namespace WeatherHistoryService.Mongo.Documents
         [Required(ErrorMessage = "Search date is required")]
         public DateTime SearchDate { get; set; }
 
-        public Temperature? Temperature { get; set; }
+        public Temperature Temperature { get; set; } = new();
         public string? Summary { get; set; }
 
         [BsonElement("Icon")]

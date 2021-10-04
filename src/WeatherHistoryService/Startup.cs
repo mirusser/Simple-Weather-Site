@@ -1,9 +1,6 @@
-using Convey;
-using Convey.CQRS.Commands;
-using Convey.CQRS.Events;
-using Convey.CQRS.Queries;
-using Convey.MessageBrokers.CQRS;
-using Convey.MessageBrokers.RabbitMQ;
+using System.Reflection;
+using MassTransit;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,11 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using WeatherHistoryService.Exceptions.Handler;
+using WeatherHistoryService.Listeners;
 using WeatherHistoryService.Mappings;
-using WeatherHistoryService.Messages.Events.External;
 using WeatherHistoryService.Mongo;
 using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
+using WeatherHistoryService.Settings;
 
 namespace WeatherHistoryService
 {
@@ -33,37 +31,34 @@ namespace WeatherHistoryService
         {
             services.Configure<MongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
 
+            services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(typeof(Maps));
+
+            services.AddMassTransit(config =>
+            {
+                RabbitMQSettings rabbitMQSettings = new();
+                Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+
+                config.AddConsumer<GotWeatherForecastListener>();
+                config.SetKebabCaseEndpointNameFormatter();
+
+                config.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(rabbitMQSettings.Host);
+                    cfg.ConfigureEndpoints(ctx);
+                });
+            });
+            services.AddMassTransitHostedService(waitUntilStarted: true);
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
             });
 
-            var mongoSettings = new MongoSettings();
-            Configuration.GetSection(nameof(MongoSettings)).Bind(mongoSettings);
-
             services.AddLogging();
 
-            services.AddConvey()
-                //    .AddConsul()
-                .AddCommandHandlers()
-                .AddEventHandlers()
-                .AddQueryHandlers()
-                .AddServiceBusEventDispatcher()
-                .AddServiceBusCommandDispatcher()
-                .AddInMemoryCommandDispatcher()
-                .AddInMemoryEventDispatcher()
-                .AddInMemoryQueryDispatcher()
-                //    .AddRedis()
-                .AddRabbitMq()
-                //.AddMongo()
-                .Build();
-
-            //register heatlChecks
             services.AddHealthChecks();
-
-            //register autoMapper
-            services.AddAutoMapper(typeof(Maps));
 
             //register services
             services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
@@ -72,8 +67,6 @@ namespace WeatherHistoryService
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseConvey();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -98,9 +91,6 @@ namespace WeatherHistoryService
                 endpoints.MapHealthChecks("/health");
                 endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
             });
-
-            app.UseRabbitMq()
-                .SubscribeEvent<GotWeatherForecastEvent>();
         }
     }
 }

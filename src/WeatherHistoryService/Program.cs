@@ -1,14 +1,8 @@
-using Convey;
-using Convey.Persistence.MongoDB;
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Convey.Logging;
+using Serilog;
 
 namespace WeatherHistoryService
 {
@@ -16,15 +10,45 @@ namespace WeatherHistoryService
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateLogger();
+
+            try
+            {
+                Log.Information($"WeatherHistoryService is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "WeatherHistoryService failed to start");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>()
-                    .UseLogging();
+                    webBuilder.UseStartup<Startup>();
                 });
+
+        private static void CreateLogger()
+        {
+            //Read configuration from appSettings
+            var config = new ConfigurationBuilder()
+                .AddJsonFile(
+                    path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
+                    optional: false,
+                    reloadOnChange: true)
+                .Build();
+
+            //Initialize Logger (Serilog)
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(config)
+                .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
+                .CreateLogger();
+        }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using MQModels.WeatherHistory;
+using WeatherHistoryService.Features.Commands;
 using WeatherHistoryService.Models.Dto;
 using WeatherHistoryService.Mongo.Documents;
 
@@ -19,6 +17,12 @@ namespace WeatherHistoryService.Mappings
                 .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
                 .ForPath(dest => dest.Temperature.TemperatureC, opt => opt.MapFrom(src => src.TemperatureC))
                 .ForPath(dest => dest.Temperature.TemperatureF, opt => opt.MapFrom(src => src.TemperatureF));
+
+            CreateMap<Temperature, TemperatureDto>().ReverseMap();
+
+            CreateMap<CreateWeatherForecastDocumentCommand, CityWeatherForecastDocument>();
+
+            CreateMap<IGotWeatherForecast, CityWeatherForecastDocument>();
         }
     }
 }

@@ -15,6 +15,6 @@ namespace WeatherHistoryService.Services.Contracts
 
         Task<CityWeatherForecastDocument?> GetAsync(string id);
 
-        Task<CityWeatherForecastDocument?> CreateAsync(CityWeatherForecastDocument? cityWeatherForecast);
+        Task<CityWeatherForecastDocument> CreateAsync(CityWeatherForecastDocument? cityWeatherForecast);
     }
 }

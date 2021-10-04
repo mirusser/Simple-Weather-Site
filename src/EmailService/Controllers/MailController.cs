@@ -19,7 +19,6 @@ namespace EmailService.Controllers
         [HttpPost]
         public async Task<IActionResult> SendEmail(SendEmailCommand command)
         {
-            throw new System.Exception("text exception");
             return Ok(await _mediator.Send(command));
         }
     }

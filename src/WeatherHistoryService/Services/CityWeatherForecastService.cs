@@ -47,20 +47,27 @@ namespace WeatherHistoryService.Services
         {
             CityWeatherForecastDocument? cityWeatherForecastDocument = null;
 
-            if (ObjectId.TryParse(id, out ObjectId objectId))
-            {
-                cityWeatherForecastDocument =
-                    await _cityWeatherForecastCollection.Find(c => c.Id == objectId).SingleOrDefaultAsync();
-            }
+            cityWeatherForecastDocument =
+                    await _cityWeatherForecastCollection.Find(c => c.Id == id).SingleOrDefaultAsync();
+
+            //if (ObjectId.TryParse(id, out ObjectId objectId))
+            //{
+            //    cityWeatherForecastDocument =
+            //        await _cityWeatherForecastCollection.Find(c => c.Id == objectId).SingleOrDefaultAsync();
+            //}
 
             return cityWeatherForecastDocument;
         }
 
-        public async Task<CityWeatherForecastDocument?> CreateAsync(CityWeatherForecastDocument? cityWeatherForecast)
+        public async Task<CityWeatherForecastDocument> CreateAsync(CityWeatherForecastDocument? cityWeatherForecast)
         {
             if (cityWeatherForecast is not null)
             {
                 await _cityWeatherForecastCollection.InsertOneAsync(cityWeatherForecast);
+            }
+            else
+            {
+                cityWeatherForecast = new();
             }
 
             return cityWeatherForecast;
