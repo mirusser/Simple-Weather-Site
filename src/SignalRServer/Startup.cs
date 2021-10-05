@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SignalRServer.Hubs.Site;
 using SignalRServer.Listeners;
+using SignalRServer.Services;
+using SignalRServer.Services.Contracts;
 using SignalRServer.Settings;
 
 namespace SignalRServer
@@ -20,6 +22,9 @@ namespace SignalRServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<MongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
+            services.Configure<HubMethods>(Configuration.GetSection(nameof(HubMethods)));
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
@@ -50,6 +55,8 @@ namespace SignalRServer
                 });
             });
             services.AddMassTransitHostedService(waitUntilStarted: true);
+
+            services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

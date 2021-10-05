@@ -36,10 +36,10 @@
         });
 
         //TODO: dont use hardcoded string
-        hubConnection.on("RefreshPageMessage", function () {
+        hubConnection.on("RefreshWeatherHistoryPage", function () {
 
-            console.log("got message: RefreshPageMessage");
-            location.reload();
+            console.log("got message: RefreshWeatherHistoryPage");
+            alert("Weather forecast was search, refresh page to load new data")
         });
 
         hubConnection.onclose(function (event) {

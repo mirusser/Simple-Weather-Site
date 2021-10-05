@@ -3,32 +3,36 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Driver;
 using MQModels.WeatherHistory;
+using SignalRServer.Mongo.Documents;
+using SignalRServer.Services.Contracts;
 
 namespace SignalRServer.Hubs.Site
 {
-    //TODO: improve saving connection, maybe save to external source or something, static class is pretty bad idea lol
-    public static class Connection
-    {
-        public static List<string> ConnectionIds { get; set; } = new();
-    }
-
     public class WeatherHistoryHub : Hub
     {
-        public override Task OnConnectedAsync()
+        private readonly IMongoCollection<WeatherHistoryConnection> _weatherHistoryConnectionCollection;
+
+        public WeatherHistoryHub(IMongoCollectionFactory<WeatherHistoryConnection> mongoCollectionFactory)
+        {
+            _weatherHistoryConnectionCollection = mongoCollectionFactory.Create();
+        }
+
+        public override async Task OnConnectedAsync()
         {
             Console.WriteLine($"Connection Established, connection Id: {Context.ConnectionId}"); //TODO: log it maybe? (add logger)
 
-            Connection.ConnectionIds.Add(Context.ConnectionId);
+            await _weatherHistoryConnectionCollection.InsertOneAsync(new WeatherHistoryConnection() { ConnectionId = Context.ConnectionId });
 
-            return base.OnConnectedAsync();
+            await base.OnConnectedAsync();
         }
 
-        public override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            Connection.ConnectionIds.Remove(Context.ConnectionId);
+            await _weatherHistoryConnectionCollection.FindOneAndDeleteAsync(w => w.ConnectionId == Context.ConnectionId);
 
-            return base.OnDisconnectedAsync(exception);
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }
