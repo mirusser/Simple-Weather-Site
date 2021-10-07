@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WeatherSite.Clients.Models.Records;
 using WeatherSite.Logic.ExtensionMethods;
@@ -14,9 +15,11 @@ namespace WeatherSite.Clients
     public class WeatherForecastClient
     {
         #region Properties
+
         private readonly HttpClient _httpClient;
         private readonly ApiEndpoints _apiEndpoints;
-        #endregion
+
+        #endregion Properties
 
         public WeatherForecastClient(
             HttpClient httpClient,
@@ -36,8 +39,14 @@ namespace WeatherSite.Clients
 
         public async Task<WeatherForecast> GetCurrentWeatherForCityByCityId(decimal cityId)
         {
-            string url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityId/{cityId}";
-            WeatherForecast weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
+            var query = new { CityId = cityId };
+            string url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityId";
+
+            var response = await _httpClient.PostAsJsonAsync(url, query);
+            var responseJson = await response.Content.ReadAsStringAsync();
+            var weatherForecast = JsonSerializer.Deserialize<WeatherForecast>(responseJson, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+            //WeatherForecast weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
 
             return weatherForecast;
         }

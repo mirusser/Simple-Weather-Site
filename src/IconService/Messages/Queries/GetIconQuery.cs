@@ -1,16 +1,12 @@
-﻿using AutoMapper;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using AutoMapper;
 using Convey.CQRS.Queries;
 using IconService.Models.Dto;
-using IconService.Mongo.Documents;
 using IconService.Services;
 using IconService.Settings;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IconService.Messages.Queries
 {
@@ -39,18 +35,25 @@ namespace IconService.Messages.Queries
         {
             IconDto iconDto = null;
 
-            var iconDocument =
-                await _iconService.GetAsync(query.Icon);
-
-            if (iconDocument != null)
+            try
             {
-                iconDto = _mapper.Map<IconDto>(iconDocument);
-                var iconPath = $"{_serviceSettings.IconsPath}\\{iconDto.Name}";
+                var iconDocument =
+                    await _iconService.GetAsync(query.Icon);
 
-                if (File.Exists(iconPath))
+                if (iconDocument != null)
                 {
-                    iconDto.FileContent = File.ReadAllBytes(iconPath);
+                    iconDto = _mapper.Map<IconDto>(iconDocument);
+                    var iconPath = $"{_serviceSettings.IconsPath}\\{iconDto.Name}";
+
+                    if (File.Exists(iconPath))
+                    {
+                        iconDto.FileContent = File.ReadAllBytes(iconPath);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                var x = ex;
             }
 
             return iconDto;

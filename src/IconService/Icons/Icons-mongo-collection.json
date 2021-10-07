@@ -61,7 +61,7 @@
   "Name": "13d@2x.png",
   "Description": "snow",
   "DayIcon": true,
-  "Icon": "01d"
+  "Icon": "13d"
 },{
   "_id": {
     "$oid": "60d8849fb1a4d841a6a7ca76"

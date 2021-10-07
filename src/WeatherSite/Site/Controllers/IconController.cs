@@ -19,10 +19,10 @@ namespace WeatherSite.Controllers
         }
 
         [HttpPost]
-        public async Task<byte[]> Get(string icon)
+        public async Task<byte[]?> Get(string icon)
         {
             var iconDto = await _iconClient.GetIcon(icon);
-            return iconDto.FileContent;
+            return iconDto?.FileContent;
         }
     }
 }

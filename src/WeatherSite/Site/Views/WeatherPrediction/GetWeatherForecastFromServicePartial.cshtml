@@ -83,9 +83,26 @@
                 },
                 function (response) {
 
-                    $('#weather-icon').attr('src', `data:image/png;base64,${response}`);
+                    if (response) {
+                        $('#weather-icon').attr('src', `data:image/png;base64,${response}`);
+                    }
+                    else {
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            icon: 'fas fa-bomb fa-lg',
+                            title: 'Error message',
+                            body: `Couldn't get icon for: @(Model.WeatherForecast.Icon)`
+                        })
+                    }
                 }
-            );
+            ).fail(function(){
+                $(document).Toasts('create', {
+                    class: 'bg-danger',
+                    icon: 'fas fa-bomb fa-lg',
+                    title: 'Error message',
+                    body: `Couldn't access icon service or get icon`
+                })
+            });
         });
     </script>
 }

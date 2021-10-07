@@ -30,21 +30,44 @@
 
         var connectionUrl = "https://localhost:5671/WeatherHistoryHub"; //TODO: add to settings
         var hubConnection = new signalR.HubConnectionBuilder().withUrl(connectionUrl).build();
-
+        
         hubConnection.start().then(function () {
-            console.log('connection opened');
+            $(document).Toasts('create', {
+                class: 'bg-success',
+                icon: 'fas fa-check-square fa-lg',
+                title: 'Success message',
+                body: 'Connected to hub (SignalR)',
+                autohide: true,
+                delay: 3000
+            });
         });
 
         //TODO: dont use hardcoded string
         hubConnection.on("RefreshWeatherHistoryPage", function () {
 
             console.log("got message: RefreshWeatherHistoryPage");
-            alert("Weather forecast was search, refresh page to load new data")
+
+            $(document).Toasts('create', {
+                class: 'bg-warning',
+                icon: 'fas fa-exclamation-triangle fa-lg',
+                title: 'Warning message',
+                body: 'There are new results. Refresh page to see them.',
+                autohide: false,
+                delay: 60000
+            });
         });
 
         hubConnection.onclose(function (event) {
 
             console.log("signalr connection lost")
+
+            $(document).Toasts('create', {
+                class: 'bg-warning',
+                icon: 'fas fa-exclamation-triangle fa-lg',
+                title: 'Warning message',
+                body: 'Connection to SignalR was lost.',
+                autohide: false
+            });
         });
 
         //manual connection closing

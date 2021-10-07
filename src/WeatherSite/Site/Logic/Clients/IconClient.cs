@@ -27,10 +27,10 @@ namespace WeatherSite.Logic.Clients
             _apiEndpoints = options.Value;
         }
 
-        public async Task<IconDto> GetIcon(string icon)
+        public async Task<IconDto?> GetIcon(string icon)
         {
             string url = $"{_apiEndpoints.IconServiceApiUrl}GetIcon/{Uri.EscapeDataString(icon)}";
-            IconDto iconDto = await _httpClient.GetFromJsonAsync<IconDto>(url);
+            IconDto? iconDto = await _httpClient.GetFromJsonAsync<IconDto>(url);
 
             return iconDto;
         }

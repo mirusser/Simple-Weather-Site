@@ -24,10 +24,12 @@ namespace Application.Features.Queries
 
         public async Task<IEnumerable<CityDto>> Handle(GetCitiesQuery request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(request.CityName) || string.IsNullOrEmpty(request.CityName.TrimStart()))
+            if (string.IsNullOrEmpty(request.CityName) ||
+                string.IsNullOrEmpty(request.CityName.TrimStart()) ||
+                string.IsNullOrEmpty(request.CityName.TrimEnd()))
                 return new List<CityDto>();
 
-            request.CityName = request.CityName.TrimStart();
+            request.CityName = request.CityName.TrimStart().TrimEnd();
 
             var cities = await _cityManger.GetCitiesByName(request.CityName, request.Limit);
 
