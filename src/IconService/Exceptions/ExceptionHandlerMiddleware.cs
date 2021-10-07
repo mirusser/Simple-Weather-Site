@@ -2,13 +2,10 @@
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
-using MassTransit;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-using MQModels.Email;
 
-namespace CitiesService.Exceptions
+namespace IconService.Exceptions
 {
     public class ExceptionHandlerMiddleware
     {
@@ -24,7 +21,7 @@ namespace CitiesService.Exceptions
             _logger = logger;
         }
 
-        public async Task Invoke(HttpContext context, IPublishEndpoint publishEndpoint)
+        public async Task Invoke(HttpContext context)
         {
             try
             {
@@ -32,11 +29,11 @@ namespace CitiesService.Exceptions
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, ex, publishEndpoint);
+                await HandleExceptionAsync(context, ex);
             }
         }
 
-        private async Task<Task> HandleExceptionAsync(HttpContext context, Exception exception, IPublishEndpoint publishEndpoint)
+        private async Task<Task> HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var defaultErrorCode = "error";
             var exceptionType = exception.GetType();
@@ -44,19 +41,11 @@ namespace CitiesService.Exceptions
             (HttpStatusCode statusCode, string errorCode) = exception switch
             {
                 Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, defaultErrorCode),
-                Exception when exceptionType == typeof(SqlException) => (HttpStatusCode.NotFound, ErrorCodes.SqlException),
                 ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
                 _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
             };
 
-            _logger.LogError("CitiesService: Exception code: {ErrorCode} Exception message: {ExceptionMEssage}", new[] { errorCode, exception.Message });
-
-            var sendEmail = new SendEmail()
-            {
-                Subject = "Exception",
-                Body = exception.InnerException != null ? exception.InnerException.ToString() : exception.Message
-            };
-            await publishEndpoint.Publish(sendEmail);
+            _logger.LogError("IconService: Exception code: {ErrorCode} Exception message: {ExceptionMEssage}", new[] { errorCode, exception.Message });
 
             var response = new { code = errorCode, message = exception.Message };
             var payload = JsonSerializer.Serialize(response, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });

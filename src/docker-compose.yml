@@ -1,46 +1,46 @@
-version: "3.5"
+version: '3.5'
 
 services:
   #consul:
-    #image: consul
-    #container_name: consul
-    #restart: unless-stopped
-    #ports:
-   #   - 8500:8500
-#    network_mode: host
-    #networks:
-    #  - conveyor
-    # volumes:
-    #   - consul:/consul/data
+  #image: consul
+  #container_name: consul
+  #restart: unless-stopped
+  #ports:
+  #   - 8500:8500
+  #    network_mode: host
+  #networks:
+  #  - conveyor
+  # volumes:
+  #   - consul:/consul/data
 
-#   fabio:
-#     image: fabiolb/fabio
-#     container_name: fabio
-#     restart: unless-stopped
-#     environment:
-#     - FABIO_REGISTRY_CONSUL_ADDR=consul:8500
-# #    network_mode: host
-#     networks:
-#       - conveyor
-#     ports:
-#     - 9998:9998
-#     - 9999:9999
+  #   fabio:
+  #     image: fabiolb/fabio
+  #     container_name: fabio
+  #     restart: unless-stopped
+  #     environment:
+  #     - FABIO_REGISTRY_CONSUL_ADDR=consul:8500
+  # #    network_mode: host
+  #     networks:
+  #       - conveyor
+  #     ports:
+  #     - 9998:9998
+  #     - 9999:9999
 
-#   jaeger:
-#     image: jaegertracing/all-in-one
-#     container_name: jaeger
-#     restart: unless-stopped
-#     ports:
-#       - 5775:5775/udp
-#       - 5778:5778
-#       - 6831:6831/udp
-#       - 6832:6832/udp
-#       - 9411:9411
-#       - 14268:14268
-#       - 16686:16686
-# #    network_mode: host
-#     networks:
-#       - conveyor
+  #   jaeger:
+  #     image: jaegertracing/all-in-one
+  #     container_name: jaeger
+  #     restart: unless-stopped
+  #     ports:
+  #       - 5775:5775/udp
+  #       - 5778:5778
+  #       - 6831:6831/udp
+  #       - 6832:6832/udp
+  #       - 9411:9411
+  #       - 14268:14268
+  #       - 16686:16686
+  # #    network_mode: host
+  #     networks:
+  #       - conveyor
 
   mongo:
     image: mongo
@@ -48,7 +48,7 @@ services:
     restart: unless-stopped
     ports:
       - 27017:27017
-#    network_mode: host
+    #    network_mode: host
     networks:
       - conveyor
     volumes:
@@ -61,10 +61,10 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-#    network_mode: host
+    #    network_mode: host
     networks:
       - conveyor
-    # volumes: 
+    # volumes:
     #   - rabbitmq:/var/lib/rabbitmq
 
   redis:
@@ -73,10 +73,10 @@ services:
     restart: unless-stopped
     ports:
       - 6379:6379
-#    network_mode: host
+    #    network_mode: host
     networks:
       - conveyor
-    volumes: 
+    volumes:
       - redis:/data
 
   seq:
@@ -89,7 +89,7 @@ services:
       - 5341:80
     networks:
       - conveyor
-    # volumes: 
+    # volumes:
     #   - seq:/data
 
   sqlserver:
@@ -97,28 +97,28 @@ services:
     user: root
     container_name: sqlserver
     ports:
-      - "1434:1433"
+      - '1434:1433'
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=P@ssword!@#
     volumes:
-      - sqlserver:/var/opt/mssql 
+      - sqlserver:/var/opt/mssql
     networks:
       - conveyor
 
-  gateway:
-    image: gateway
-    container_name: gateway
-    hostname: gateway
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
-    ports:
-      - 8085:80
-    networks:
-      - conveyor
-      - overlaynetwork
-    
+  # gateway:
+  #   image: gateway
+  #   container_name: gateway
+  #   hostname: gateway
+  #   restart: unless-stopped
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Docker
+  #   ports:
+  #     - 8085:80
+  #   networks:
+  #     - conveyor
+  #     - overlaynetwork
+
   citiesservice:
     image: citiesservice
     container_name: citiesservice
@@ -128,6 +128,19 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - 8080:80
+    networks:
+      - conveyor
+      - overlaynetwork
+
+  citiesgrpcservice:
+    image: citiesgrpcservice
+    container_name: citiesgrpcservice
+    hostname: citiesgrpcservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8681:80
     networks:
       - conveyor
       - overlaynetwork
@@ -156,7 +169,7 @@ services:
       - 8083:80
     networks:
       - conveyor
-      - overlaynetwork  
+      - overlaynetwork
 
   weathersite:
     image: weathersite
@@ -168,7 +181,33 @@ services:
     ports:
       - 8081:80
     networks:
-      - conveyor  
+      - conveyor
+      - overlaynetwork
+
+  iconservice:
+    image: iconservice
+    container_name: iconservice
+    hostname: iconservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8887:80
+    networks:
+      - conveyor
+      - overlaynetwork
+
+  signalrserver:
+    image: signalrserver
+    container_name: signalrserver
+    hostname: signalrserver
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8897:80
+    networks:
+      - conveyor
       - overlaynetwork
 
   emailservice:
@@ -181,7 +220,7 @@ services:
     ports:
       - 8087:80
     networks:
-      - conveyor  
+      - conveyor
       - overlaynetwork
 
 networks:
@@ -191,7 +230,6 @@ networks:
     name: overlaynetwork
     external: true
 
-
 volumes:
   # consul:
   #   driver: local
@@ -200,7 +238,7 @@ volumes:
   mongo:
     driver: local
   sqlserver:
-      driver: local
+    driver: local
   # prometheus:
   #   driver: local
   # rabbitmq:

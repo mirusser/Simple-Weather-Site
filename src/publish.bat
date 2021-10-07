@@ -1,4 +1,10 @@
 
+@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesGrpcService\deploy"
+md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesGrpcService"
+cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesGrpcService"
+dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesGrpcService\deploy"
+docker build -t citiesgrpcservice .
+
 @RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesService\deploy"
 md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesService"
 cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesService"
@@ -17,17 +23,23 @@ cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherHistorySer
 dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherHistoryService\deploy"
 docker build -t weatherhistoryservice .
 
-@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\Gateway\deploy"
-md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\Gateway"
-cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\Gateway"
-dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\Gateway\deploy"
-docker build -t gateway .
-
 @RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\deploy"
 md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService"
 cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService"
 dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\deploy"
 docker build -t emailservice .
+
+@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\IconService\deploy"
+md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\IconService"
+cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\IconService"
+dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\IconService\deploy"
+docker build -t iconservice .
+
+@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\SignalRServer\deploy"
+md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\SignalRServer"
+cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\SignalRServer"
+dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\SignalRServer\deploy"
+docker build -t signalrserver .
 
 @RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite\deploy"
 md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite"

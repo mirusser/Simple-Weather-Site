@@ -1,12 +1,8 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace WeatherSite
 {
@@ -14,19 +10,11 @@ namespace WeatherSite
     {
         public static void Main(string[] args)
         {
-            //Read configuration from appSettings
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            //Initialize Logger (Serilog)
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(config)
-                .CreateLogger();
+            CreateLogger();
 
             try
             {
-                Log.Information("WeatherSite is starting");
+                Log.Information($"WeatherSite is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
@@ -46,5 +34,22 @@ namespace WeatherSite
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
+        private static void CreateLogger()
+        {
+            //Read configuration from appSettings
+            var config = new ConfigurationBuilder()
+                .AddJsonFile(
+                    path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
+                    optional: false,
+                    reloadOnChange: true)
+                .Build();
+
+            //Initialize Logger (Serilog)
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(config)
+                .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
+                .CreateLogger();
+        }
     }
 }

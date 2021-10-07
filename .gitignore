@@ -464,3 +464,6 @@ src/WeatherService/appsettings.Development.json
 /src/CitiesService/CitiesService/deploy
 /src/CitiesService/CitiesService/appsettings.Development.json
 /src/WeatherSite/Site/deploy
+/src/IconService/deploy
+/src/SignalRServer/deploy
+/src/CitiesService/CitiesGrpcService/deploy

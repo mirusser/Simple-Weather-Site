@@ -77,7 +77,7 @@ namespace WeatherService
 
             #endregion Swagger
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
 

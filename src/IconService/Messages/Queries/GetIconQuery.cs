@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using AutoMapper;
 using Convey.CQRS.Queries;
@@ -35,25 +34,18 @@ namespace IconService.Messages.Queries
         {
             IconDto iconDto = null;
 
-            try
-            {
-                var iconDocument =
-                    await _iconService.GetAsync(query.Icon);
+            var iconDocument =
+                await _iconService.GetAsync(query.Icon);
 
-                if (iconDocument != null)
+            if (iconDocument != null)
+            {
+                iconDto = _mapper.Map<IconDto>(iconDocument);
+                var iconPath = $"{_serviceSettings.IconsPath}/{iconDto.Name}";
+
+                if (File.Exists(iconPath))
                 {
-                    iconDto = _mapper.Map<IconDto>(iconDocument);
-                    var iconPath = $"{_serviceSettings.IconsPath}\\{iconDto.Name}";
-
-                    if (File.Exists(iconPath))
-                    {
-                        iconDto.FileContent = File.ReadAllBytes(iconPath);
-                    }
+                    iconDto.FileContent = File.ReadAllBytes(iconPath);
                 }
-            }
-            catch (Exception ex)
-            {
-                var x = ex;
             }
 
             return iconDto;

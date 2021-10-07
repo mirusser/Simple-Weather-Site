@@ -2,6 +2,7 @@ using Convey;
 using Convey.CQRS.Commands;
 using Convey.CQRS.Queries;
 using Convey.Persistence.MongoDB;
+using IconService.Exceptions;
 using IconService.Mappings;
 using IconService.Mongo;
 using IconService.Mongo.Documents;
@@ -55,7 +56,6 @@ namespace IconService
                 .AddMongoRepository<IconDocument, string>(mongoSettings.IconsCollectionName)
                 .Build();
 
-
             //register autoMapper
             services.AddAutoMapper(typeof(Maps));
 
@@ -70,11 +70,13 @@ namespace IconService
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware(typeof(ExceptionHandlerMiddleware));
+
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "IconService v1"));
 
             app.UseConvey();
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 

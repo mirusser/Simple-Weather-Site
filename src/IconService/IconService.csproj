@@ -5,10 +5,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="deploy\**" />
+    <Content Remove="deploy\**" />
+    <EmbeddedResource Remove="deploy\**" />
+    <None Remove="deploy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="Convey.CQRS.Commands" Version="0.5.445" />
     <PackageReference Include="Convey.Persistence.MongoDB" Version="0.5.445" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
+    <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="5.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
   </ItemGroup>
 

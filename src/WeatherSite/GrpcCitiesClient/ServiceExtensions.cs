@@ -32,7 +32,8 @@ namespace GrpcCitiesClient
 
             services.AddGrpcClient<Cities.CitiesClient>("Cities", o =>
             {
-                o.Address = new Uri("https://localhost:5031");
+                //o.Address = new Uri("http://citiesgrpcservice:80"); //TODO add to settings
+                o.Address = new Uri("http://localhost:8681"); //TODO add to settings
             })
             .ConfigureChannel(o =>
             {
