@@ -28,7 +28,7 @@
             1,
             25);
 
-        var connectionUrl = "http://signalrserver:80/WeatherHistoryHub"; //TODO: add to settings
+        var connectionUrl = "http://localhost:8897/WeatherHistoryHub"; //TODO: add to settings
         var hubConnection = new signalR.HubConnectionBuilder().withUrl(connectionUrl).build();
 
         hubConnection.start().then(function () {
