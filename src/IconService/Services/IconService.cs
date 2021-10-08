@@ -35,5 +35,10 @@ namespace IconService.Services
 
             return iconDocuments;
         }
+
+        public async Task UpdateAsync(IconDocument iconDocument)
+        {
+            await _repository.UpdateAsync(iconDocument);
+        }
     }
 }

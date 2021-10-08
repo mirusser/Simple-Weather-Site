@@ -11,5 +11,7 @@ namespace IconService.Services
         Task<IconDocument> GetAsync(string icon);
 
         Task<List<IconDocument>> CreateAsync(List<IconDocument> iconDocuments);
+
+        Task UpdateAsync(IconDocument iconDocument);
     }
 }

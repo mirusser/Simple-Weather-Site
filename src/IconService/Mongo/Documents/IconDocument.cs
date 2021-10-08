@@ -29,5 +29,9 @@ namespace IconService.Mongo.Documents
         [BsonElement("DayIcon")]
         [BsonRepresentation(BsonType.Boolean)]
         public bool DayIcon { get; set; }
+
+        [BsonElement("FileContent")]
+        [BsonRepresentation(BsonType.Binary)]
+        public byte[] FileContent { get; set; }
     }
 }

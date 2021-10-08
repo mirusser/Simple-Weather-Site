@@ -193,6 +193,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - 8887:80
+    volumes:
+      - iconservice:/var/lib/iconservicefiles
     networks:
       - conveyor
       - overlaynetwork
@@ -249,3 +251,5 @@ volumes:
   #   driver: local
   # seq:
   #   driver: local
+  iconservice:
+    driver: local

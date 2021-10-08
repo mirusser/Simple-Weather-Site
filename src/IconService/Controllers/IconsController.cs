@@ -1,12 +1,9 @@
-﻿using Convey.CQRS.Commands;
+﻿using System.Threading.Tasks;
+using Convey.CQRS.Commands;
 using Convey.CQRS.Queries;
 using IconService.Messages.Queries;
 using IconService.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IconService.Controllers
 {
