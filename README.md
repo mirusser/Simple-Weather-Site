@@ -25,4 +25,4 @@ TODO:
 - In each microservice add proper logging (error, warning) using seq I think
 - Weather site: make proper user interface, add messages/alerts to user on what is going on (alerts on success/failure) and proper visualisation of weather forecast (like proper images and visualisation of data)
 - Implement proper healthchecks for each microservice, and implement hangfire job in weather site that will check health of each microservice from time to time, and if any will be unhealthy send mail to me with info about it (add microservice for sending emails?)
-  test test
+  test test test
