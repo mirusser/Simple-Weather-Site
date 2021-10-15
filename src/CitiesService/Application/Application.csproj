@@ -8,6 +8,8 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="FluentValidation" Version="10.3.3" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.3" />
     <PackageReference Include="MassTransit" Version="7.2.2" />
     <PackageReference Include="MassTransit.AspNetCore" Version="7.2.2" />
     <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.2.2" />

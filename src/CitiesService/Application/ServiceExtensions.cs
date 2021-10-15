@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
 using Application.Interfaces.Managers;
 using Application.Managers;
+using Application.PipelineBehaviours;
 using Domain.Settings;
+using FluentValidation;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -14,6 +16,10 @@ namespace Application
     {
         public static void AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+
             services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddMassTransit(config =>

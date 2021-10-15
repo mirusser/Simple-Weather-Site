@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
@@ -46,6 +47,7 @@ namespace CitiesService.Exceptions
                 Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, defaultErrorCode),
                 Exception when exceptionType == typeof(SqlException) => (HttpStatusCode.NotFound, ErrorCodes.SqlException),
                 ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
+                ValidationException when exceptionType == typeof(ValidationException) => (HttpStatusCode.BadRequest, ErrorCodes.ValidationException),
                 _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
             };
 

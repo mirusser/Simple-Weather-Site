@@ -21,8 +21,6 @@ namespace CitiesService.Controllers
             _mediator = mediator;
         }
 
-        #region Convey ways of handling queries and commands
-
         [HttpPost]
         public async Task<ActionResult<List<CityDto>>> GetCitiesByName(GetCitiesQuery query)
         {
@@ -40,7 +38,5 @@ namespace CitiesService.Controllers
         {
             return Ok(await _mediator.Send(command));
         }
-
-        #endregion Convey ways of handling queries and commands
     }
 }
