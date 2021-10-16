@@ -1,26 +1,15 @@
-using Convey;
-using Convey.CQRS.Commands;
-using Convey.CQRS.Queries;
-using Convey.Persistence.MongoDB;
+using System.Reflection;
 using IconService.Exceptions;
 using IconService.Mappings;
-using IconService.Mongo;
-using IconService.Mongo.Documents;
 using IconService.Services;
 using IconService.Settings;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IconService
 {
@@ -35,8 +24,11 @@ namespace IconService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<Mongo.MongoSettings>(Configuration.GetSection(nameof(Mongo.MongoSettings)));
+            services.Configure<MongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
             services.Configure<ServiceSettings>(Configuration.GetSection(nameof(ServiceSettings)));
+
+            services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
+            services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -44,18 +36,8 @@ namespace IconService
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IconService", Version = "v1" });
             });
 
-            services.AddConvey()
-                .AddCommandHandlers()
-                .AddQueryHandlers()
-                .AddInMemoryCommandDispatcher()
-                .AddInMemoryQueryDispatcher()
-                .Build();
-
             //register autoMapper
             services.AddAutoMapper(typeof(Maps));
-
-            //register services
-            services.AddScoped<IIconService, Services.IconService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -70,7 +52,6 @@ namespace IconService
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "IconService v1"));
 
-            app.UseConvey();
             //app.UseHttpsRedirection();
 
             app.UseRouting();

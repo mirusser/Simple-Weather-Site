@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Convey.CQRS.Commands;
-using Convey.CQRS.Queries;
 using IconService.Messages.Queries;
 using IconService.Models.Dto;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IconService.Controllers
@@ -11,21 +10,17 @@ namespace IconService.Controllers
     [Route("api/[controller]/[action]")]
     public class IconsController : ControllerBase
     {
-        private readonly ICommandDispatcher _commandDispatcher;
-        private readonly IQueryDispatcher _queryDispatcher;
+        private readonly IMediator _mediator;
 
-        public IconsController(
-            IQueryDispatcher queryDispatcher,
-            ICommandDispatcher commandDispatcher)
+        public IconsController(IMediator mediator)
         {
-            _queryDispatcher = queryDispatcher;
-            _commandDispatcher = commandDispatcher;
+            _mediator = mediator;
         }
 
-        [HttpGet("{Icon}", Name = "GetByCityName")]
-        public async Task<IconDto?> GetIcon([FromRoute] GetIconQuery query)
+        [HttpPost]
+        public async Task<ActionResult<IconDto?>> GetIcon(GetIconQuery query)
         {
-            return await _queryDispatcher.QueryAsync(query);
+            return Ok(await _mediator.Send(query));
         }
     }
 }

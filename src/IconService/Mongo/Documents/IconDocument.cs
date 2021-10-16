@@ -1,30 +1,26 @@
-﻿using Convey.Types;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace IconService.Mongo.Documents
 {
-    public class IconDocument : IIdentifiable<string>
+    public class IconDocument
     {
+        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string Id { get; set; } = null!;
 
         [BsonElement("Name")]
         [BsonRepresentation(BsonType.String)]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [BsonElement("Description")]
         [BsonRepresentation(BsonType.String)]
-        public string Description { get; set; }
+        public string Description { get; set; } = null!;
 
         [BsonElement("Icon")]
         [BsonRepresentation(BsonType.String)]
-        public string Icon { get; set; }
+        public string Icon { get; set; } = null!;
 
         [BsonElement("DayIcon")]
         [BsonRepresentation(BsonType.Boolean)]
@@ -32,6 +28,6 @@ namespace IconService.Mongo.Documents
 
         [BsonElement("FileContent")]
         [BsonRepresentation(BsonType.Binary)]
-        public byte[] FileContent { get; set; }
+        public byte[] FileContent { get; set; } = null!;
     }
 }

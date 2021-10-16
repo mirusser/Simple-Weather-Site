@@ -1,37 +1,40 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
-using Convey.CQRS.Queries;
 using IconService.Models.Dto;
 using IconService.Mongo.Documents;
 using IconService.Services;
+using MediatR;
 using MongoDB.Driver;
 
 namespace IconService.Messages.Queries
 {
-    public class GetIconQuery : IQuery<IconDto?>
+    public class GetIconQuery : IRequest<IconDto?>
     {
         public string? Icon { get; set; }
     }
 
-    public class GetIconQueryHandler : IQueryHandler<GetIconQuery, IconDto?>
+    public class GetIconQueryHandler : IRequestHandler<GetIconQuery, IconDto?>
     {
         private readonly IMongoCollection<IconDocument> _iconCollection;
         private readonly IMapper _mapper;
 
         public GetIconQueryHandler(
-            IMongoCollection<IconDocument> iconCollection,
+            IMongoCollectionFactory<IconDocument> mongoCollectionFactory,
             IMapper mapper)
         {
-            _iconCollection = iconCollection;
+            _iconCollection = mongoCollectionFactory.Create();
             _mapper = mapper;
         }
 
-        public async Task<IconDto?> HandleAsync(GetIconQuery query)
+        public async Task<IconDto?> Handle(GetIconQuery request, CancellationToken cancellationToken)
         {
             IconDto? iconDto = null;
 
             var iconDocument =
-                (await _iconCollection.FindAsync(i => i.Icon == query.Icon)).FirstOrDefault();
+                await _iconCollection.Find(
+                    i => i.Icon == request.Icon)
+                .FirstOrDefaultAsync();
 
             if (iconDocument != null)
             {
