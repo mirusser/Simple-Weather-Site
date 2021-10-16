@@ -7,6 +7,6 @@ namespace IconService.Settings
 {
     public class ServiceSettings
     {
-        public string IconsPath { get; set; }
+        public string IconsPath { get; set; } = null!;
     }
 }

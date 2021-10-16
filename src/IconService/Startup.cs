@@ -35,7 +35,7 @@ namespace IconService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<MongoSettings>(Configuration.GetSection("mongo"));
+            services.Configure<Mongo.MongoSettings>(Configuration.GetSection(nameof(Mongo.MongoSettings)));
             services.Configure<ServiceSettings>(Configuration.GetSection(nameof(ServiceSettings)));
 
             services.AddControllers();
@@ -44,16 +44,11 @@ namespace IconService
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IconService", Version = "v1" });
             });
 
-            var mongoSettings = new MongoSettings();
-            Configuration.GetSection("mongo").Bind(mongoSettings);
-
             services.AddConvey()
                 .AddCommandHandlers()
                 .AddQueryHandlers()
                 .AddInMemoryCommandDispatcher()
                 .AddInMemoryQueryDispatcher()
-                .AddMongo()
-                .AddMongoRepository<IconDocument, string>(mongoSettings.IconsCollectionName)
                 .Build();
 
             //register autoMapper

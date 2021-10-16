@@ -23,7 +23,7 @@ namespace IconService.Controllers
         }
 
         [HttpGet("{Icon}", Name = "GetByCityName")]
-        public async Task<IconDto> GetIcon([FromRoute] GetIconQuery query)
+        public async Task<IconDto?> GetIcon([FromRoute] GetIconQuery query)
         {
             return await _queryDispatcher.QueryAsync(query);
         }

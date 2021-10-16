@@ -2,38 +2,40 @@
 using AutoMapper;
 using Convey.CQRS.Queries;
 using IconService.Models.Dto;
+using IconService.Mongo.Documents;
 using IconService.Services;
+using MongoDB.Driver;
 
 namespace IconService.Messages.Queries
 {
-    public class GetIconQuery : IQuery<IconDto>
+    public class GetIconQuery : IQuery<IconDto?>
     {
-        public string Icon { get; set; }
+        public string? Icon { get; set; }
     }
 
-    public class GetIconQueryHandler : IQueryHandler<GetIconQuery, IconDto>
+    public class GetIconQueryHandler : IQueryHandler<GetIconQuery, IconDto?>
     {
-        private readonly IIconService _iconService;
+        private readonly IMongoCollection<IconDocument> _iconCollection;
         private readonly IMapper _mapper;
 
         public GetIconQueryHandler(
-            IIconService iconService,
+            IMongoCollection<IconDocument> iconCollection,
             IMapper mapper)
         {
-            _iconService = iconService;
+            _iconCollection = iconCollection;
             _mapper = mapper;
         }
 
-        public async Task<IconDto> HandleAsync(GetIconQuery query)
+        public async Task<IconDto?> HandleAsync(GetIconQuery query)
         {
-            IconDto iconDto = null;
+            IconDto? iconDto = null;
 
             var iconDocument =
-                await _iconService.GetAsync(query.Icon);
+                (await _iconCollection.FindAsync(i => i.Icon == query.Icon)).FirstOrDefault();
 
             if (iconDocument != null)
             {
-                iconDto = _mapper.Map<IconDto>(iconDocument);
+                iconDto = _mapper.Map<IconDto?>(iconDocument);
             }
 
             return iconDto;
