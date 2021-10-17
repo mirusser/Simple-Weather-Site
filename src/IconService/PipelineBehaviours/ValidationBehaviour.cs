@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
@@ -23,10 +21,15 @@ namespace IconService.PipelineBehaviours
             if (_validators?.Any() == true)
             {
                 var context = new ValidationContext<TRequest>(request);
-                var validationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
-                var failures = validationResults.SelectMany(r => r.Errors).Where(_ => true);
 
-                if (failures.Any())
+                var failures =
+                    _validators
+                    .Select(x => x.Validate(context))
+                    .SelectMany(x => x.Errors)
+                    .Where(_ => true)
+                    .ToList();
+
+                if (failures.Count > 0)
                 {
                     throw new ValidationException(failures);
                 }
