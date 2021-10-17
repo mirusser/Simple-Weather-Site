@@ -16,7 +16,7 @@ namespace Application.Validators
                 .Cascade(CascadeMode.Continue)
                 .NotEmpty().WithMessage("{PropertyName} should be not empty.")
                 .Length(2, int.MaxValue).WithMessage("{PropertyName} should be at least 2 characters long")
-                .Must(c => c.TrimStart().TrimEnd().Length > 2).WithMessage("{PropertyName} should be have at least 2 characters that are not white characters");
+                .Must(c => c.TrimStart().TrimEnd().Length >= 2).WithMessage("{PropertyName} should be have at least 2 characters that are not white characters");
 
             RuleFor(g => g.Limit)
                 .Cascade(CascadeMode.Stop)

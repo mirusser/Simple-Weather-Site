@@ -1,6 +1,8 @@
 using System.Reflection;
+using FluentValidation;
 using IconService.Exceptions;
 using IconService.Mappings;
+using IconService.PipelineBehaviours;
 using IconService.Services;
 using IconService.Settings;
 using MediatR;
@@ -15,18 +17,20 @@ namespace IconService
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<MongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
             services.Configure<ServiceSettings>(Configuration.GetSection(nameof(ServiceSettings)));
 
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
             services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
             services.AddMediatR(Assembly.GetExecutingAssembly());
 
@@ -36,7 +40,6 @@ namespace IconService
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IconService", Version = "v1" });
             });
 
-            //register autoMapper
             services.AddAutoMapper(typeof(Maps));
         }
 
