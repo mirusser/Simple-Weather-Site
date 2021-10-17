@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -42,6 +43,7 @@ namespace IconService.Exceptions
             {
                 Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, defaultErrorCode),
                 ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
+                ValidationException when exceptionType == typeof(ValidationException) => (HttpStatusCode.BadRequest, ErrorCodes.ValidationException),
                 _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
             };
 
