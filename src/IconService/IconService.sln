@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31402.337
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IconService", "IconService.csproj", "{3949A5EF-9A8B-41A3-AB0A-C3E19C650D42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService", "IconService.csproj", "{3949A5EF-9A8B-41A3-AB0A-C3E19C650D42}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Test", "..\IconService.Test\IconService.Test.csproj", "{F371357B-63D3-43D2-A9B3-A0B92B247F46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{3949A5EF-9A8B-41A3-AB0A-C3E19C650D42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3949A5EF-9A8B-41A3-AB0A-C3E19C650D42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3949A5EF-9A8B-41A3-AB0A-C3E19C650D42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F371357B-63D3-43D2-A9B3-A0B92B247F46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F371357B-63D3-43D2-A9B3-A0B92B247F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F371357B-63D3-43D2-A9B3-A0B92B247F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F371357B-63D3-43D2-A9B3-A0B92B247F46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

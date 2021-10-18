@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using IconService.Models.Dto;
 using IconService.Mongo.Documents;
 using IconService.Services;
 using MediatR;
@@ -12,7 +13,7 @@ using MongoDB.Driver;
 
 namespace IconService.Messages.Commands
 {
-    public class CreateIconCommand : IRequest<bool>
+    public class CreateIconCommand : IRequest<CreateIconDto>
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
@@ -21,7 +22,7 @@ namespace IconService.Messages.Commands
         public byte[]? FileContent { get; set; }
     }
 
-    public class CreateIconHandler : IRequestHandler<CreateIconCommand, bool>
+    public class CreateIconHandler : IRequestHandler<CreateIconCommand, CreateIconDto>
     {
         private readonly IMapper _mapper;
         private readonly IMongoCollection<IconDocument> _iconCollection;
@@ -34,12 +35,14 @@ namespace IconService.Messages.Commands
             _iconCollection = mongoCollectionFactory.Create();
         }
 
-        public async Task<bool> Handle(CreateIconCommand request, CancellationToken cancellationToken)
+        public async Task<CreateIconDto> Handle(CreateIconCommand request, CancellationToken cancellationToken)
         {
             var iconDocument = _mapper.Map<IconDocument>(request);
             await _iconCollection.InsertOneAsync(iconDocument);
 
-            return true;
+            var createIconDto = _mapper.Map<CreateIconDto>(iconDocument);
+
+            return createIconDto;
         }
     }
 }

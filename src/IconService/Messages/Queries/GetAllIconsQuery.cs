@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -13,12 +10,11 @@ using MongoDB.Driver;
 
 namespace IconService.Messages.Queries
 {
-    public class GetAllIconsQuery : IRequest<IEnumerable<IconDto>>
+    public class GetAllIconsQuery : IRequest<IEnumerable<GetIconDto>>
     {
-        
     }
 
-    public class GetAllIconsHandler : IRequestHandler<GetAllIconsQuery, IEnumerable<IconDto>>
+    public class GetAllIconsHandler : IRequestHandler<GetAllIconsQuery, IEnumerable<GetIconDto>>
     {
         private readonly IMapper _mapper;
         private readonly IMongoCollection<IconDocument> _iconCollection;
@@ -29,10 +25,10 @@ namespace IconService.Messages.Queries
             _iconCollection = mongoCollectionFactory.Create();
         }
 
-        public async Task<IEnumerable<IconDto>> Handle(GetAllIconsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<GetIconDto>> Handle(GetAllIconsQuery request, CancellationToken cancellationToken)
         {
             var iconDocuments = (await _iconCollection.FindAsync(_ => true, cancellationToken: cancellationToken)).ToEnumerable(cancellationToken: cancellationToken);
-            return _mapper.Map<IEnumerable<IconDto>>(iconDocuments);
+            return _mapper.Map<IEnumerable<GetIconDto>>(iconDocuments);
         }
     }
 }

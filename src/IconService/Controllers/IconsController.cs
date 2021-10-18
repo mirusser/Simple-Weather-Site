@@ -25,7 +25,7 @@ namespace IconService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IconDto?>> Get(GetIconQuery query)
+        public async Task<ActionResult<GetIconDto?>> Get(GetIconQuery query)
         {
             return Ok(await _mediator.Send(query));
         }

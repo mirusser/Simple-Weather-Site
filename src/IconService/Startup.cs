@@ -2,6 +2,7 @@ using System.Reflection;
 using FluentValidation;
 using IconService.Exceptions;
 using IconService.Mappings;
+using IconService.Mongo.Repository;
 using IconService.PipelineBehaviours;
 using IconService.Services;
 using IconService.Settings;
@@ -29,9 +30,10 @@ namespace IconService
             services.Configure<MongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
             services.Configure<ServiceSettings>(Configuration.GetSection(nameof(ServiceSettings)));
 
+            services.AddTransient(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+            services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-            services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
             services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddControllers();

@@ -9,9 +9,10 @@ namespace IconService.Models.Dto
 {
     public class CreateIconDto
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string Icon { get; set; } = null!;
         public bool DayIcon { get; set; }
-        public IFormFile File { get; set; }
+        public byte[] FileContent { get; set; } = null!;
     }
 }
