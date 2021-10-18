@@ -55,7 +55,7 @@ namespace IconService.Exceptions
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;
 
-            return context.Response.WriteAsync(payload);
+            return await Task.FromResult(context.Response.WriteAsync(payload));
         }
     }
 }

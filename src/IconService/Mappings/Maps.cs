@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using IconService.Mongo.Documents;
 using IconService.Models.Dto;
+using IconService.Messages.Commands;
 
 namespace IconService.Mappings
 {
@@ -23,6 +24,10 @@ namespace IconService.Mappings
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                 .ForMember(dest => dest.DayIcon, opt => opt.MapFrom(src => src.DayIcon))
                 .ReverseMap();
+
+            CreateMap<IEnumerable<IconDocument>, IEnumerable<CreateIconDto>>();
+
+            CreateMap<CreateIconCommand, IconDocument>();
         }
     }
 }

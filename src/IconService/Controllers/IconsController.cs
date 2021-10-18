@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using IconService.Messages.Commands;
 using IconService.Messages.Queries;
 using IconService.Models.Dto;
 using MediatR;
@@ -18,7 +19,19 @@ namespace IconService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IconDto?>> GetIcon(GetIconQuery query)
+        public async Task<IActionResult> Create(CreateIconCommand command)
+        {
+            return Ok(await _mediator.Send(command));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<IconDto?>> Get(GetIconQuery query)
+        {
+            return Ok(await _mediator.Send(query));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetAll(GetAllIconsQuery query)
         {
             return Ok(await _mediator.Send(query));
         }

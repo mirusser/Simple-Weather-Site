@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <Folder Include="Icons\" />
-    <Folder Include="Messages\Commands\" />
   </ItemGroup>
 
 </Project>
