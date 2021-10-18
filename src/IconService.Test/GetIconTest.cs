@@ -35,11 +35,9 @@ namespace IconService.Test
             //arrange
             var fixture = new Fixture();
 
-            IconDocument iconDocument = fixture.Create<IconDocument>();
-            var getIconQuery = new GetIconQuery() { Icon = iconDocument.Icon };
+            var iconDocument = fixture.Create<IconDocument>();
 
-            Mock<IMongoCollection<IconDocument>> iconCollectionMock = new();
-
+            //From what I've read Moq doesn't support setting up a specific expression, so that makes this test little diluted.
             _iconMockMongoRepository
                 .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<IconDocument, bool>>>(), It.IsAny<FindOptions?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(iconDocument);
@@ -56,6 +54,7 @@ namespace IconService.Test
                     Name = iconDocument.Name
                 });
 
+            var getIconQuery = new GetIconQuery() { Icon = iconDocument.Icon };
             _sut = new GetIconQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
 
             //act
@@ -65,6 +64,26 @@ namespace IconService.Test
             Assert.NotNull(iconDto);
             Assert.Equal(getIconQuery.Icon, iconDto.Icon);
             Assert.NotEmpty(iconDto.Id);
+        }
+
+        [Fact]
+        public async Task ShouldReturnNothingIfIconDoesNotExists()
+        {
+            //arrange
+            var fixture = new Fixture();
+
+            _iconMockMongoRepository
+                .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<IconDocument, bool>>>(), It.IsAny<FindOptions?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(() => null);
+
+            var getIconQuery = new GetIconQuery() { Icon = It.IsAny<string>() };
+            _sut = new GetIconQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
+
+            //act
+            var iconDto = await _sut.Handle(getIconQuery, CancellationToken.None);
+
+            //assert
+            Assert.Null(iconDto);
         }
     }
 }

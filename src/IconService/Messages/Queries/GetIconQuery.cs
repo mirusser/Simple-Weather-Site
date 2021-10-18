@@ -32,7 +32,7 @@ namespace IconService.Messages.Queries
 
             var iconDocument =
                 await _iconRepository
-                .FindOneAsync(i => i.Icon == request.Icon, cancellation: cancellationToken);
+                .FindOneAsync(i => i.Icon == request.Icon, findOptions: null, cancellation: cancellationToken);
 
             if (iconDocument != null)
             {
