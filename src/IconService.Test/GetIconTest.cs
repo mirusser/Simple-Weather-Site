@@ -4,11 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoMapper;
+using FluentAssertions;
 using IconService.Messages.Queries;
 using IconService.Models.Dto;
 using IconService.Mongo.Documents;
 using IconService.Mongo.Repository;
 using IconService.Services;
+using MediatR;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -30,6 +32,12 @@ namespace IconService.Test
         }
 
         [Fact]
+        public void ShouldImplementIRequest()
+        {
+            typeof(GetIconQueryHandler).Should().Implement<IRequestHandler<GetIconQuery, GetIconDto?>>();
+        }
+
+        [Fact]
         public async Task ShouldReturnIconIfExists()
         {
             //arrange
@@ -37,7 +45,8 @@ namespace IconService.Test
 
             var iconDocument = fixture.Create<IconDocument>();
 
-            //From what I've read Moq doesn't support setting up a specific expression, so that makes this test little diluted.
+            //From what I've read Moq doesn't support setting up a specific expression, so that makes this test a little diluted.
+            //https://stackoverflow.com/questions/2751935/moq-mockt-how-to-set-up-a-method-that-takes-an-expression
             _iconMockMongoRepository
                 .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<IconDocument, bool>>>(), It.IsAny<FindOptions?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(iconDocument);
@@ -61,9 +70,12 @@ namespace IconService.Test
             var iconDto = await _sut.Handle(getIconQuery, CancellationToken.None);
 
             //assert
-            Assert.NotNull(iconDto);
-            Assert.Equal(getIconQuery.Icon, iconDto.Icon);
-            Assert.NotEmpty(iconDto.Id);
+            iconDto
+                .Should()
+                .NotBeNull()
+                .And
+                .Equals(getIconQuery.Icon);
+            iconDto.Id.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -83,7 +95,7 @@ namespace IconService.Test
             var iconDto = await _sut.Handle(getIconQuery, CancellationToken.None);
 
             //assert
-            Assert.Null(iconDto);
+            iconDto.Should().BeNull();
         }
     }
 }

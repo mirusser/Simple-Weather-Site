@@ -9,6 +9,7 @@ using MongoDB.Driver;
 
 namespace IconService.Services
 {
+    //TODO: maybe think about merging with MongoRepository
     public class MongoCollectionFactory<TMongoDocument> : IMongoCollectionFactory<TMongoDocument> where TMongoDocument : class
     {
         private readonly MongoSettings _settings;
@@ -18,7 +19,7 @@ namespace IconService.Services
             _settings = settings.Value;
         }
 
-        public IMongoCollection<TMongoDocument> Create(string? collectionName = null)
+        public IMongoCollection<TMongoDocument> Get(string? collectionName = null)
         {
             collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : typeof(TMongoDocument).Name;
             var client = new MongoClient(_settings.ConnectionString);

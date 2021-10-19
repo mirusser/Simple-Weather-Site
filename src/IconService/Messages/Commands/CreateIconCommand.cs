@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using IconService.Models.Dto;
 using IconService.Mongo.Documents;
+using IconService.Mongo.Repository;
 using IconService.Services;
 using MediatR;
 using MongoDB.Driver;
@@ -25,20 +26,19 @@ namespace IconService.Messages.Commands
     public class CreateIconHandler : IRequestHandler<CreateIconCommand, CreateIconDto>
     {
         private readonly IMapper _mapper;
-        private readonly IMongoCollection<IconDocument> _iconCollection;
+        private readonly IMongoRepository<IconDocument> _iconRepository;
 
         public CreateIconHandler(
-            IMapper mapper,
-            IMongoCollectionFactory<IconDocument> mongoCollectionFactory)
+            IMapper mapper, IMongoRepository<IconDocument> iconRepository)
         {
             _mapper = mapper;
-            _iconCollection = mongoCollectionFactory.Create();
+            _iconRepository = iconRepository;
         }
 
         public async Task<CreateIconDto> Handle(CreateIconCommand request, CancellationToken cancellationToken)
         {
             var iconDocument = _mapper.Map<IconDocument>(request);
-            await _iconCollection.InsertOneAsync(iconDocument);
+            iconDocument = await _iconRepository.CreateOneAsync(iconDocument, null, cancellationToken);
 
             var createIconDto = _mapper.Map<CreateIconDto>(iconDocument);
 
