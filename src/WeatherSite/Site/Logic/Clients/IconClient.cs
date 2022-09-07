@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WeatherSite.Clients.Models.Records;
 using WeatherSite.Settings;
@@ -29,8 +30,13 @@ namespace WeatherSite.Logic.Clients
 
         public async Task<IconDto?> GetIcon(string icon)
         {
-            string url = $"{_apiEndpoints.IconServiceApiUrl}GetIcon/{Uri.EscapeDataString(icon)}";
-            IconDto? iconDto = await _httpClient.GetFromJsonAsync<IconDto>(url);
+            var url = $"{_apiEndpoints.IconServiceApiUrl}Get";
+            var query = new { icon };
+            var response = await _httpClient.PostAsJsonAsync(url, query);
+            var responseJson = await response.Content.ReadAsStringAsync();
+            var iconDto = JsonSerializer.Deserialize<IconDto>(
+                responseJson,
+                new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
             return iconDto;
         }

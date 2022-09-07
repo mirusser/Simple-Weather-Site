@@ -1,4 +1,6 @@
 
+docker network create -d bridge overlaynetwork
+
 @RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesGrpcService\deploy"
 md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesGrpcService"
 cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\CitiesService\CitiesGrpcService"
