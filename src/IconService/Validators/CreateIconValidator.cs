@@ -14,7 +14,7 @@ namespace IconService.Validators
 
         public CreateIconValidator(IMongoCollectionFactory<IconDocument> mongoCollectionFactory)
         {
-            _iconCollection = mongoCollectionFactory.Create();
+            _iconCollection = mongoCollectionFactory.Get();
 
             RuleFor(c => c.Name)
                .Cascade(CascadeMode.Stop)

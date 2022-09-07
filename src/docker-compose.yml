@@ -130,7 +130,7 @@ services:
       - 8080:80
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
   citiesgrpcservice:
     image: citiesgrpcservice
@@ -143,7 +143,7 @@ services:
       - 8681:80
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
   weatherservice:
     image: weatherservice
@@ -156,7 +156,7 @@ services:
       - 8082:80
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
   weatherhistoryservice:
     image: weatherhistoryservice
@@ -169,7 +169,7 @@ services:
       - 8083:80
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
   weathersite:
     image: weathersite
@@ -182,7 +182,7 @@ services:
       - 8081:80
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
   iconservice:
     image: iconservice
@@ -197,7 +197,7 @@ services:
       - iconservice:/var/lib/iconservicefiles
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
   signalrserver:
     image: signalrserver
@@ -210,7 +210,7 @@ services:
       - 8897:80
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
   emailservice:
     image: emailservice
@@ -223,14 +223,14 @@ services:
       - 8087:80
     networks:
       - conveyor
-      - overlaynetwork
+      # - overlaynetwork
 
 networks:
   conveyor:
     name: conveyor-network
-  overlaynetwork:
-    name: overlaynetwork
-    external: true
+  # overlaynetwork:
+  #   name: overlaynetwork
+  #   external: true
 
 volumes:
   # consul:

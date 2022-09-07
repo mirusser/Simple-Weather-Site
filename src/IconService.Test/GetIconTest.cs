@@ -28,7 +28,7 @@ namespace IconService.Test
             Mock<IMongoCollection<IconDocument>> iconCollectionMock = new();
 
             var _iconMockCollectionFactory = new Mock<IMongoCollectionFactory<IconDocument>>();
-            _iconMockCollectionFactory.Setup(x => x.Create(It.IsAny<string>())).Returns(iconCollectionMock.Object);
+            _iconMockCollectionFactory.Setup(x => x.Get(It.IsAny<string>())).Returns(iconCollectionMock.Object);
         }
 
         [Fact]
