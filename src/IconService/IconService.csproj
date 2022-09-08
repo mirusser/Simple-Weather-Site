@@ -10,9 +10,13 @@
 
   <ItemGroup>
     <Compile Remove="deploy\**" />
+    <Compile Remove="IconService.Test\**" />
     <Content Remove="deploy\**" />
+    <Content Remove="IconService.Test\**" />
     <EmbeddedResource Remove="deploy\**" />
+    <EmbeddedResource Remove="IconService.Test\**" />
     <None Remove="deploy\**" />
+    <None Remove="IconService.Test\**" />
   </ItemGroup>
 
   <ItemGroup>
