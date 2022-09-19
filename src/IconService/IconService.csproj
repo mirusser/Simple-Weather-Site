@@ -41,6 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CitiesService\Application\Application.csproj" />
     <ProjectReference Include="..\IconService.Application\IconService.Application.csproj" />
     <ProjectReference Include="..\IconService.Infrastructure\IconService.Infrastructure.csproj" />
   </ItemGroup>

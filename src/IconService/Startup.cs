@@ -1,11 +1,12 @@
 using System.Reflection;
+using Application.PipelineBehaviours;
 using FluentValidation;
+using IconService.Application;
+using IconService.Application.Common.Interfaces.Persistence;
+using IconService.Domain.Settings;
 using IconService.Exceptions;
-using IconService.Mappings;
-using IconService.Mongo.Repository;
-using IconService.PipelineBehaviours;
-using IconService.Services;
-using IconService.Settings;
+using IconService.Infrastructure;
+using IconService.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,11 +31,14 @@ namespace IconService
             services.Configure<MongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
             services.Configure<ServiceSettings>(Configuration.GetSection(nameof(ServiceSettings)));
 
-            services.AddTransient(typeof(IMongoRepository<>), typeof(MongoRepository<>));
-            services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
-            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-            services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddApplication();
+            services.AddInfrastructure();
+
+            //services.AddTransient(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+            //services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
+            //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+            //services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -42,7 +46,7 @@ namespace IconService
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IconService", Version = "v1" });
             });
 
-            services.AddAutoMapper(typeof(Maps));
+            //services.AddAutoMapper(typeof(Maps));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
