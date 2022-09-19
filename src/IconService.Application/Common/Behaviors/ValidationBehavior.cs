@@ -17,13 +17,15 @@ public class ValidationBehavior<TRequest, TResponse> :
     }
 
     public async Task<TResponse> Handle(
-        TRequest request,
+        TRequest request, //to investigate/manipulate/log something before moving next in the pipeline
         CancellationToken cancellationToken,
-        RequestHandlerDelegate<TResponse> next)
+        RequestHandlerDelegate<TResponse> next) // this delegate eventually invoke handler
     {
         if (validator is null)
         {
+            //before the handler
             return await next();
+            //after the handler
         }
 
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
