@@ -27,12 +27,6 @@
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="MongoDB.Bson" Version="2.17.1" />
     <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
-    <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
-    <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
-    <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
@@ -42,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CitiesService\Application\Application.csproj" />
+    <ProjectReference Include="..\Common\Common.Presentation.csproj" />
     <ProjectReference Include="..\IconService.Application\IconService.Application.csproj" />
     <ProjectReference Include="..\IconService.Infrastructure\IconService.Infrastructure.csproj" />
   </ItemGroup>
