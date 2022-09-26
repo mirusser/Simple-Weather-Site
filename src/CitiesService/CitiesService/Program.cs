@@ -1,54 +1,78 @@
-using System;
+using System.Linq;
+using System.Text.Json;
+using CitiesService;
+using CitiesService.Application;
+using CitiesService.Domain.Models;
+using CitiesService.Infrastructure;
+using Common.Presentation;
+using Common.Presentation.Exceptions.Handlers;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace CitiesService
+var builder = WebApplication.CreateBuilder(args);
 {
-    public class Program
+    builder.Host.UseSerilog();
+
+    builder.Services
+        .AddPresentation()
+        .AddApplicationLayer(builder.Configuration)
+        .AddInfrastructure(builder.Configuration);
+}
+
+var app = builder.Build();
+{
+    if (builder.Environment.IsDevelopment())
     {
-        public static void Main(string[] args)
-        {
-            CreateLogger();
-
-            try
-            {
-                Log.Information($"CitiesService is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "CitiesService failed to start");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-
-        private static void CreateLogger()
-        {
-            //Read configuration from appSettings
-            var config = new ConfigurationBuilder()
-                .AddJsonFile(
-                    path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
-                    optional: false,
-                    reloadOnChange: true)
-                .Build();
-
-            //Initialize Logger (Serilog)
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(config)
-                .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
-                .CreateLogger();
-        }
+        app.UseDeveloperExceptionPage();
     }
+
+    app.UseServiceExceptionHandler();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
+
+    app.UseApplicationLayer();
+
+    //app.UseHttpsRedirection();
+    app.UseRouting();
+
+    app.UseAuthorization();
+
+    app.UseCors("AllowAll");
+
+    #region Healthchecks
+
+    app.UseHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            context.Response.ContentType = "application/json";
+            var response = new HealthCheckReponse
+            {
+                Status = report.Status.ToString(),
+                HealthCheckDuration = report.TotalDuration,
+                HealthChecks = report.Entries.Select(x => new IndividualHealthCheckResponse
+                {
+                    Component = x.Key,
+                    Status = x.Value.Status.ToString(),
+                    Description = x.Value.Description
+                })
+            };
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        }
+    });
+
+    #endregion Healthchecks
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+        //endpoints.MapHealthChecks("/health");
+        endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
+    });
+
+    WebApplicationStartup.Run(app);
 }

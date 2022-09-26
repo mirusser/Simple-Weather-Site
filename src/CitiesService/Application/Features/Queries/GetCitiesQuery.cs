@@ -1,39 +1,38 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Dto;
-using Application.Interfaces.Managers;
+using CitiesService.Application.Dto;
+using CitiesService.Application.Interfaces.Managers;
 using MediatR;
 
-namespace Application.Features.Queries
+namespace CitiesService.Application.Features.Queries;
+
+public class GetCitiesQuery : IRequest<IEnumerable<CityDto>>
 {
-    public class GetCitiesQuery : IRequest<IEnumerable<CityDto>>
+    public string CityName { get; set; } = null!;
+    public int Limit { get; set; } = 10;
+}
+
+public class GetCitiesHandler : IRequestHandler<GetCitiesQuery, IEnumerable<CityDto>>
+{
+    private readonly ICityManager _cityManger;
+
+    public GetCitiesHandler(ICityManager cityManger)
     {
-        public string CityName { get; set; } = null!;
-        public int Limit { get; set; } = 10;
+        _cityManger = cityManger;
     }
 
-    public class GetCitiesHandler : IRequestHandler<GetCitiesQuery, IEnumerable<CityDto>>
+    public async Task<IEnumerable<CityDto>> Handle(GetCitiesQuery request, CancellationToken cancellationToken)
     {
-        private readonly ICityManager _cityManger;
+        if (string.IsNullOrEmpty(request.CityName) ||
+            string.IsNullOrEmpty(request.CityName.TrimStart()) ||
+            string.IsNullOrEmpty(request.CityName.TrimEnd()))
+            return new List<CityDto>();
 
-        public GetCitiesHandler(ICityManager cityManger)
-        {
-            _cityManger = cityManger;
-        }
+        request.CityName = request.CityName.TrimStart().TrimEnd();
 
-        public async Task<IEnumerable<CityDto>> Handle(GetCitiesQuery request, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrEmpty(request.CityName) ||
-                string.IsNullOrEmpty(request.CityName.TrimStart()) ||
-                string.IsNullOrEmpty(request.CityName.TrimEnd()))
-                return new List<CityDto>();
+        var cities = await _cityManger.GetCitiesByName(request.CityName, request.Limit);
 
-            request.CityName = request.CityName.TrimStart().TrimEnd();
-
-            var cities = await _cityManger.GetCitiesByName(request.CityName, request.Limit);
-
-            return cities ?? new();
-        }
+        return cities ?? new();
     }
 }

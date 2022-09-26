@@ -1,5 +1,6 @@
 ﻿using Common.Presentation;
 using Common.Presentation.Exceptions;
+using Common.Presentation.Exceptions.Handlers;
 using IconService;
 using IconService.Application;
 using IconService.Infrastructure;
@@ -25,7 +26,7 @@ var app = builder.Build();
         app.UseDeveloperExceptionPage();
     }
 
-    app.UseMiddleware(typeof(ExceptionHandlerMiddleware));
+    app.UseServiceExceptionHandler();
 
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "IconService v1"));

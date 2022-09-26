@@ -1,10 +1,9 @@
-﻿using Domain.Entities;
+﻿using CitiesService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Persistence.Contexts
+namespace CitiesService.Infrastructure.Contexts;
+
+public interface IApplicationDbContext
 {
-    public interface IApplicationDbContext
-    {
-        DbSet<CityInfo> CityInfos { get; set; }
-    }
+    DbSet<CityInfo> CityInfos { get; set; }
 }

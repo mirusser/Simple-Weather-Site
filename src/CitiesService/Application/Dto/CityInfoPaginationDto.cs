@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Entities;
+﻿using System.Collections.Generic;
+using CitiesService.Domain.Entities;
 
-namespace Application.Dto
+namespace CitiesService.Application.Dto;
+
+public class CityInfoPaginationDto
 {
-    public class CityInfoPaginationDto
-    {
-        public List<CityInfo> CityInfos { get; set; } = new List<CityInfo>();
-        public int NumberOfAllCities { get; set; }
-    }
+    public List<CityInfo> CityInfos { get; set; } = new List<CityInfo>();
+    public int NumberOfAllCities { get; set; }
 }
