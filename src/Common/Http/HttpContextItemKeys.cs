@@ -1,4 +1,4 @@
-﻿namespace IconService.Common.Http;
+﻿namespace Common.Presentation.Http;
 
 public static class HttpContextItemKeys
 {

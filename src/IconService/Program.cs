@@ -1,7 +1,7 @@
 ﻿using Common.Presentation;
+using Common.Presentation.Exceptions;
 using IconService;
 using IconService.Application;
-using IconService.Exceptions;
 using IconService.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

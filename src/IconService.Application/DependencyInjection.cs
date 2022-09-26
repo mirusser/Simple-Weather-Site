@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
+using Common.Application.Behaviors;
 using FluentValidation;
-using IconService.Application.Common.Behaviors;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 

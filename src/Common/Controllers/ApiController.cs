@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Common.Presentation.Http;
 using ErrorOr;
-using IconService.Common.Http;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace IconService.Controllers;
+namespace Common.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]

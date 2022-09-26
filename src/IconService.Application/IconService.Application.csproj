@@ -7,18 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentResults" Version="3.11.0" />
-    <PackageReference Include="FluentValidation" Version="11.2.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.1" />
-    <PackageReference Include="Mapster" Version="7.3.0" />
-    <PackageReference Include="Mapster.DependencyInjection" Version="1.0.0" />
-    <PackageReference Include="MediatR" Version="10.0.1" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-    <PackageReference Include="OneOf" Version="3.0.223" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\IconService.Contracts\IconService.Contracts.csproj" />
     <ProjectReference Include="..\IconService.Domain\IconService.Domain.csproj" />
   </ItemGroup>

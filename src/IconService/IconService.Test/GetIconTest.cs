@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
-//using AutoMapper;
 using ErrorOr;
 using FluentAssertions;
 using IconService.Application.Common.Interfaces.Persistence;
@@ -15,7 +14,6 @@ using MediatR;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
-using static IconService.Domain.Common.Errors.Errors;
 
 namespace IconService.Test
 {

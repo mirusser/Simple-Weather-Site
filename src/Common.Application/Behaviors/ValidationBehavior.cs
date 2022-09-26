@@ -2,7 +2,7 @@
 using FluentValidation;
 using MediatR;
 
-namespace IconService.Application.Common.Behaviors;
+namespace Common.Application.Behaviors;
 
 public class ValidationBehavior<TRequest, TResponse> :
     IPipelineBehavior<TRequest, TResponse>
