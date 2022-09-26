@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace CitiesService.Domain.Settings;
 
-namespace Domain.Settings
+public class ConnectionStrings
 {
-    public class ConnectionStrings
-    {
-        public string DefaultConnection { get; set; }
-        public string RedisConnection { get; set; }
-    }
+    public string DefaultConnection { get; set; }
+    public string RedisConnection { get; set; }
 }

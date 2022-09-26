@@ -1,39 +1,55 @@
 ﻿using System.Threading.Tasks;
-using IconService.Messages.Commands;
-using IconService.Messages.Queries;
-using IconService.Models.Dto;
+using Common.Presentation.Controllers;
+using IconService.Application.Icon.Commands.Create;
+using IconService.Application.Icon.Get;
+using IconService.Application.Icon.GetAll;
+using IconService.Contracts.Icon;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace IconService.Controllers
+namespace IconService.Controllers;
+
+public class IconsController : ApiController
 {
-    [ApiController]
-    [Route("api/[controller]/[action]")]
-    public class IconsController : ControllerBase
+    private readonly ISender _mediator;
+    private readonly IMapper mapper;
+
+    public IconsController(
+        ISender mediator,
+        IMapper mapper)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+        this.mapper = mapper;
+    }
 
-        public IconsController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateRequest request)
+    {
+        var command = mapper.Map<CreateCommand>(request);
 
-        [HttpPost]
-        public async Task<IActionResult> Create(CreateIconCommand command)
-        {
-            return Ok(await _mediator.Send(command));
-        }
+        var createResult = await _mediator.Send(command);
 
-        [HttpPost]
-        public async Task<ActionResult<GetIconDto?>> Get(GetIconQuery query)
-        {
-            return Ok(await _mediator.Send(query));
-        }
+        return createResult.Match(
+            createResult => Ok(mapper.Map<CreateResponse>(createResult)),
+            errors => base.Problem(errors));
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> GetAll(GetAllIconsQuery query)
-        {
-            return Ok(await _mediator.Send(query));
-        }
+    [HttpPost]
+    public async Task<IActionResult> Get(GetRequest request)
+    {
+        var query = mapper.Map<GetQuery>(request);
+
+        var getResult = await _mediator.Send(query);
+
+        return getResult.Match(
+            getResult => Ok(mapper.Map<GetResponse>(getResult)),
+            errors => base.Problem(errors));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GetAll(GetAllQuery query)
+    {
+        return Ok(await _mediator.Send(query));
     }
 }

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace Application.Dto
+namespace CitiesService.Application.Dto;
+
+public class CitiesPaginationDto
 {
-    public class CitiesPaginationDto
-    {
-        public List<CityDto> Cities { get; set; } = new List<CityDto>();
-        public int NumberOfAllCities { get; set; }
-    }
+    public List<CityDto> Cities { get; set; } = new List<CityDto>();
+    public int NumberOfAllCities { get; set; }
 }

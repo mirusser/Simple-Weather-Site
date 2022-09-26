@@ -1,59 +1,46 @@
+﻿using Common.Presentation;
+using Common.Presentation.Exceptions;
+using Common.Presentation.Exceptions.Handlers;
+using IconService;
+using IconService.Application;
+using IconService.Infrastructure;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace IconService
+var builder = WebApplication.CreateBuilder(args);
 {
-    public class Program
+    builder.Host.UseSerilog();
+
+    builder.Services
+        .AddPresentation()
+        .AddApplication()
+        .AddInfrastructure(builder.Configuration);
+}
+
+var app = builder.Build();
+{
+    if (builder.Environment.IsDevelopment())
     {
-        public static void Main(string[] args)
-        {
-            CreateLogger();
-
-            try
-            {
-                Log.Information($"IconService is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "IconService failed to start");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-
-        private static void CreateLogger()
-        {
-            //Read configuration from appSettings
-            var config = new ConfigurationBuilder()
-                .AddJsonFile(
-                    path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
-                    optional: false,
-                    reloadOnChange: true)
-                .Build();
-
-            //Initialize Logger (Serilog)
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(config)
-                .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
-                .CreateLogger();
-        }
+        app.UseDeveloperExceptionPage();
     }
+
+    app.UseServiceExceptionHandler();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "IconService v1"));
+
+    //app.UseHttpsRedirection();
+
+    app.UseRouting();
+
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
+
+    WebApplicationStartup.Run(app);
 }

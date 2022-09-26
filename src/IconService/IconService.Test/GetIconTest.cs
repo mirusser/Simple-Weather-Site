@@ -3,13 +3,13 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
-using AutoMapper;
+using ErrorOr;
 using FluentAssertions;
-using IconService.Messages.Queries;
-using IconService.Models.Dto;
-using IconService.Mongo.Documents;
-using IconService.Mongo.Repository;
-using IconService.Services;
+using IconService.Application.Common.Interfaces.Persistence;
+using IconService.Application.Icon.Get;
+using IconService.Application.Icon.Models.Dto;
+using IconService.Domain.Entities.Documents;
+using MapsterMapper;
 using MediatR;
 using MongoDB.Driver;
 using Moq;
@@ -19,7 +19,7 @@ namespace IconService.Test
 {
     public class GetIconTest
     {
-        private GetIconQueryHandler? _sut { get; set; }
+        private GetQueryHandler? _sut { get; set; }
         private readonly Mock<IMapper> _mapperMock = new();
         private readonly Mock<IMongoRepository<IconDocument>> _iconMockMongoRepository = new();
 
@@ -34,7 +34,7 @@ namespace IconService.Test
         [Fact]
         public void ShouldImplementIRequest()
         {
-            typeof(GetIconQueryHandler).Should().Implement<IRequestHandler<GetIconQuery, GetIconDto?>>();
+            typeof(GetQueryHandler).Should().Implement<IRequestHandler<GetQuery, ErrorOr<GetResult>>>();
         }
 
         [Fact]
@@ -52,8 +52,8 @@ namespace IconService.Test
                 .ReturnsAsync(iconDocument);
 
             _mapperMock
-                .Setup(x => x.Map<GetIconDto>(It.IsAny<IconDocument>()))
-                .Returns(new GetIconDto()
+                .Setup(x => x.Map<GetResult>(It.IsAny<IconDocument>()))
+                .Returns(new GetResult()
                 {
                     Id = iconDocument.Id,
                     DayIcon = iconDocument.DayIcon,
@@ -63,8 +63,8 @@ namespace IconService.Test
                     Name = iconDocument.Name
                 });
 
-            var getIconQuery = new GetIconQuery() { Icon = iconDocument.Icon };
-            _sut = new GetIconQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
+            var getIconQuery = new GetQuery(iconDocument.Icon);
+            _sut = new GetQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
 
             //act
             var iconDto = await _sut.Handle(getIconQuery, CancellationToken.None);
@@ -75,7 +75,7 @@ namespace IconService.Test
                 .NotBeNull()
                 .And
                 .Equals(getIconQuery.Icon);
-            iconDto.Id.Should().NotBeEmpty();
+            iconDto.Value.Id.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -88,8 +88,8 @@ namespace IconService.Test
                 .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<IconDocument, bool>>>(), It.IsAny<FindOptions?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => null);
 
-            var getIconQuery = new GetIconQuery() { Icon = It.IsAny<string>() };
-            _sut = new GetIconQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
+            var getIconQuery = new GetQuery(It.IsAny<string>());
+            _sut = new GetQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
 
             //act
             var iconDto = await _sut.Handle(getIconQuery, CancellationToken.None);

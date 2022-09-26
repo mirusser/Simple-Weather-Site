@@ -1,31 +1,25 @@
-﻿using Domain.Entities;
+﻿using CitiesService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Infrastructure.Persistence.Contexts
+namespace CitiesService.Infrastructure.Contexts;
+
+public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
-    public class ApplicationDbContext : DbContext, IApplicationDbContext
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<CityInfo>()
-        //        .HasAlternateKey(c => c.CityId)
-        //        .HasName("AlternateKey_CityId");
-
-        //    modelBuilder.Entity<CityInfo>()
-        //        .HasIndex(c => c.CityId)
-        //        .IsUnique();
-        //}
-
-        public DbSet<CityInfo> CityInfos { get; set; }
     }
+
+    //protected override void OnModelCreating(ModelBuilder modelBuilder)
+    //{
+    //    modelBuilder.Entity<CityInfo>()
+    //        .HasAlternateKey(c => c.CityId)
+    //        .HasName("AlternateKey_CityId");
+
+    //    modelBuilder.Entity<CityInfo>()
+    //        .HasIndex(c => c.CityId)
+    //        .IsUnique();
+    //}
+
+    public DbSet<CityInfo> CityInfos { get; set; }
 }
