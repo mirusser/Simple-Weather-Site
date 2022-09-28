@@ -1,4 +1,4 @@
-﻿using CitiesService.Application.HealthChecks;
+﻿using CitiesService.Application.Features.HealthChecks;
 using CitiesService.Infrastructure.Contexts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;

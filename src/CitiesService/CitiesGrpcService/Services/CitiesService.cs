@@ -1,40 +1,55 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using CitiesService.Application.Interfaces.Managers;
+using CitiesService.Application.Common.Interfaces.Persistance;
+using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
+using CitiesService.Domain.Entities;
 using Google.Protobuf.Collections;
 using Grpc.Core;
+using MapsterMapper;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CitiesGrpcService.Services;
 
+//TODO: mapping (check)
 public class CitiesService : Cities.CitiesBase
 {
-    private readonly ICityManager _cityManager;
-    private readonly IMapper _mapper;
+    private readonly IGenericRepository<CityInfo> cityInfoRepo;
+    private readonly IMapper mapper;
+    private readonly IMediator mediator;
 
     public CitiesService(
-        ICityManager cityManager,
-        IMapper mapper)
+        IMapper mapper,
+        IGenericRepository<CityInfo> cityInfoRepo,
+        IMediator mediator)
     {
-        _cityManager = cityManager;
-        _mapper = mapper;
+        this.mapper = mapper;
+        this.cityInfoRepo = cityInfoRepo;
+        this.mediator = mediator;
     }
 
-    public override async Task<CitiesPaginationInfoReply> GetCitiesPaginationInfo(CitiesPaginationInfoRequest request, ServerCallContext context)
+    public override async Task<CitiesPaginationInfoReply> GetCitiesPaginationInfo(
+        CitiesPaginationInfoRequest request,
+        ServerCallContext context)
     {
-        var countOfAllCities = await _cityManager.GetCountOfAllCities();
-        var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities };
+        var countOfAllCities = await cityInfoRepo.FindAll().CountAsync();
+        var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities, };
 
         return citiesPaginationInfoReply;
     }
 
-    public override async Task<CitiesPaginationReply> GetCitiesPagination(CitiesPaginationRequest request, ServerCallContext context)
+    public override async Task<CitiesPaginationReply> GetCitiesPagination(
+        CitiesPaginationRequest request,
+        ServerCallContext context)
     {
-        var getCitiesInfoPagination = await _cityManager.GetCitiesInfoPagination(request.NumberOfCities, request.PageNumber);
+        var query = new GetCitiesPaginationQuery { NumberOfCities = request.NumberOfCities, PageNumber = request.PageNumber };
+        var result = await mediator.Send(query);
 
-        var citiesPaginationReply = _mapper.Map<CitiesPaginationReply>(getCitiesInfoPagination);
-        citiesPaginationReply.Cities.AddRange(_mapper.Map<RepeatedField<CityReply>>(getCitiesInfoPagination.CityInfos.ToList()));
+        var citiesPaginationReply = new CitiesPaginationReply()
+        {
+            NumberOfAllCities = result.Value.NumberOfAllCities,
+        };
+        citiesPaginationReply.Cities.AddRange(mapper.Map<RepeatedField<CityReply>>(result.Value.Cities));
 
         return citiesPaginationReply;
     }
@@ -44,8 +59,10 @@ public class CitiesService : Cities.CitiesBase
         IServerStreamWriter<CityReply> responseStream,
         ServerCallContext context)
     {
-        var getCitiesInfoPagination = await _cityManager.GetCitiesInfoPagination(request.NumberOfCities, request.PageNumber);
-        var cities = _mapper.Map<List<CityReply>>(getCitiesInfoPagination.CityInfos.ToList());
+        var query = new GetCitiesPaginationQuery { NumberOfCities = request.NumberOfCities, PageNumber = request.PageNumber };
+        var result = await mediator.Send(query);
+
+        var cities = mapper.Map<List<CityReply>>(result.Value.Cities);
 
         foreach (var city in cities)
         {
