@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
-using IconService.Application.Icon.Get;
 
-namespace IconService.Validators;
+namespace IconService.Application.Icon.Queries.Get;
 
 public class GetValidator : AbstractValidator<GetQuery>
 {

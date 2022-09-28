@@ -6,7 +6,7 @@ using IconService.Domain.Entities.Documents;
 using MapsterMapper;
 using MediatR;
 
-namespace IconService.Application.Icon.GetAll;
+namespace IconService.Application.Icon.Queries.GetAll;
 
 public class GetAllIconsHandler
     : IRequestHandler<GetAllQuery, ErrorOr<IEnumerable<GetResult>>>

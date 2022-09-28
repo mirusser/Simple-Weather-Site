@@ -1,6 +1,6 @@
 ﻿using IconService.Application.Icon.Commands.Create;
-using IconService.Application.Icon.Get;
 using IconService.Application.Icon.Models.Dto;
+using IconService.Application.Icon.Queries.Get;
 using IconService.Contracts.Icon;
 using IconService.Domain.Entities.Documents;
 using Mapster;

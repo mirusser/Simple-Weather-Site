@@ -2,9 +2,9 @@
 using IconService.Application.Icon.Models.Dto;
 using MediatR;
 
-namespace IconService.Application.Icon.Get;
+namespace IconService.Application.Icon.Queries.Get;
 
 public record GetQuery
 (
     string? Icon
-): IRequest<ErrorOr<GetResult?>>;
+) : IRequest<ErrorOr<GetResult?>>;
