@@ -7,40 +7,44 @@ using Microsoft.Extensions.Options;
 using Models.Internal;
 using Models.Settings;
 
-namespace EmailService.Features.Commands
+namespace EmailService.Features.Commands;
+
+public class SendEmailCommand : MailRequest, IRequest<Response<SentMailRequest>>
 {
-    public class SendEmailCommand : MailRequest, IRequest<Response<SentMailRequest>>
+}
+
+public class SendEmailHandler : IRequestHandler<SendEmailCommand, Response<SentMailRequest>>
+{
+    private readonly MailSettings _mailSettings;
+    private readonly IMailService _mailService;
+    private readonly IMapper _mapper;
+
+    public SendEmailHandler(
+        IOptions<MailSettings> options,
+        IMailService mailService,
+        IMapper mapper)
     {
+        _mailSettings = options.Value;
+        _mailService = mailService;
+        _mapper = mapper;
     }
 
-    public class SendEmailHandler : IRequestHandler<SendEmailCommand, Response<SentMailRequest>>
+    //TODO: add some validation here? maybe? yes, no?
+    public async Task<Response<SentMailRequest>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
     {
-        private readonly MailSettings _mailSettings;
-        private readonly IMailService _mailService;
-        private readonly IMapper _mapper;
+        if (request is null)
+            return new Response<SentMailRequest>(message: "Request was null");
 
-        public SendEmailHandler(
-            IOptions<MailSettings> options,
-            IMailService mailService,
-            IMapper mapper)
-        {
-            _mailSettings = options.Value;
-            _mailService = mailService;
-            _mapper = mapper;
-        }
+        request.To = !string.IsNullOrEmpty(request.To)
+            ? request.To
+            : _mailSettings.DefaultEmailReciever;
+        request.From = !string.IsNullOrEmpty(request.From)
+            ? request.From
+            : _mailSettings.From;
+        var mailRequest = _mapper.Map<MailRequest>(request);
 
-        //TODO: add some validation here? maybe? yes, no?
-        public async Task<Response<SentMailRequest>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
-        {
-            if (request is null)
-                return new Response<SentMailRequest>(message: "Request was null");
+        var sentEmailRequest = await _mailService.SendEmailAsync(mailRequest);
 
-            request.To = !string.IsNullOrEmpty(request.To) ? request.To : _mailSettings.DefaultEmailReciever;
-            var mailRequest = _mapper.Map<MailRequest>(request);
-
-            var sentEmailRequest = await _mailService.SendEmailAsync(mailRequest);
-
-            return new Response<SentMailRequest>(sentEmailRequest);
-        }
+        return new Response<SentMailRequest>(sentEmailRequest);
     }
 }

@@ -3,7 +3,6 @@ using System.Text.Json;
 using CitiesService;
 using CitiesService.Application;
 using CitiesService.Contracts.HealthCheck;
-using CitiesService.Domain.Models;
 using CitiesService.Infrastructure;
 using Common.Presentation;
 using Common.Presentation.Exceptions.Handlers;

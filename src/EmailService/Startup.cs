@@ -13,73 +13,86 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Models.Settings;
 
-namespace EmailService
+namespace EmailService;
+
+public class Startup
 {
-    public class Startup
+    public IConfiguration Configuration { get; }
+
+    public Startup(IConfiguration configuration)
     {
-        public IConfiguration Configuration { get; }
+        Configuration = configuration;
+    }
 
-        public Startup(IConfiguration configuration)
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<ExceptionHandler>();
+        services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
+
+        services.AddMediatR(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+        services.AddMassTransit(config =>
         {
-            Configuration = configuration;
+            RabbitMQSettings rabbitMQSettings = new();
+            Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+
+            config.AddConsumer<SendEmailListener>();
+            config.SetKebabCaseEndpointNameFormatter();
+
+            config.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host(rabbitMQSettings.Host);
+                cfg.ConfigureEndpoints(ctx);
+            });
+        });
+
+        services.AddOptions<MassTransitHostOptions>()
+        .Configure(options =>
+        {
+            // if specified, waits until the bus is started before
+            // returning from IHostedService.StartAsync
+            // default is false
+            options.WaitUntilStarted = true;
+
+            // if specified, limits the wait time when starting the bus
+            //options.StartTimeout = TimeSpan.FromSeconds(10);
+
+            // if specified, limits the wait time when stopping the bus
+            //options.StopTimeout = TimeSpan.FromSeconds(30);
+        });
+
+        services.AddControllers();
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "EmailService", Version = "v1" });
+        });
+
+        services.AddTransient<IMailService, MailService>();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        app.UseMiddleware<ExceptionHandler>();
+        app.UseSwagger();
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EmailService v1"));
+
+        //app.UseHttpsRedirection();
+
+        app.UseRouting();
+
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
         {
-            services.AddSingleton<ExceptionHandler>();
-            services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
-
-            services.AddMediatR(Assembly.GetExecutingAssembly());
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
-            services.AddMassTransit(config =>
-            {
-                RabbitMQSettings rabbitMQSettings = new();
-                Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
-
-                config.AddConsumer<SendEmailListener>();
-                config.SetKebabCaseEndpointNameFormatter();
-
-                config.UsingRabbitMq((ctx, cfg) =>
-                {
-                    cfg.Host(rabbitMQSettings.Host);
-                    cfg.ConfigureEndpoints(ctx);
-                });
-            });
-            services.AddMassTransitHostedService(waitUntilStarted: true);
-
-            services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "EmailService", Version = "v1" });
-            });
-
-            services.AddTransient<IMailService, MailService>();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseMiddleware<ExceptionHandler>();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EmailService v1"));
-
-            //app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
-                endpoints.MapGet("", ctx => ctx.Response.WriteAsync($"EmailService in {env.EnvironmentName} mode"));
-            });
-        }
+            endpoints.MapControllers();
+            endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
+            endpoints.MapGet("", ctx => ctx.Response.WriteAsync($"EmailService in {env.EnvironmentName} mode"));
+        });
     }
 }
