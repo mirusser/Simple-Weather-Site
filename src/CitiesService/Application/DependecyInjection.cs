@@ -1,7 +1,5 @@
-﻿using System;
-using System.Reflection;
-using CitiesService.Application.Interfaces.Managers;
-using CitiesService.Application.Managers;
+﻿using System.Reflection;
+using CitiesService.Application.Common.Mappings;
 using CitiesService.Domain.Settings;
 using Common.Application.Behaviors;
 using FluentValidation;
@@ -53,13 +51,7 @@ public static class DependecyInjection
                 //options.StopTimeout = TimeSpan.FromSeconds(30);
             });
 
-        #region Managers
-
-        services.AddTransient<ICityManager, CityManager>();
-
-        #endregion Managers
-
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddMappings();
 
         return services;
     }

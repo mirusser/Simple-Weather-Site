@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using CitiesService.Application.Interfaces.Repositories;
+using CitiesService.Application.Common.Interfaces.Persistance;
 using CitiesService.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +34,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             query = query.Where(searchExpression);
         }
 
-        if (includes != null && includes.Any())
+        if (includes?.Count > 0)
         {
             foreach (var table in includes)
             {
@@ -64,7 +64,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         IQueryable<T> query = _db;
 
-        if (includes != null && includes.Any())
+        if (includes?.Count > 0)
         {
             foreach (var table in includes)
             {

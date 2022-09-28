@@ -23,12 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CitiesService.Contracts\CitiesService.Contracts.csproj" />
     <ProjectReference Include="..\..\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\..\MQModels\MQModels.csproj" />
     <ProjectReference Include="..\Domain\CitiesService.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Managers\Contracts\" />
   </ItemGroup>
 </Project>

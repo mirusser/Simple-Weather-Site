@@ -1,4 +1,4 @@
-﻿using CitiesService.Application.Interfaces.Repositories;
+﻿using CitiesService.Application.Common.Interfaces.Persistance;
 using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
 using CitiesService.Infrastructure.Contexts;

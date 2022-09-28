@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text.Json;
 using CitiesService;
 using CitiesService.Application;
+using CitiesService.Contracts.HealthCheck;
 using CitiesService.Domain.Models;
 using CitiesService.Infrastructure;
 using Common.Presentation;
