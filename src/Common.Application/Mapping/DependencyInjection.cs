@@ -3,7 +3,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IconService.Application.Common.Mapping;
+namespace Common.Application.Mapping;
 
 public static class DependencyInjection
 {

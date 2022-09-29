@@ -1,27 +1,59 @@
-﻿using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using EmailService.Domain.Settings;
+using EmailService.Features.Models.Dto;
+using ErrorOr;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using MapsterMapper;
+using MediatR;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using Models.Internal;
-using Models.Settings;
 
-namespace EmailService.Services;
+namespace EmailService.Features.Commands;
 
-public class MailService : IMailService
+public class SendEmailCommand
+    : MailRequest, IRequest<ErrorOr<SendEmailResult>>
+{
+}
+
+public class SendEmailHandler
+    : IRequestHandler<SendEmailCommand, ErrorOr<SendEmailResult>>
 {
     private readonly MailSettings _mailSettings;
     private readonly IMapper _mapper;
 
-    public MailService(
-        IOptions<MailSettings> mailSettings,
+    public SendEmailHandler(
+        IOptions<MailSettings> options,
         IMapper mapper)
     {
-        _mailSettings = mailSettings.Value;
+        _mailSettings = options.Value;
         _mapper = mapper;
+    }
+
+    public async Task<ErrorOr<SendEmailResult>> Handle(
+        SendEmailCommand request,
+        CancellationToken cancellationToken)
+    {
+        request.To = !string.IsNullOrEmpty(request.To)
+            ? request.To
+            : _mailSettings.DefaultEmailReciever;
+        request.From = !string.IsNullOrEmpty(request.From)
+            ? request.From
+            : _mailSettings.From;
+        var mailRequest = _mapper.Map<MailRequest>(request);
+
+        var sentEmailRequest = await SendEmailAsync(mailRequest);
+
+        return sentEmailRequest;
+    }
+
+    private async Task<SendEmailResult> SendEmailAsync(MailRequest request)
+    {
+        var mimeMessage = await CreateMimeMessage(request);
+        await SendEmailAsync(mimeMessage);
+
+        var sentEmailRequest = _mapper.Map<SendEmailResult>(mimeMessage);
+
+        return sentEmailRequest;
     }
 
     private async Task<MimeMessage> CreateMimeMessage(MailRequest mailRequest)
@@ -48,7 +80,7 @@ public class MailService : IMailService
             HtmlBody = request.Body
         };
 
-        if (request.Attachments == null || !request.Attachments.Any())
+        if (request.Attachments?.Any() != true)
             return builder;
 
         byte[] fileBytes;
@@ -75,15 +107,5 @@ public class MailService : IMailService
         await smtp.AuthenticateAsync(_mailSettings.From, _mailSettings.Password);
         await smtp.SendAsync(email);
         await smtp.DisconnectAsync(true);
-    }
-
-    public async Task<SentMailRequest> SendEmailAsync(MailRequest request)
-    {
-        var mimeMessage = await CreateMimeMessage(request);
-        await SendEmailAsync(mimeMessage);
-
-        var sentEmailRequest = _mapper.Map<SentMailRequest>(mimeMessage);
-
-        return sentEmailRequest;
     }
 }

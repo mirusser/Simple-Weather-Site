@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using AutoMapper;
 using EmailService.Features.Commands;
+using MapsterMapper;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;

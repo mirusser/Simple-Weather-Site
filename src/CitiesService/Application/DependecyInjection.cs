@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using CitiesService.Application.Common.Mappings;
 using CitiesService.Domain.Settings;
 using Common.Application.Behaviors;
+using Common.Application.Mapping;
 using FluentValidation;
 using MassTransit;
 using MediatR;

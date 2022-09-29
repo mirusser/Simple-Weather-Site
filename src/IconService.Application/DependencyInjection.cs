@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Common.Application.Behaviors;
+using Common.Application.Mapping;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddMappings();
+
         services.AddMediatR(typeof(DependencyInjection).Assembly);
 
         services.AddScoped(

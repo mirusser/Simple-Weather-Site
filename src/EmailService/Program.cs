@@ -1,54 +1,53 @@
-using System;
+using Common.Presentation;
+using Common.Presentation.Exceptions.Handlers;
+using EmailService.Application;
+using EmailService.Domain.Settings;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
-namespace EmailService;
-
-public class Program
+var builder = WebApplication.CreateBuilder(args);
 {
-    public static void Main(string[] args)
-    {
-        CreateLogger();
+    builder.Host.UseSerilog();
 
-        try
-        {
-            Log.Information($"EmailService is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
-            CreateHostBuilder(args).Build().Run();
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "EmailService failed to start");
-        }
-        finally
-        {
-            Log.CloseAndFlush();
-        }
+    builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+
+    builder.Services.AddApplication(builder.Configuration);
+
+    builder.Services.AddControllers();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "EmailService", Version = "v1" });
+    });
+}
+
+var app = builder.Build();
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
     }
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .UseSerilog()
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
+    app.UseServiceExceptionHandler();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EmailService v1"));
 
-    private static void CreateLogger()
+    //app.UseHttpsRedirection();
+
+    app.UseRouting();
+
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =>
     {
-        //Read configuration from appSettings
-        var config = new ConfigurationBuilder()
-            .AddJsonFile(
-                path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
-                optional: false,
-                reloadOnChange: true)
-            .Build();
+        endpoints.MapControllers();
+        endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
+        endpoints.MapGet("", ctx => ctx.Response.WriteAsync($"EmailService in {builder.Environment.EnvironmentName} mode"));
+    });
 
-        //Initialize Logger (Serilog)
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(config)
-            .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
-            .CreateLogger();
-    }
+    WebApplicationStartup.Run(app);
 }
