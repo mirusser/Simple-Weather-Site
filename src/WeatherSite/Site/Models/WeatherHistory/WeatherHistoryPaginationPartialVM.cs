@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace WeatherSite.Models.WeatherHistory
+namespace WeatherSite.Models.WeatherHistory;
+
+public class WeatherHistoryPaginationPartialVM
 {
-    public class WeatherHistoryPaginationPartialVM
-    {
-        public PaginationVM PaginationVM { get; set; }
+    public PaginationVM PaginationVM { get; set; }
 
-        //TODO: make a proper view model of this property
-        public List<Clients.Models.Records.CityWeatherForecastDocument> CityWeatherForecastDocuments { get; set; }
+    //TODO: make a proper view model of this property
+    public List<Clients.Models.Records.CityWeatherForecastDocument> CityWeatherForecastDocuments { get; set; }
 
-        public string Url { get; set; }
-    }
+    public string Url { get; set; }
 }

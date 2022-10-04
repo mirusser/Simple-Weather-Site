@@ -1,38 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
-namespace WeatherSite.Clients.Models.Enums
+namespace WeatherSite.Clients.Models.Enums;
+
+public enum WeatherDescriptionEnum
 {
-    public enum WeatherDescriptionEnum
-    {
-        [Description("clear sky")]
-        ClearSky,
+    [Description("clear sky")]
+    ClearSky,
 
-        [Description("few clouds")]
-        FewClouds,
+    [Description("few clouds")]
+    FewClouds,
 
-        [Description("scattered clouds")]
-        ScatteredClouds,
+    [Description("scattered clouds")]
+    ScatteredClouds,
 
-        [Description("broken clouds")]
-        BrokenClouds,
+    [Description("broken clouds")]
+    BrokenClouds,
 
-        [Description("shower rain")]
-        ShowerRain,
+    [Description("shower rain")]
+    ShowerRain,
 
-        [Description("rain")]
-        Rain,
+    [Description("rain")]
+    Rain,
 
-        [Description("thunderstorm")]
-        Thunderstorm,
+    [Description("thunderstorm")]
+    Thunderstorm,
 
-        [Description("snow")]
-        Snow,
+    [Description("snow")]
+    Snow,
 
-        [Description("mist")]
-        Mist
-    }
+    [Description("mist")]
+    Mist
 }

@@ -1,11 +1,9 @@
-namespace WeatherService.Models
+namespace WeatherService.Models;
+
+public class DetailedWeatherForecast
 {
-    public class DetailedWeatherForecast
-    {
-        public decimal Longitude { get; set; }
-        public decimal Latitude { get; set; }
+    public decimal Longitude { get; set; }
+    public decimal Latitude { get; set; }
 
-        //TODO: finish it maybe later
-
-    }
+    //TODO: finish it maybe later
 }

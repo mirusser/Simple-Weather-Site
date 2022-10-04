@@ -1,25 +1,34 @@
 ﻿using System.Threading.Tasks;
+using Common.Presentation.Controllers;
+using EmailService.Contracts.Email;
 using EmailService.Features.Commands;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EmailService.Controllers
+namespace EmailService.Controllers;
+
+public class MailController : ApiController
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class MailController : ControllerBase
+    private readonly IMediator _mediator;
+    private readonly IMapper mapper;
+
+    public MailController(
+        IMediator mediator,
+        IMapper mapper)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+        this.mapper = mapper;
+    }
 
-        public MailController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    [HttpPost]
+    public async Task<IActionResult> SendEmail(SendEmailRequest request)
+    {
+        var command = mapper.Map<SendEmailCommand>(request);
+        var sendEmailResult = await _mediator.Send(command);
 
-        [HttpPost]
-        public async Task<IActionResult> SendEmail(SendEmailCommand command)
-        {
-            return Ok(await _mediator.Send(command));
-        }
+        return sendEmailResult.Match(
+            sendEmailResult => Ok(mapper.Map<SendEmailResponse>(sendEmailResult)),
+            errors => base.Problem(errors));
     }
 }

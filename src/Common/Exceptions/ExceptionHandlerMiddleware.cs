@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using ErrorOr;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -41,13 +42,17 @@ public class ExceptionHandlerMiddleware
         {
             Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, defaultErrorCode),
             ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
+            Exception when exceptionType == typeof(HttpRequestException) => (HttpStatusCode.ServiceUnavailable, ErrorCodes.Service_Unavailable),
             ValidationException when exceptionType == typeof(ValidationException) => (HttpStatusCode.BadRequest, ErrorCodes.ValidationException),
             _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
         };
 
-        _logger.LogError("IconService: Exception code: {ErrorCode} Exception message: {ExceptionMEssage}", new[] { errorCode, exception.Message });
+        _logger.LogError("Exception code: {ErrorCode} Exception message: {ExceptionMessage}", new[] { errorCode, exception.Message });
 
-        var response = new { code = errorCode, message = exception.Message };
+        var response = Error.Failure(
+            code: errorCode,
+            description: exception.Message);
+
         var payload = JsonSerializer.Serialize(response, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
         context.Response.ContentType = "application/json";

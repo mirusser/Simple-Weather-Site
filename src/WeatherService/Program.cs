@@ -1,55 +1,97 @@
 using System;
+using System.Reflection;
+using Common.Presentation;
+using Common.Presentation.Exceptions.Handlers;
+using MassTransit;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using Polly;
 using Serilog;
+using WeatherService.Clients;
+using WeatherService.HealthCheck;
+using WeatherService.Settings;
 
-namespace WeatherService
+var builder = WebApplication.CreateBuilder(args);
 {
-    public class Program
+    builder.Host.UseSerilog();
+
+    builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
+
+    builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+    builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+    builder.Services.AddMassTransit(config =>
     {
-        public static void Main(string[] args)
+        RabbitMQSettings rabbitMQSettings = new();
+        builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+
+        config.SetKebabCaseEndpointNameFormatter();
+
+        config.UsingRabbitMq((ctx, cfg) =>
         {
-            CreateLogger();
+            cfg.Host(rabbitMQSettings.Host);
+            cfg.ConfigureEndpoints(ctx);
+        });
+    });
+    builder.Services.AddOptions<MassTransitHostOptions>()
+    .Configure(options =>
+    {
+        // if specified, waits until the bus is started before
+        // returning from IHostedService.StartAsync
+        // default is false
+        options.WaitUntilStarted = true;
 
-            try
-            {
-                Log.Information($"WeatherService is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "WeatherService failed to start");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
+        // if specified, limits the wait time when starting the bus
+        //options.StartTimeout = TimeSpan.FromSeconds(10);
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+        // if specified, limits the wait time when stopping the bus
+        //options.StopTimeout = TimeSpan.FromSeconds(30);
+    });
 
-        private static void CreateLogger()
-        {
-            //Read configuration from appSettings
-            var config = new ConfigurationBuilder()
-                .AddJsonFile(
-                    path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
-                    optional: false,
-                    reloadOnChange: true)
-                .Build();
+    builder.Services.AddControllers();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherService", Version = "v1" });
+    });
 
-            //Initialize Logger (Serilog)
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(config)
-                .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
-                .CreateLogger();
-        }
+    builder.Services.AddHttpClient<WeatherClient>()
+         .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(10, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
+         .AddTransientHttpErrorPolicy(builder => builder.CircuitBreakerAsync(3, TimeSpan.FromSeconds(10)));
+
+    builder.Services.AddHealthChecks()
+        .AddCheck<ExternalEndpointHealthCheck>("OpenWeather");
+}
+
+var app = builder.Build();
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
     }
+
+    app.UseServiceExceptionHandler();
+
+    #region Swagger
+
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeatherService v1"));
+
+    #endregion Swagger
+
+    //app.UseHttpsRedirection();
+    app.UseRouting();
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+        endpoints.MapHealthChecks("/api/weatherforecast/health");
+    });
+
+    WebApplicationStartup.Run(app);
 }

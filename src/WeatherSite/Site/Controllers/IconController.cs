@@ -1,28 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using WeatherSite.Logic.Clients;
-using WeatherSite.Settings;
 
-namespace WeatherSite.Controllers
+namespace WeatherSite.Controllers;
+
+public class IconController : Controller
 {
-    public class IconController : Controller
+    private readonly IconClient _iconClient;
+
+    public IconController(IconClient iconClient)
     {
-        private readonly IconClient _iconClient;
+        _iconClient = iconClient;
+    }
 
-        public IconController(IconClient iconClient)
-        {
-            _iconClient = iconClient;
-        }
-
-        [HttpPost]
-        public async Task<byte[]?> Get(string icon)
-        {
-            var iconDto = await _iconClient.GetIcon(icon);
-            return iconDto?.FileContent;
-        }
+    [HttpPost]
+    public async Task<byte[]?> Get(string icon)
+    {
+        var iconDto = await _iconClient.GetIcon(icon);
+        return iconDto?.FileContent;
     }
 }

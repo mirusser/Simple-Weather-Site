@@ -5,27 +5,26 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using WeatherService.Settings;
 
-namespace WeatherService.HealthCheck
+namespace WeatherService.HealthCheck;
+
+public class ExternalEndpointHealthCheck : IHealthCheck
 {
-    public class ExternalEndpointHealthCheck : IHealthCheck
+    private readonly ServiceSettings _serviceSettings;
+
+    public ExternalEndpointHealthCheck(IOptions<ServiceSettings> options)
     {
-        private readonly ServiceSettings _serviceSettings;
+        _serviceSettings = options.Value;
+    }
 
-        public ExternalEndpointHealthCheck(IOptions<ServiceSettings> options)
-        {
-            _serviceSettings = options.Value;
-        }
+    public async Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext context,
+        CancellationToken cancellationToken = default)
+    {
+        Ping ping = new();
 
-        public async Task<HealthCheckResult> CheckHealthAsync(
-            HealthCheckContext context, 
-            CancellationToken cancellationToken = default)
-        {
-            Ping ping = new();
+        var reply = await ping.SendPingAsync(_serviceSettings.OpenWeatherHost);
 
-            var reply = await ping.SendPingAsync(_serviceSettings.OpenWeatherHost);
-
-            return reply.Status != IPStatus.Success ?
-                HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
-        }
+        return reply.Status != IPStatus.Success ?
+            HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
     }
 }

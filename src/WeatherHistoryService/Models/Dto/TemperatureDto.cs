@@ -1,8 +1,7 @@
-﻿namespace WeatherHistoryService.Models.Dto
+﻿namespace WeatherHistoryService.Models.Dto;
+
+public class TemperatureDto
 {
-    public class TemperatureDto
-    {
-        public int TemperatureC { get; set; }
-        public int TemperatureF { get; set; }
-    }
+    public int TemperatureC { get; set; }
+    public int TemperatureF { get; set; }
 }
