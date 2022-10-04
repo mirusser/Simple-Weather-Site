@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿namespace WeatherSite.Settings;
 
-namespace WeatherSite.Settings
+public class ApiEndpoints
 {
-    public class ApiEndpoints
-    {
-        public string WeatherServiceApiUrl { get; set; }
-        public string CitiesServiceApiUrl { get; set; }
-        public string CitiesServiceLocalApiUrl { get; set; }
-        public string WeatherHistoryServiceApiUrl { get; set; }
-        public string IconServiceApiUrl { get; set; }
-    }
+    public string WeatherServiceApiUrl { get; set; }
+    public string CitiesServiceApiUrl { get; set; }
+    public string CitiesServiceLocalApiUrl { get; set; }
+    public string WeatherHistoryServiceApiUrl { get; set; }
+    public string IconServiceApiUrl { get; set; }
 }

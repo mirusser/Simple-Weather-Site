@@ -1,32 +1,48 @@
+using Common.Presentation;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
+using Serilog;
 
-namespace Gateway
+var builder = WebApplication.CreateBuilder(args);
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+    builder.Host.UseSerilog();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                })
-                .ConfigureAppConfiguration((hostingContext, config) =>
-                {
-                    config
-                    .SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
-                    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
-                });
+    builder.Services.AddOcelot();
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll",
+            builder =>
+            {
+                builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+            });
+    });
+}
+
+var app = builder.Build();
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
     }
+
+    app.UseRouting();
+
+    app.UseCors("AllowAll");
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
+
+    await app.UseOcelot();
+
+    WebApplicationStartup.Run(app);
 }

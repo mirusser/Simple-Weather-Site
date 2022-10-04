@@ -1,43 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-//using System.Text.Json;
-using System;
-using System.Collections.Generic;
+﻿//using System.Text.Json;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
-using WeatherSite.Clients;
+using Microsoft.AspNetCore.Mvc;
 using WeatherSite.Models;
-using WeatherSite.Settings;
 
-namespace WeatherSite.Controllers
+namespace WeatherSite.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    [HttpGet]
+    public async Task<IActionResult> Index()
     {
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            return View();
-        }
+        return View();
+    }
 
-        public async Task<IActionResult> ErrorPartial(string code, string message)
+    public async Task<IActionResult> ErrorPartial(string code, string message)
+    {
+        var vm = new ErrorPartialVM()
         {
-            var vm = new ErrorPartialVM()
-            {
-                Code = code,
-                Message = message
-            };
+            Code = code,
+            Message = message
+        };
 
-            return PartialView(vm);
-        }
+        return PartialView(vm);
+    }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

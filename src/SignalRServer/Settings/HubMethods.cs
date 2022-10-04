@@ -1,7 +1,6 @@
-﻿namespace SignalRServer.Settings
+﻿namespace SignalRServer.Settings;
+
+public class HubMethods
 {
-    public class HubMethods
-    {
-        public string RefreshWeatherHistoryPage { get; set; } = null!;
-    }
+    public string RefreshWeatherHistoryPage { get; set; } = null!;
 }

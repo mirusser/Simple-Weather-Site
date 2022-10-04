@@ -1,5 +1,4 @@
 ﻿using Common.Presentation;
-using Common.Presentation.Exceptions;
 using Common.Presentation.Exceptions.Handlers;
 using IconService;
 using IconService.Application;

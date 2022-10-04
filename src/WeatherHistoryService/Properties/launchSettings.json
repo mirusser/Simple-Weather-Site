@@ -1,22 +1,6 @@
 {
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:15696",
-      "sslPort": 44322
-    }
-  },
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     "WeatherHistoryService": {
       "commandName": "Project",
       "launchBrowser": true,
@@ -25,7 +9,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
-      "applicationUrl": "https://localhost:8084;http://localhost:8083"
+      "applicationUrl": "https://localhost:8784;http://localhost:8783"
     },
     "Docker": {
       "commandName": "Docker",

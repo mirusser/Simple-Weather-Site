@@ -7,45 +7,44 @@ using MQModels.WeatherHistory;
 using WeatherService.Clients;
 using WeatherService.Models.Dto;
 
-namespace WeatherService.Messages.Queries
+namespace WeatherService.Messages.Queries;
+
+public class GetByCityNameQuery : IRequest<WeatherForecastDto>
 {
-    public class GetByCityNameQuery : IRequest<WeatherForecastDto>
+    public string City { get; set; }
+}
+
+public class GetByCityNameHandler : IRequestHandler<GetByCityNameQuery, WeatherForecastDto>
+{
+    private readonly WeatherClient _weatherClient;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IMapper _mapper;
+
+    public GetByCityNameHandler(
+        WeatherClient weatherClient,
+        IPublishEndpoint publishEndpoint,
+        IMapper mapper)
     {
-        public string City { get; set; }
+        _weatherClient = weatherClient;
+        _publishEndpoint = publishEndpoint;
+        _mapper = mapper;
     }
 
-    public class GetByCityNameHandler : IRequestHandler<GetByCityNameQuery, WeatherForecastDto>
+    public async Task<WeatherForecastDto> Handle(GetByCityNameQuery request, CancellationToken cancellationToken)
     {
-        private readonly WeatherClient _weatherClient;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly IMapper _mapper;
+        var forecast = await _weatherClient.GetCurrentWeatherByCityNameAsync(request.City);
 
-        public GetByCityNameHandler(
-            WeatherClient weatherClient,
-            IPublishEndpoint publishEndpoint,
-            IMapper mapper)
+        if (forecast == null)
         {
-            _weatherClient = weatherClient;
-            _publishEndpoint = publishEndpoint;
-            _mapper = mapper;
+            //TODO: logging
+            return new();
         }
 
-        public async Task<WeatherForecastDto> Handle(GetByCityNameQuery request, CancellationToken cancellationToken)
-        {
-            var forecast = await _weatherClient.GetCurrentWeatherByCityNameAsync(request.City);
+        var weatherForecastDto = _mapper.Map<WeatherForecastDto>(forecast);
+        var gotWeatherForecast = _mapper.Map<IGotWeatherForecast>(weatherForecastDto);
 
-            if (forecast == null)
-            {
-                //TODO: logging
-                return new();
-            }
+        await _publishEndpoint.Publish(gotWeatherForecast);
 
-            var weatherForecastDto = _mapper.Map<WeatherForecastDto>(forecast);
-            var gotWeatherForecast = _mapper.Map<IGotWeatherForecast>(weatherForecastDto);
-
-            await _publishEndpoint.Publish(gotWeatherForecast);
-
-            return weatherForecastDto;
-        }
+        return weatherForecastDto;
     }
 }

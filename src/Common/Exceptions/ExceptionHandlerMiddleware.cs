@@ -42,6 +42,7 @@ public class ExceptionHandlerMiddleware
         {
             Exception when exceptionType == typeof(UnauthorizedAccessException) => (HttpStatusCode.Unauthorized, defaultErrorCode),
             ServiceException e when exceptionType == typeof(ServiceException) => (HttpStatusCode.BadRequest, e.Code),
+            Exception when exceptionType == typeof(HttpRequestException) => (HttpStatusCode.ServiceUnavailable, ErrorCodes.Service_Unavailable),
             ValidationException when exceptionType == typeof(ValidationException) => (HttpStatusCode.BadRequest, ErrorCodes.ValidationException),
             _ => (HttpStatusCode.InternalServerError, defaultErrorCode),
         };

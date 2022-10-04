@@ -1,7 +1,6 @@
-﻿namespace WeatherService.Settings
+﻿namespace WeatherService.Settings;
+
+public class RabbitMQSettings
 {
-    public class RabbitMQSettings
-    {
-        public string Host { get; set; } = null!;
-    }
+    public string Host { get; set; } = null!;
 }

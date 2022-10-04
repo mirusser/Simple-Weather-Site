@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WeatherSite.Clients.Models.Records;
+﻿namespace WeatherSite.Models.City;
 
-namespace WeatherSite.Models.City
+public class CitiesPaginationVM
 {
-    public class CitiesPaginationVM
-    {
-        //TODO: add some properties here
-    }
+    //TODO: add some properties here
 }

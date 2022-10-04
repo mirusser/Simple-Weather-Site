@@ -1,65 +1,60 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.Extensions.Options;
 using WeatherSite.Clients.Models.Records;
-using WeatherSite.Logic.Helpers;
 using WeatherSite.Settings;
 
-namespace WeatherSite.Clients
+namespace WeatherSite.Clients;
+
+public class CityClient
 {
-    public class CityClient
+    #region Properties
+
+    private readonly HttpClient _httpClient;
+    private readonly ApiEndpoints _apiEndpoints;
+
+    #endregion Properties
+
+    public CityClient(
+        HttpClient httpClient,
+        IOptions<ApiEndpoints> options)
     {
-        #region Properties
+        _httpClient = httpClient;
+        _apiEndpoints = options.Value;
+    }
 
-        private readonly HttpClient _httpClient;
-        private readonly ApiEndpoints _apiEndpoints;
+    public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
+    {
+        //string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
 
-        #endregion Properties
+        string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName";
 
-        public CityClient(
-            HttpClient httpClient,
-            IOptions<ApiEndpoints> options)
+        var getCitiesQuery = new
         {
-            _httpClient = httpClient;
-            _apiEndpoints = options.Value;
-        }
+            cityName,
+            limit
+        };
 
-        public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
-        {
-            //string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
+        var jsonContent = JsonContent.Create(getCitiesQuery);
 
-            string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName";
+        HttpResponseMessage response = await _httpClient.PostAsync(url, jsonContent);
 
-            var getCitiesQuery = new
-            {
-                cityName,
-                limit
-            };
+        var content = await response.Content.ReadAsStringAsync();
+        var cities = JsonSerializer.Deserialize<List<City>>(content);
 
-            var jsonContent = JsonContent.Create(getCitiesQuery);
+        return cities ?? new();
+    }
 
-            HttpResponseMessage response = await _httpClient.PostAsync(url, jsonContent);
+    public async Task<CitiesPagination?> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
+    {
+        string url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
 
-            var content = await response.Content.ReadAsStringAsync();
-            var cities = JsonSerializer.Deserialize<List<City>>(content);
+        CitiesPagination? citiesPagination = await _httpClient.GetFromJsonAsync<CitiesPagination>(url);
 
-            return cities ?? new();
-        }
-
-        public async Task<CitiesPagination?> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
-        {
-            string url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
-
-            CitiesPagination? citiesPagination = await _httpClient.GetFromJsonAsync<CitiesPagination>(url);
-
-            return citiesPagination;
-        }
+        return citiesPagination;
     }
 }

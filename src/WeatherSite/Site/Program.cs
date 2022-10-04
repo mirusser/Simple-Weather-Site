@@ -1,55 +1,59 @@
-using System;
+using Common.Presentation;
+using Common.Presentation.Exceptions.Handlers;
+using GrpcCitiesClient;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using WeatherSite.Clients;
+using WeatherSite.Logic.Clients;
+using WeatherSite.Settings;
 
-namespace WeatherSite
+var builder = WebApplication.CreateBuilder(args);
 {
-    public class Program
+    builder.Host.UseSerilog();
+
+    builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));
+
+    builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+    builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
+    builder.Services.AddHttpClient<WeatherForecastClient>();
+    builder.Services.AddHttpClient<CityClient>();
+    builder.Services.AddHttpClient<WeatherHistoryClient>();
+    builder.Services.AddHttpClient<IconClient>();
+
+    builder.Services.AddGrpcCitiesClient(builder.Configuration);
+}
+
+var app = builder.Build();
+{
+    if (builder.Environment.IsDevelopment())
     {
-        public static void Main(string[] args)
-        {
-            CreateLogger();
-
-            try
-            {
-                Log.Information($"WeatherSite is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "WeatherSite failed to start");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-
-        private static void CreateLogger()
-        {
-            //Read configuration from appSettings
-            var config = new ConfigurationBuilder()
-                .AddJsonFile(
-                    path: $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json",
-                    optional: false,
-                    reloadOnChange: true)
-                .Build();
-
-            //Initialize Logger (Serilog)
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(config)
-                .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
-                .CreateLogger();
-        }
+        app.UseDeveloperExceptionPage();
     }
+    else
+    {
+        app.UseExceptionHandler("/Home/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+    app.UseServiceExceptionHandler();
+    //app.UseHttpsRedirection();
+    app.UseStaticFiles();
+
+    app.UseRouting();
+
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=WeatherPrediction}/{action=Index}/{id?}");
+    });
+
+    WebApplicationStartup.Run(app);
 }
