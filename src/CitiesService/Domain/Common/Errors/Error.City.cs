@@ -1,6 +1,6 @@
 ﻿using ErrorOr;
 
-namespace CitiesService.Domain.Common.Errors;
+namespace Domain.Common.Errors;
 
 public static partial class Errors
 {

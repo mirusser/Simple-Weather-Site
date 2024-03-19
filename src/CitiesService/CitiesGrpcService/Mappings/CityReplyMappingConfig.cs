@@ -1,5 +1,5 @@
-﻿using CitiesService.Application.Models.Dto;
-using CitiesService.Domain.Entities;
+﻿using Application.Models.Dto;
+using Domain.Entities;
 using Mapster;
 
 namespace CitiesGrpcService.Mappings;

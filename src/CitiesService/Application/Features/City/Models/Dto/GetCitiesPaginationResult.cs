@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CitiesService.Application.Models.Dto;
+namespace Application.Models.Dto;
 
 public class GetCitiesPaginationResult
 {

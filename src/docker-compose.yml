@@ -1,54 +1,12 @@
 version: '3.5'
 
 services:
-  #consul:
-  #image: consul
-  #container_name: consul
-  #restart: unless-stopped
-  #ports:
-  #   - 8500:8500
-  #    network_mode: host
-  #networks:
-  #  - conveyor
-  # volumes:
-  #   - consul:/consul/data
-
-  #   fabio:
-  #     image: fabiolb/fabio
-  #     container_name: fabio
-  #     restart: unless-stopped
-  #     environment:
-  #     - FABIO_REGISTRY_CONSUL_ADDR=consul:8500
-  # #    network_mode: host
-  #     networks:
-  #       - conveyor
-  #     ports:
-  #     - 9998:9998
-  #     - 9999:9999
-
-  #   jaeger:
-  #     image: jaegertracing/all-in-one
-  #     container_name: jaeger
-  #     restart: unless-stopped
-  #     ports:
-  #       - 5775:5775/udp
-  #       - 5778:5778
-  #       - 6831:6831/udp
-  #       - 6832:6832/udp
-  #       - 9411:9411
-  #       - 14268:14268
-  #       - 16686:16686
-  # #    network_mode: host
-  #     networks:
-  #       - conveyor
-
   mongo:
     image: mongo
     container_name: mongo
     restart: unless-stopped
     ports:
       - 27017:27017
-    #    network_mode: host
     networks:
       - conveyor
     volumes:
@@ -61,11 +19,8 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    #    network_mode: host
     networks:
       - conveyor
-    # volumes:
-    #   - rabbitmq:/var/lib/rabbitmq
 
   redis:
     image: redis
@@ -73,7 +28,6 @@ services:
     restart: unless-stopped
     ports:
       - 6379:6379
-    #    network_mode: host
     networks:
       - conveyor
     volumes:
@@ -89,8 +43,6 @@ services:
       - 5341:80
     networks:
       - conveyor
-    # volumes:
-    #   - seq:/data
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -101,6 +53,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=P@ssword!@#
+      - SA_PASSWORD=P@ssword!@#
     volumes:
       - sqlserver:/var/opt/mssql
     networks:
@@ -233,23 +186,11 @@ networks:
     external: true
 
 volumes:
-  # consul:
-  #   driver: local
-  # grafana:
-  #   driver: local
   mongo:
     driver: local
   sqlserver:
     driver: local
-  # prometheus:
-  #   driver: local
-  # rabbitmq:
-  #   driver: local
   redis:
     driver: local
-  # sql_data_volume:
-  #   driver: local
-  # seq:
-  #   driver: local
   iconservice:
     driver: local

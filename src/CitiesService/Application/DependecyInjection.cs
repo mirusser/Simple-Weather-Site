@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using CitiesService.Domain.Settings;
+using Domain.Settings;
 using Common.Application.Behaviors;
 using Common.Application.Mapping;
 using FluentValidation;
@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CitiesService.Application;
+namespace Application;
 
 public static class DependecyInjection
 {
@@ -19,7 +19,7 @@ public static class DependecyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-        services.AddMediatR(Assembly.GetExecutingAssembly());
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
         services.AddMassTransit(config =>
         {
@@ -42,7 +42,7 @@ public static class DependecyInjection
                 // if specified, waits until the bus is started before
                 // returning from IHostedService.StartAsync
                 // default is false
-                options.WaitUntilStarted = true;
+                options.WaitUntilStarted = false;
 
                 // if specified, limits the wait time when starting the bus
                 //options.StartTimeout = TimeSpan.FromSeconds(10);

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace CitiesService.Application.Features.City.Queries.GetCitiesPagination;
+namespace Application.Features.City.Queries.GetCitiesPagination;
 
 public class GetCitiesPaginationValidator : AbstractValidator<GetCitiesPaginationQuery>
 {

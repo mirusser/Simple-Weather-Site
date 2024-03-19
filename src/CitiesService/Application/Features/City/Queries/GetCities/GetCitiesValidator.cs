@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace CitiesService.Application.Features.City.Queries.GetCities;
+namespace Application.Features.City.Queries.GetCities;
 
 public class GetCitiesValidator : AbstractValidator<GetCitiesQuery>
 {

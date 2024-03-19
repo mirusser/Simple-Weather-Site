@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using CitiesService.Domain.Entities;
+using Domain.Entities;
 
-namespace CitiesService.Application.Models.Dto;
+namespace Application.Models.Dto;
 
 public class CityInfoPaginationDto
 {

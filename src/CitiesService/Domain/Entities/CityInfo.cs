@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CitiesService.Domain.Entities;
+namespace Domain.Entities;
 
 public class CityInfo
 {

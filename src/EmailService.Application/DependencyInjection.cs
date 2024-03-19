@@ -17,9 +17,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         ConfigurationManager configuration)
     {
-        services.AddMediatR(typeof(DependencyInjection).Assembly);
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
-        services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddMappings();
 
         services.AddMassTransit(config =>

@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
-using CitiesService.Application.Features.City.Queries.GetCities;
-using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
-using CitiesService.Contracts.City;
+using Application.Features.City.Commands.AddCitiesToDatabase;
+using Application.Features.City.Queries.GetCities;
+using Application.Features.City.Queries.GetCitiesPagination;
+using Contracts.City;
 using Common.Presentation.Controllers;
 using MapsterMapper;
 using MediatR;
@@ -52,7 +52,12 @@ public class CityController : ApiController
     [HttpPost]
     public async Task<IActionResult> AddCityInfosToDatabase(AddCitiesToDatabaseRequest request)
     {
-        var command = mapper.Map<AddCitiesToDatabaseCommand>(request);
+        //var command = mapper.Map<AddCitiesToDatabaseCommand>(request);
+
+        var command = new AddCitiesToDatabaseCommand()
+        {
+            
+        };
 
         var addCitiesToDatabaseResult = await mediator.Send(command);
 
