@@ -1,7 +1,7 @@
 ﻿using CitiesGrpcService.Mappings;
 using CitiesGrpcService.Services;
-using CitiesService.Application;
-using CitiesService.Infrastructure;
+using Application;
+using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;

@@ -27,6 +27,6 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.Icon, opt => opt.MapFrom(_ => ""))
             .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Lastupdate.Value));
 
-        CreateMap<WeatherForecastDto, IGotWeatherForecast>();
+        CreateMap<WeatherForecastDto, IGotWeatherForecast>().ReverseMap();
     }
 }

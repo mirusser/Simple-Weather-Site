@@ -13,7 +13,7 @@ public static class DependencyInjection
     {
         services.AddMappings();
 
-        services.AddMediatR(typeof(DependencyInjection).Assembly);
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
         services.AddScoped(
             typeof(IPipelineBehavior<,>),

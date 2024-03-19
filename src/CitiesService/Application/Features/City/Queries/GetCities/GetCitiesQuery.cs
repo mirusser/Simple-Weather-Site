@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CitiesService.Application.Common.Interfaces.Persistance;
-using CitiesService.Application.Features.City.Models.Dto;
-using CitiesService.Application.Models.Dto;
-using CitiesService.Domain.Common.Errors;
-using CitiesService.Domain.Entities;
+using Application.Common.Interfaces.Persistance;
+using Application.Features.City.Models.Dto;
+using Application.Models.Dto;
+using Domain.Common.Errors;
+using Domain.Entities;
 using ErrorOr;
 using MapsterMapper;
 using MediatR;
@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace CitiesService.Application.Features.City.Queries.GetCities;
+namespace Application.Features.City.Queries.GetCities;
 
 public class GetCitiesQuery : IRequest<ErrorOr<GetCitiesResult>>
 {

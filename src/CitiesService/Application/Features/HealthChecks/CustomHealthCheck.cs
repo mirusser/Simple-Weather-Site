@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
+using Application.Features.City.Queries.GetCitiesPagination;
 using MediatR;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace CitiesService.Application.Features.HealthChecks;
+namespace Application.Features.HealthChecks;
 
 public class CustomHealthCheck : IHealthCheck
 {

@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Text.Json;
 using CitiesService;
-using CitiesService.Application;
-using CitiesService.Contracts.HealthCheck;
-using CitiesService.Infrastructure;
+using Application;
+using Contracts.HealthCheck;
+using Infrastructure;
 using Common.Presentation;
 using Common.Presentation.Exceptions.Handlers;
 using Microsoft.AspNetCore.Builder;
@@ -36,14 +36,14 @@ var app = builder.Build();
 
     app.UseApplicationLayer();
 
-    //app.UseHttpsRedirection();
+    app.UseHttpsRedirection();
     app.UseRouting();
 
     app.UseAuthorization();
 
     app.UseCors("AllowAll");
 
-    #region Healthchecks
+    #region Health checks
 
     app.UseHealthChecks("/health", new HealthCheckOptions
     {
@@ -65,7 +65,7 @@ var app = builder.Build();
         }
     });
 
-    #endregion Healthchecks
+    #endregion Health checks
 
     app.UseEndpoints(endpoints =>
     {

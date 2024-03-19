@@ -4,18 +4,18 @@ using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using CitiesService.Application.Common.Helpers;
-using CitiesService.Application.Common.Interfaces.Persistance;
-using CitiesService.Application.Features.City.Models.Dto;
-using CitiesService.Application.Models.Dto;
-using CitiesService.Domain.Entities;
-using CitiesService.Domain.Settings;
+using Application.Common.Helpers;
+using Application.Common.Interfaces.Persistance;
+using Application.Features.City.Models.Dto;
+using Application.Models.Dto;
+using Domain.Entities;
+using Domain.Settings;
 using ErrorOr;
 using MapsterMapper;
 using MediatR;
 using Microsoft.Extensions.Options;
 
-namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
+namespace Application.Features.City.Commands.AddCitiesToDatabase;
 
 public class AddCitiesToDatabaseCommand : IRequest<ErrorOr<AddCitiesToDatabaseResult>>
 {

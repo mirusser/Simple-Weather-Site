@@ -2,7 +2,6 @@ using System.Reflection;
 using Common.Presentation;
 using Common.Presentation.Exceptions.Handlers;
 using MassTransit;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
 
-    builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
     builder.Services.AddAutoMapper(typeof(Maps));
 
     builder.Services.AddMassTransit(config =>

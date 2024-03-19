@@ -1,13 +1,13 @@
-﻿using CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
-using CitiesService.Application.Features.City.Models.Dto;
-using CitiesService.Application.Features.City.Queries.GetCities;
-using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
-using CitiesService.Application.Models.Dto;
-using CitiesService.Contracts.City;
-using CitiesService.Domain.Entities;
+﻿using Application.Features.City.Commands.AddCitiesToDatabase;
+using Application.Features.City.Models.Dto;
+using Application.Features.City.Queries.GetCities;
+using Application.Features.City.Queries.GetCitiesPagination;
+using Application.Models.Dto;
+using Contracts.City;
+using Domain.Entities;
 using Mapster;
 
-namespace CitiesService.Application.Mappings;
+namespace Application.Mappings;
 
 public class CityMappingConfig : IRegister
 {

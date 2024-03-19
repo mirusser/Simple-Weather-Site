@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using CitiesService.Application.Models.Dto;
+using Application.Models.Dto;
 
-namespace CitiesService.Application.Features.City.Models.Dto;
+namespace Application.Features.City.Models.Dto;
 
 public class GetCitiesResult
 {

@@ -1,5 +1,5 @@
-﻿using CitiesService.Application.Features.HealthChecks;
-using CitiesService.Infrastructure.Contexts;
+﻿using Application.Features.HealthChecks;
+using Infrastructure.Contexts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
@@ -32,7 +32,7 @@ public static class DependencyInjection
 
         services.AddHealthChecks()
             .AddDbContextCheck<ApplicationDbContext>()
-            .AddCheck<CustomHealthCheck>(name: "Custom Healthcheck");
+            .AddCheck<CustomHealthCheck>(name: "Custom health check");
 
         return services;
     }

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 
-namespace CitiesService.Application.Common.Helpers;
+namespace Application.Common.Helpers;
 
 public static class GzipHelper
 {

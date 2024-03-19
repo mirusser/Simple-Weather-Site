@@ -15,6 +15,7 @@ using Serilog;
 using WeatherService.Clients;
 using WeatherService.HealthCheck;
 using WeatherService.Settings;
+using Common.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -22,8 +23,9 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
 
-    builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
-    builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+    //builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+    builder.Services.AddMappings();
 
     builder.Services.AddMassTransit(config =>
     {

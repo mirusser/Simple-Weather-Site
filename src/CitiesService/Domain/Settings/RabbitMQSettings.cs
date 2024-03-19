@@ -1,4 +1,4 @@
-﻿namespace CitiesService.Domain.Settings;
+﻿namespace Domain.Settings;
 
 public class RabbitMQSettings
 {

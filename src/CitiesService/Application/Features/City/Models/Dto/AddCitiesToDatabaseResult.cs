@@ -1,4 +1,4 @@
-﻿namespace CitiesService.Application.Features.City.Models.Dto;
+﻿namespace Application.Features.City.Models.Dto;
 
 public class AddCitiesToDatabaseResult
 {

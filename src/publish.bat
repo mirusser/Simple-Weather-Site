@@ -43,10 +43,10 @@ cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\SignalRServer"
 dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\SignalRServer\deploy"
 docker build -t signalrserver .
 
-@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite\deploy"
-md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite"
-cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite"
-dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite\deploy"
+@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite\Site\deploy"
+md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite\Site"
+cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite\Site"
+dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherSite\Site\deploy"
 docker build -t weathersite .
 
 docker-compose build

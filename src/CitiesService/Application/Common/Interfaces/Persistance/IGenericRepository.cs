@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace CitiesService.Application.Common.Interfaces.Persistance;
+namespace Application.Common.Interfaces.Persistance;
 
 public interface IGenericRepository<T> where T : class
 {
