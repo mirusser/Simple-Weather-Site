@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Create a Docker network
+docker network create -d bridge overlaynetwork
+
+# Define a base directory variable for easier path management
+BASE_DIR="/home/JanKowalski/Source/Repos/Simple-Weather-Site/src"
+
+# CitiesGrpcService
+rm -rf "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
+mkdir -p "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
+cd "$BASE_DIR/CitiesService/CitiesGrpcService" || exit
+dotnet publish -c Release -o "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
+docker build -t citiesgrpcservice .
+
+# CitiesService
+rm -rf "$BASE_DIR/CitiesService/CitiesService/deploy"
+mkdir -p "$BASE_DIR/CitiesService/CitiesService/deploy"
+cd "$BASE_DIR/CitiesService/CitiesService" || exit
+dotnet publish -c Release -o "$BASE_DIR/CitiesService/CitiesService/deploy"
+docker build -t citiesservice .
+
+# WeatherService
+rm -rf "$BASE_DIR/WeatherService/deploy"
+mkdir -p "$BASE_DIR/WeatherService/deploy"
+cd "$BASE_DIR/WeatherService" || exit
+dotnet publish -c Release -o "$BASE_DIR/WeatherService/deploy"
+docker build -t weatherservice .
+
+# WeatherHistoryService
+rm -rf "$BASE_DIR/WeatherHistoryService/deploy"
+mkdir -p "$BASE_DIR/WeatherHistoryService/deploy"
+cd "$BASE_DIR/WeatherHistoryService" || exit
+dotnet publish -c Release -o "$BASE_DIR/WeatherHistoryService/deploy"
+docker build -t weatherhistoryservice .
+
+# EmailService
+rm -rf "$BASE_DIR/EmailService/deploy"
+mkdir -p "$BASE_DIR/EmailService/deploy"
+cd "$BASE_DIR/EmailService" || exit
+dotnet publish -c Release -o "$BASE_DIR/EmailService/deploy"
+docker build -t emailservice .
+
+# IconService
+rm -rf "$BASE_DIR/IconService/deploy"
+mkdir -p "$BASE_DIR/IconService/deploy"
+cd "$BASE_DIR/IconService" || exit
+dotnet publish -c Release -o "$BASE_DIR/IconService/deploy"
+docker build -t iconservice .
+
+# SignalRServer
+rm -rf "$BASE_DIR/SignalRServer/deploy"
+mkdir -p "$BASE_DIR/SignalRServer/deploy"
+cd "$BASE_DIR/SignalRServer" || exit
+dotnet publish -c Release -o "$BASE_DIR/SignalRServer/deploy"
+docker build -t signalrserver .
+
+# WeatherSite
+rm -rf "$BASE_DIR/WeatherSite/Site/deploy"
+mkdir -p "$BASE_DIR/WeatherSite/Site/deploy"
+cd "$BASE_DIR/WeatherSite/Site" || exit
+dotnet publish -c Release -o "$BASE_DIR/WeatherSite/Site/deploy"
+docker build -t weathersite .
+
+# Build and run with docker-compose
+docker-compose build
+docker-compose up -d
+
+# Wait for user input to continue (mimics the pause command in Windows)
+read -p "Press any key to continue . . . " -n1 -s
