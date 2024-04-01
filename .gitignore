@@ -467,3 +467,4 @@ src/WeatherService/appsettings.Development.json
 /src/IconService/deploy
 /src/SignalRServer/deploy
 /src/CitiesService/CitiesGrpcService/deploy
+.mono/registry/CurrentUser/software/microsoft/csdevkit/v1/pids/4927_133564390224511667/values.xml

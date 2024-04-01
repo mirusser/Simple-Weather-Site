@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# This script is meant to run locally for dev purposes
+
 # Create a Docker network
 docker network create -d bridge overlaynetwork
 
 # Define a base directory variable for easier path management
-BASE_DIR="/home/JanKowalski/Source/Repos/Simple-Weather-Site/src"
+# Change path to reflect your local path 
+BASE_DIR="/home/arnie/Repos/Projects/Simple-Weather-Site/src"
 
 # CitiesGrpcService
 rm -rf "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
@@ -63,8 +66,8 @@ dotnet publish -c Release -o "$BASE_DIR/WeatherSite/Site/deploy"
 docker build -t weathersite .
 
 # Build and run with docker-compose
-docker-compose build
-docker-compose up -d
+docker compose build
+docker compose -p "sws-containers" up
 
 # Wait for user input to continue (mimics the pause command in Windows)
 read -p "Press any key to continue . . . " -n1 -s
