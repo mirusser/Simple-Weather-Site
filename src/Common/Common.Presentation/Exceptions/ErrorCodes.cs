@@ -2,7 +2,11 @@
 
 public static partial class ErrorCodes
 {
-    public static string DefaultErrorCode => "Error";
-    public const string ValidationException = "Validation Exception";
-    public static string Service_Unavailable => "Service_is_unavailable";
+    public const string DefaultError = "error";
+
+    public const string ValidationException = "validation_exception";
+
+    public const string Service_Unavailable = "service_unavailable";
+
+    public const string Unauthorized = "unauthorized";
 }
