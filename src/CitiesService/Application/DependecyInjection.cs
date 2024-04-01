@@ -15,11 +15,12 @@ public static class DependecyInjection
 {
     public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        var executingAssembly = Assembly.GetExecutingAssembly();
+        services.AddValidatorsFromAssembly(executingAssembly);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
 
         services.AddMassTransit(config =>
         {
@@ -51,7 +52,7 @@ public static class DependecyInjection
                 //options.StopTimeout = TimeSpan.FromSeconds(30);
             });
 
-        services.AddMappings();
+        services.AddMappings(executingAssembly);
 
         return services;
     }

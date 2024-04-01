@@ -19,13 +19,13 @@ using Common.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+    var executingAssembly = Assembly.GetExecutingAssembly();
     builder.Host.UseSerilog();
 
     builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
 
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-    //builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
-    builder.Services.AddMappings();
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
+    builder.Services.AddMappings(executingAssembly);
 
     builder.Services.AddMassTransit(config =>
     {

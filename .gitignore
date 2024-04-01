@@ -467,3 +467,4 @@ src/WeatherService/appsettings.Development.json
 /src/IconService/deploy
 /src/SignalRServer/deploy
 /src/CitiesService/CitiesGrpcService/deploy
+/src/EmailService/appsettings.Docker.json

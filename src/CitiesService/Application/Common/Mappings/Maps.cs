@@ -16,6 +16,8 @@ public class CityMappingConfig : IRegister
         config.NewConfig<GetCityResult, CityInfo>()
             .Map(dest => dest.CityId, src => src.Id)
             .Map(dest => dest.CountryCode, src => src.Country)
+            .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.State, src => src.State)
             .Map(dest => dest.Lon, src => src.Coord != null ? src.Coord.Lon : default)
             .Map(dest => dest.Lat, src => src.Coord != null ? src.Coord.Lat : default)
             .IgnoreNonMapped(true);

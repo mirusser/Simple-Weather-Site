@@ -7,11 +7,11 @@ namespace Common.Application.Mapping;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddMappings(this IServiceCollection services)
+    public static IServiceCollection AddMappings(this IServiceCollection services, Assembly? executingAssembly = null)
     {
-        var foo = Assembly.GetExecutingAssembly();
+        executingAssembly ??= Assembly.GetExecutingAssembly();
         var config = TypeAdapterConfig.GlobalSettings;
-        var registers = config.Scan(foo);
+        var registers = config.Scan(executingAssembly);
 
         config.Apply(registers);
 

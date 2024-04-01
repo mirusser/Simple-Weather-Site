@@ -17,9 +17,10 @@ public static class DependencyInjection
         this IServiceCollection services,
         ConfigurationManager configuration)
     {
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        var executingAssembly = Assembly.GetExecutingAssembly();
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
 
-        services.AddMappings();
+        services.AddMappings(executingAssembly);
 
         services.AddMassTransit(config =>
         {
@@ -55,7 +56,7 @@ public static class DependencyInjection
             typeof(IPipelineBehavior<,>),
             typeof(ValidationBehavior<,>));
 
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddValidatorsFromAssembly(executingAssembly);
 
         services.AddTransient(
             typeof(IPipelineBehavior<,>),

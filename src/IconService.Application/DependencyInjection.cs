@@ -11,15 +11,16 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddMappings();
+        var executingAssembly = Assembly.GetExecutingAssembly();
+        services.AddMappings(executingAssembly);
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
 
         services.AddScoped(
             typeof(IPipelineBehavior<,>),
             typeof(ValidationBehavior<,>));
 
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddValidatorsFromAssembly(executingAssembly);
 
         services.AddTransient(
             typeof(IPipelineBehavior<,>),
