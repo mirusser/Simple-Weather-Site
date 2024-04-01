@@ -1,77 +1,6 @@
-version: '3.5'
+version: '3.8'
 
 services:
-  mongo:
-    image: mongo
-    container_name: mongo
-    restart: unless-stopped
-    ports:
-      - 27017:27017
-    networks:
-      - conveyor
-    volumes:
-      - mongo:/data/db
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    restart: unless-stopped
-    ports:
-      - 5672:5672
-      - 15672:15672
-    networks:
-      - conveyor
-
-  redis:
-    image: redis
-    container_name: redis
-    restart: unless-stopped
-    ports:
-      - 6379:6379
-    networks:
-      - conveyor
-    volumes:
-      - redis:/data
-
-  seq:
-    image: datalust/seq
-    container_name: seq
-    restart: unless-stopped
-    environment:
-      - ACCEPT_EULA=Y
-    ports:
-      - 5341:80
-    networks:
-      - conveyor
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    user: root
-    container_name: sqlserver
-    ports:
-      - '1434:1433'
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=P@ssword!@#
-      - SA_PASSWORD=P@ssword!@#
-    volumes:
-      - sqlserver:/var/opt/mssql
-    networks:
-      - conveyor
-
-  # gateway:
-  #   image: gateway
-  #   container_name: gateway
-  #   hostname: gateway
-  #   restart: unless-stopped
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Docker
-  #   ports:
-  #     - 8085:80
-  #   networks:
-  #     - conveyor
-  #     - overlaynetwork
-
   citiesservice:
     image: citiesservice
     container_name: citiesservice
@@ -80,9 +9,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
-      - 8080:80
+      - 8081:80
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
   citiesgrpcservice:
@@ -95,7 +24,7 @@ services:
     ports:
       - 8681:80
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
   weatherservice:
@@ -108,7 +37,7 @@ services:
     ports:
       - 8082:80
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
   weatherhistoryservice:
@@ -121,7 +50,7 @@ services:
     ports:
       - 8083:80
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
   weathersite:
@@ -132,9 +61,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
-      - 8081:80
+      - 8084:80
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
   iconservice:
@@ -149,7 +78,7 @@ services:
     volumes:
       - iconservice:/var/lib/iconservicefiles
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
   signalrserver:
@@ -162,7 +91,7 @@ services:
     ports:
       - 8897:80
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
   emailservice:
@@ -175,22 +104,16 @@ services:
     ports:
       - 8087:80
     networks:
-      - conveyor
+      - default
       - overlaynetwork
 
 networks:
-  conveyor:
-    name: conveyor-network
+  default:
+    driver: bridge
   overlaynetwork:
     name: overlaynetwork
     external: true
 
 volumes:
-  mongo:
-    driver: local
-  sqlserver:
-    driver: local
-  redis:
-    driver: local
   iconservice:
     driver: local

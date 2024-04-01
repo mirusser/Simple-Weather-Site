@@ -468,3 +468,4 @@ src/WeatherService/appsettings.Development.json
 /src/SignalRServer/deploy
 /src/CitiesService/CitiesGrpcService/deploy
 /src/EmailService/appsettings.Docker.json
+.mono/registry/CurrentUser/software/microsoft/csdevkit/v1/pids/4927_133564390224511667/values.xml
