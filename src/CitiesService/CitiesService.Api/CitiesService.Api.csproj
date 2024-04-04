@@ -40,7 +40,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj" />
     <ProjectReference Include="..\CitiesService.Application\CitiesService.Application.csproj" />
-    <ProjectReference Include="..\Infrastructure\CitiesService.Infrastructure.csproj" />
+    <ProjectReference Include="..\CitiesService.Infrastructure\CitiesService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
