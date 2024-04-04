@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Application.Common.Interfaces.Persistance;
-using Application.Features.City.Queries.GetCitiesPagination;
-using Domain.Entities;
+using CitiesService.ApplicationCommon.Interfaces.Persistance;
+using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
+using CitiesService.Domain.Entities;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 using MapsterMapper;

@@ -17,10 +17,10 @@ dotnet publish -c Release -o "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
 docker build -t citiesgrpcservice .
 
 # CitiesService
-rm -rf "$BASE_DIR/CitiesService/CitiesService/deploy"
-mkdir -p "$BASE_DIR/CitiesService/CitiesService/deploy"
-cd "$BASE_DIR/CitiesService/CitiesService" || exit
-dotnet publish -c Release -o "$BASE_DIR/CitiesService/CitiesService/deploy"
+rm -rf "$BASE_DIR/CitiesService/CitiesService.Api/deploy"
+mkdir -p "$BASE_DIR/CitiesService/CitiesService.Api/deploy"
+cd "$BASE_DIR/CitiesService/CitiesService.Api" || exit
+dotnet publish -c Release -o "$BASE_DIR/CitiesService/CitiesService.Api/deploy"
 docker build -t citiesservice .
 
 # WeatherService

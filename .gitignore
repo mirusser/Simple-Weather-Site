@@ -470,3 +470,6 @@ src/WeatherService/appsettings.Development.json
 /src/EmailService/appsettings.Docker.json
 .mono/registry/CurrentUser/software/microsoft/csdevkit/v1/pids/4927_133564390224511667/values.xml
 /src/WeatherSite/Site/wwwroot/lib
+/src/CitiesService/CitiesService.Api/appsettings.Development.json
+/src/CitiesService/CitiesService.Api/appsettings.Docker.json
+/src/CitiesService/CitiesService.Api/deploy
