@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -16,10 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.Application\Common.Application.csproj" />
-    <ProjectReference Include="..\EmailService.Contracts\EmailService.Contracts.csproj" />
-    <ProjectReference Include="..\EmailService\Models\EmailService.Domain.csproj" />
-    <ProjectReference Include="..\MQModels\MQModels.csproj" />
+    <ProjectReference Include="..\..\Common\Common.Application\Common.Application.csproj" />
+    <ProjectReference Include="..\..\EmailService\EmailService.Contracts\EmailService.Contracts.csproj" />
+    <ProjectReference Include="..\..\EmailService\EmailService.Domain\EmailService.Domain.csproj" />
+    <ProjectReference Include="..\..\MQModels\MQModels.csproj" />
   </ItemGroup>
 
 </Project>

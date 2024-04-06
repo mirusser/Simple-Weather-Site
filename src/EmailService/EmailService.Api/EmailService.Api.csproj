@@ -20,10 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.Presentation\Common.Presentation.csproj" />
-    <ProjectReference Include="..\EmailService.Application\EmailService.Application.csproj" />
-    <ProjectReference Include="..\MQModels\MQModels.csproj" />
-    <ProjectReference Include="Models\EmailService.Domain.csproj" />
+    <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj" />
+    <ProjectReference Include="..\..\EmailService\EmailService.Application\EmailService.Application.csproj" />
+    <ProjectReference Include="..\..\MQModels\MQModels.csproj" />
+    <ProjectReference Include="..\..\EmailService\EmailService.Domain\EmailService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

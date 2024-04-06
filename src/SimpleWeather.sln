@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CitiesService.Api", "Cities
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmailService", "EmailService", "{9E0A53BA-21EB-4298-9579-A0FD9094447C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService", "EmailService\EmailService.csproj", "{764F3BF3-6F3B-43AE-A358-52153A5DB47E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Api", "EmailService\EmailService.Api\EmailService.Api.csproj", "{764F3BF3-6F3B-43AE-A358-52153A5DB47E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gateway", "Gateway", "{DE008914-924A-4B17-9D99-8D214E62A72F}"
 EndProject
@@ -43,7 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcCitiesClient", "Weather
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherSite", "WeatherSite\Site\WeatherSite.csproj", "{FEF998A2-BA3B-42BD-84DE-A7D92FC12645}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Domain", "EmailService\Models\EmailService.Domain.csproj", "{31D05EDF-635E-4220-B88E-949FAD3E1F19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Domain", "EmailService\EmailService.Domain\EmailService.Domain.csproj", "{31D05EDF-635E-4220-B88E-949FAD3E1F19}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{0758D8DD-8ECB-40A2-9876-A5C8A638FE32}"
 	ProjectSection(SolutionItems) = preProject
@@ -64,9 +64,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Contracts", "Ic
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commons", "Commons", "{9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Contracts", "EmailService.Contracts\EmailService.Contracts.csproj", "{818B0634-754B-4C69-B264-7D5EE17AD965}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Contracts", "EmailService\EmailService.Contracts\EmailService.Contracts.csproj", "{818B0634-754B-4C69-B264-7D5EE17AD965}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Application", "EmailService.Application\EmailService.Application.csproj", "{0077BCA6-E201-409D-BE62-C8226920269C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService.Application", "EmailService\EmailService.Application\EmailService.Application.csproj", "{0077BCA6-E201-409D-BE62-C8226920269C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CitiesService.Application", "CitiesService\CitiesService.Application\CitiesService.Application.csproj", "{A71EC5D4-A906-47F5-8211-545AC563B68B}"
 EndProject

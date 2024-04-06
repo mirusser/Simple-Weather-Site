@@ -25,10 +25,10 @@ cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherHistorySer
 dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\WeatherHistoryService\deploy"
 docker build -t weatherhistoryservice .
 
-@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\deploy"
-md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService"
-cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService"
-dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\deploy"
+@RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\EmailService.Api\deploy"
+md "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\EmailService.Api"
+cd "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\EmailService.Api"
+dotnet publish  -c Release -o "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\EmailService\EmailService.Api\deploy"
 docker build -t emailservice .
 
 @RD /S /Q "C:\Users\Jan Kowalski\Source\Repos\Simple-Weather-Site\src\IconService\deploy"

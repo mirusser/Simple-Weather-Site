@@ -472,3 +472,6 @@ src/WeatherService/appsettings.Development.json
 /src/WeatherSite/Site/wwwroot/lib
 /src/CitiesService/CitiesService.Api/appsettings.Development.json
 /src/CitiesService/CitiesService.Api/deploy
+/src/EmailService/EmailService.Api/appsettings.Development.json
+/src/EmailService/EmailService.Api/appsettings.Docker.json
+/src/EmailService/EmailService.Api/deploy
