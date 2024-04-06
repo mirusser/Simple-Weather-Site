@@ -477,3 +477,4 @@ src/WeatherService/appsettings.Development.json
 /src/EmailService/EmailService.Api/deploy
 /src/IconService/IconService.Api/appsettings.Development.json
 /src/IconService/IconService.Api/deploy
+.mono/

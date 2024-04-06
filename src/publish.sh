@@ -2,8 +2,17 @@
 
 # This script is meant to run locally for dev purposes
 
-# Create a Docker network
-docker network create -d bridge overlaynetwork
+# Network name
+network_name="overlaynetwork"
+
+# Check if the network already exists
+if ! docker network ls --format "{{.Name}}" | grep -wq $network_name; then
+    # Create the Docker network since it doesn't exist
+    docker network create -d bridge "$network_name"
+    echo "Network $network_name created."
+else
+    echo "Network $network_name already exists."
+fi
 
 # Define a base directory variable for easier path management
 # Change path to reflect your local path 
