@@ -95,7 +95,7 @@
                 delay: 550,
                 cache: true,
                 dataType: 'json',
-                url: '@(Model.CitiesServiceLocalEndpoint)GetCitiesByName',
+                url: '@(Url.Action(nameof(CityController.GetCitiesByName), MvcHelper.NameOfController<CityController>()))',
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 data: function (term) {

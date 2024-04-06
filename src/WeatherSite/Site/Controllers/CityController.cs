@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GrpcCitiesClient;
 using Microsoft.AspNetCore.Mvc;
 using WeatherSite.Clients;
+using WeatherSite.Clients.Models.Records;
 using WeatherSite.Helpers;
 using WeatherSite.Models.City;
 
@@ -11,8 +13,8 @@ namespace WeatherSite.Controllers;
 
 public class CityController : Controller
 {
-    private readonly CityClient _cityClient;
-    private readonly ICitiesClient _citiesClient;
+    private readonly CityClient _cityClient; //Rest client
+    private readonly ICitiesClient _citiesClient; //Grpc client
 
     public CityController(CityClient cityClient, ICitiesClient citiesClient)
     {
@@ -61,4 +63,18 @@ public class CityController : Controller
 
         return PartialView(vm);
     }
+
+    [HttpPost]
+    public async Task<List<City>> GetCitiesByName([FromBody] Request request)
+    {
+        var response = await _cityClient.GetCitiesByName(request.CityName);
+
+        return response;
+    }
+}
+
+public class Request
+{
+    public string CityName { get; set; }
+    public int Limit { get; set; }
 }

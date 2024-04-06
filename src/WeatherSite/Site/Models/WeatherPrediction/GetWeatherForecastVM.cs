@@ -13,7 +13,6 @@ public class GetWeatherForecastVM
     public decimal CityId { get; set; }
 
     public string CitiesServiceEndpoint { get; set; }
-    public string CitiesServiceLocalEndpoint { get; internal set; }
 
     //TODO: make a proper view model of this property maybe
     public WeatherForecast WeatherForecast { get; set; }

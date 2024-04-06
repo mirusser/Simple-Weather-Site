@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.Json;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.Options;
@@ -10,6 +10,7 @@ using WeatherSite.Settings;
 
 namespace WeatherSite.Clients;
 
+//TODO: interface, HttpFactory, Polly, hardcoded strings, exception handling
 public class CityClient
 {
     #region Properties
@@ -31,7 +32,7 @@ public class CityClient
     {
         //string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
 
-        string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName";
+        string url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesByName";
 
         var getCitiesQuery = new
         {
@@ -44,9 +45,9 @@ public class CityClient
         HttpResponseMessage response = await _httpClient.PostAsync(url, jsonContent);
 
         var content = await response.Content.ReadAsStringAsync();
-        var cities = JsonSerializer.Deserialize<List<City>>(content);
+        var cities = JsonConvert.DeserializeObject<CitiesResponse>(content);
 
-        return cities ?? new();
+        return cities?.Cities ?? [];
     }
 
     public async Task<CitiesPagination?> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)

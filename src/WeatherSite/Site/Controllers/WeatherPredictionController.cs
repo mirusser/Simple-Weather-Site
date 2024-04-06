@@ -39,8 +39,7 @@ public class WeatherPredictionController : Controller
     {
         var vm = new GetWeatherForecastVM()
         {
-            CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl,
-            CitiesServiceLocalEndpoint = _apiEndpoints.CitiesServiceLocalApiUrl
+            CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl
         };
 
         return PartialView(vm);
