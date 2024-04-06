@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gateway", "Gateway\Gateway.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IconService", "IconService", "{50C315C1-E61B-44B5-A120-621C410BF7B5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService", "IconService\IconService.csproj", "{0D55BCA1-9AAD-4FFA-A19D-AD82C8BE460B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Api", "IconService\IconService.Api\IconService.Api.csproj", "{0D55BCA1-9AAD-4FFA-A19D-AD82C8BE460B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MQModels", "MQModels", "{9DA46D96-AA74-4A22-A7A3-1906F14D0B68}"
 EndProject
@@ -54,13 +54,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{0758D8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Test", "IconService\IconService.Test\IconService.Test.csproj", "{EF48DAF8-769E-4D86-8E99-F0AA748B418E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Application", "IconService.Application\IconService.Application.csproj", "{04343A9D-40FE-4237-89D1-29769C72B6A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Application", "IconService\IconService.Application\IconService.Application.csproj", "{04343A9D-40FE-4237-89D1-29769C72B6A0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Domain", "IconService.Domain\IconService.Domain.csproj", "{E43AC6C2-D899-40C6-90AE-1EEF4C2B886A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Domain", "IconService\IconService.Domain\IconService.Domain.csproj", "{E43AC6C2-D899-40C6-90AE-1EEF4C2B886A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Infrastructure", "IconService.Infrastructure\IconService.Infrastructure.csproj", "{A3A71D8A-5355-4EA1-8E9A-B7DAE05544D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Infrastructure", "IconService\IconService.Infrastructure\IconService.Infrastructure.csproj", "{A3A71D8A-5355-4EA1-8E9A-B7DAE05544D0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Contracts", "IconService.Contracts\IconService.Contracts.csproj", "{3DE96069-D6DB-441B-9D89-6B10D3DF9DAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IconService.Contracts", "IconService\IconService.Contracts\IconService.Contracts.csproj", "{3DE96069-D6DB-441B-9D89-6B10D3DF9DAE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commons", "Commons", "{9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}"
 EndProject

@@ -38,17 +38,17 @@ dotnet publish -c Release -o "$BASE_DIR/WeatherHistoryService/deploy"
 docker build -t weatherhistoryservice .
 
 # EmailService
-rm -rf "$BASE_DIR/EmailService/deploy"
-mkdir -p "$BASE_DIR/EmailService/deploy"
-cd "$BASE_DIR/EmailService" || exit
-dotnet publish -c Release -o "$BASE_DIR/EmailService/deploy"
+rm -rf "$BASE_DIR/EmailService/EmailService.Api/deploy"
+mkdir -p "$BASE_DIR/EmailService/EmailService.Api/deploy"
+cd "$BASE_DIR/EmailService/EmailService.Api" || exit
+dotnet publish -c Release -o "$BASE_DIR/EmailService/EmailService.Api/deploy"
 docker build -t emailservice .
 
 # IconService
-rm -rf "$BASE_DIR/IconService/deploy"
-mkdir -p "$BASE_DIR/IconService/deploy"
-cd "$BASE_DIR/IconService" || exit
-dotnet publish -c Release -o "$BASE_DIR/IconService/deploy"
+rm -rf "$BASE_DIR/IconService/IconService.Api/deploy"
+mkdir -p "$BASE_DIR/IconService/IconService.Api/deploy"
+cd "$BASE_DIR/IconService/IconService.Api" || exit
+dotnet publish -c Release -o "$BASE_DIR/IconService/IconService.Api/deploy"
 docker build -t iconservice .
 
 # SignalRServer

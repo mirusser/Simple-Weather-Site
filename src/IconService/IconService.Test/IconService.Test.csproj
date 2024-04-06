@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IconService.csproj" />
+    <ProjectReference Include="..\IconService.Api\IconService.Api.csproj" />
   </ItemGroup>
 
 </Project>

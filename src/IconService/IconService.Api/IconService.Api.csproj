@@ -28,9 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.Presentation\Common.Presentation.csproj" />
-    <ProjectReference Include="..\IconService.Application\IconService.Application.csproj" />
-    <ProjectReference Include="..\IconService.Infrastructure\IconService.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj" />
+    <ProjectReference Include="..\..\IconService\IconService.Application\IconService.Application.csproj" />
+    <ProjectReference Include="..\..\IconService\IconService.Infrastructure\IconService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
