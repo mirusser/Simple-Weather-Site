@@ -16,7 +16,7 @@ public class CityClient
     #region Properties
 
     private readonly HttpClient _httpClient;
-    private readonly ApiEndpoints _apiEndpoints;
+    private readonly ApiEndpoints _apiEndpoints; 
 
     #endregion Properties
 
