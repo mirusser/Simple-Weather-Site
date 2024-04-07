@@ -1,25 +1,34 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WeatherSite.Clients;
 using WeatherSite.Helpers;
 using WeatherSite.Models.WeatherHistory;
+using WeatherSite.Settings;
 
 namespace WeatherSite.Controllers;
 
 public class WeatherHistoryController : Controller
 {
-    private readonly WeatherHistoryClient _weatherHistoryClient;
+    private readonly WeatherHistoryClient weatherHistoryClient;
+    private readonly ApiEndpoints apiEndpoints;
 
-    public WeatherHistoryController(WeatherHistoryClient weatherHistoryClient)
+    public WeatherHistoryController(
+        WeatherHistoryClient weatherHistoryClient,
+        IOptions<ApiEndpoints> options)
     {
-        _weatherHistoryClient = weatherHistoryClient;
+        this.weatherHistoryClient = weatherHistoryClient;
+        apiEndpoints = options.Value;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetWeatherHistoryPagination()
     {
-        WeatherHistoryVM vm = new();
+        WeatherHistoryVM vm = new()
+        {
+            SignalRServerUrl = apiEndpoints.SignalRServer
+        };
 
         return View(vm);
     }
@@ -28,7 +37,7 @@ public class WeatherHistoryController : Controller
     [HttpPost]
     public async Task<IActionResult> GetWeatherHistoryPaginationPartial(int pageNumber = 1, int numberOfEntitiesOnPage = 25)
     {
-        var weatherHistoryForecastPagination = await _weatherHistoryClient.GetWeatherHistoryForecastPagination(pageNumber, numberOfEntitiesOnPage);
+        var weatherHistoryForecastPagination = await weatherHistoryClient.GetWeatherHistoryForecastPagination(pageNumber, numberOfEntitiesOnPage);
         WeatherHistoryPaginationPartialVM vm = new()
         {
             CityWeatherForecastDocuments = weatherHistoryForecastPagination?.WeatherForecastDocuments,
