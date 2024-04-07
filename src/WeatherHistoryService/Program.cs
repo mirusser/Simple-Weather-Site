@@ -1,4 +1,5 @@
 using System.Reflection;
+using Common.Application.Mapping;
 using Common.Presentation;
 using Common.Presentation.Exceptions.Handlers;
 using MassTransit;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using WeatherHistoryService.Listeners;
-using WeatherHistoryService.Mappings;
 using WeatherHistoryService.Mongo;
 using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
@@ -19,12 +19,13 @@ using WeatherHistoryService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+    var executinAssembly = Assembly.GetExecutingAssembly();
     builder.Host.UseSerilog();
 
     builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
 
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-    builder.Services.AddAutoMapper(typeof(Maps));
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executinAssembly));
+    builder.Services.AddMappings(executinAssembly);
 
     builder.Services.AddMassTransit(config =>
     {

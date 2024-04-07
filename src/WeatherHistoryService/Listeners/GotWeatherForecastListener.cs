@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using AutoMapper;
+using MapsterMapper;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using MQModels.WeatherHistory;

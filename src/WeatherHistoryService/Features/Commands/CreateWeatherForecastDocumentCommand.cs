@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
+using MapsterMapper;
 using MassTransit;
 using MediatR;
 using MQModels.WeatherHistory;

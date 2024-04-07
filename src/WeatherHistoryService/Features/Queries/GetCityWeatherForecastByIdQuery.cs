@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using MediatR;
 using WeatherHistoryService.Mongo.Documents;
 using WeatherHistoryService.Services.Contracts;
@@ -15,14 +14,10 @@ public class GetCityWeatherForecastByIdQuery : IRequest<CityWeatherForecastDocum
 public class GetCityWeatherForecastByIdHandler : IRequestHandler<GetCityWeatherForecastByIdQuery, CityWeatherForecastDocument?>
 {
     private readonly ICityWeatherForecastService _cityWeatherForecastService;
-    private readonly IMapper _mapper;
 
-    public GetCityWeatherForecastByIdHandler(
-        ICityWeatherForecastService cityWeatherForecastService,
-        IMapper mapper)
+    public GetCityWeatherForecastByIdHandler(ICityWeatherForecastService cityWeatherForecastService)
     {
         _cityWeatherForecastService = cityWeatherForecastService;
-        _mapper = mapper;
     }
 
     public async Task<CityWeatherForecastDocument?> Handle(GetCityWeatherForecastByIdQuery request, CancellationToken cancellationToken)

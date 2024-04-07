@@ -1,7 +1,8 @@
-﻿using CitiesGrpcService.Mappings;
+﻿using System.Reflection;
 using CitiesGrpcService.Services;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
+using Common.Application.Mapping;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +11,8 @@ using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+    var executingAssembly = Assembly.GetExecutingAssembly();
+
     builder.Services.AddGrpc();
 
     //Configure to user cors, needs: Grpc.AspNetCore.Web package
@@ -24,7 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddApplicationLayer(builder.Configuration);
     builder.Services.AddInfrastructure(builder.Configuration);
 
-    builder.Services.AddMappings();
+    builder.Services.AddMappings(executingAssembly);
 }
 
 var app = builder.Build();

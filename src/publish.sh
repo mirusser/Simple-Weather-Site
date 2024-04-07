@@ -3,6 +3,7 @@
 # This script is meant to run locally for dev purposes
 # (Run with sudo)
 
+# Colors for better readability
 GREEN='\033[0;32m' # for success messages
 YELLOW='\033[0;33m' # for warning messages
 RED='\033[0;31m' # for error messages
