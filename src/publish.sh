@@ -102,7 +102,7 @@ echo -e "${GREEN}'Docker Compose' has started the containers in the background.$
 
 # TODO: maybe move the port listening to another script
 # Define an array of ports you want to check
-ports=(5672)
+ports=(5672 27017)
 
 # Loop through each port in the array
 for PORT in "${ports[@]}"; do
