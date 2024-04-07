@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Common.Presentation.Http;
+﻿using Common.Presentation.Http;
 using ErrorOr;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,20 +27,24 @@ public class ApiController : ControllerBase
         return Problem(errors[0]);
     }
 
-    private IActionResult Problem(Error error)
+    private ObjectResult Problem(Error error)
     {
         var statusCode = error.Type switch
         {
-            ErrorType.Conflict => StatusCodes.Status409Conflict,
             ErrorType.Validation => StatusCodes.Status400BadRequest,
+            ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+            ErrorType.Forbidden => StatusCodes.Status403Forbidden,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Conflict => StatusCodes.Status409Conflict,
+            ErrorType.Unexpected => StatusCodes.Status500InternalServerError,
+            ErrorType.Failure => StatusCodes.Status501NotImplemented,
             _ => StatusCodes.Status500InternalServerError,
         };
 
         return Problem(statusCode: statusCode, title: error.Description);
     }
 
-    private IActionResult ValidationProblem(List<Error> errors)
+    private ActionResult ValidationProblem(List<Error> errors)
     {
         ModelStateDictionary modelStateDictionary = new();
 

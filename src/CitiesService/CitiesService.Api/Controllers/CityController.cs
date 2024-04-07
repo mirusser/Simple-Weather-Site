@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 using CitiesService.Application.Features.City.Queries.GetCities;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
-using Common.Presentation.Controllers;
 using CitiesService.Contracts.City;
+using Common.Presentation.Controllers;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Cors;
@@ -12,18 +13,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace CitiesService.Api.Controllers;
 
 [EnableCors("AllowAll")]
-public class CityController : ApiController
+public class CityController(
+    IMediator mediator,
+    IMapper mapper) : ApiController
 {
-    private readonly IMediator mediator;
-    private readonly IMapper mapper;
-
-    public CityController(
-        IMediator mediator,
-        IMapper mapper)
-    {
-        this.mediator = mediator;
-        this.mapper = mapper;
-    }
+    private readonly IMediator mediator = mediator;
+    private readonly IMapper mapper = mapper;
 
     [HttpPost]
     public async Task<IActionResult> GetCitiesByName(GetCitiesRequest request)
@@ -34,7 +29,7 @@ public class CityController : ApiController
 
         return getCitiesResult.Match(
             getCitiesResult => Ok(mapper.Map<GetCitiesResponse>(getCitiesResult)),
-            errors => base.Problem(errors));
+            Problem);
     }
 
     [HttpPost]
@@ -46,22 +41,18 @@ public class CityController : ApiController
 
         return getCitiesPaginationResult.Match(
             getCitiesPaginationResult => Ok(mapper.Map<GetCitiesPaginationResponse>(getCitiesPaginationResult)),
-            errors => base.Problem(errors));
+            Problem);
     }
 
     [HttpPost]
     public async Task<IActionResult> AddCityInfosToDatabase(AddCitiesToDatabaseRequest request)
     {
-        //var command = mapper.Map<AddCitiesToDatabaseCommand>(request);
-
-        var command = new AddCitiesToDatabaseCommand()
-        {
-        };
+        var command = mapper.Map<AddCitiesToDatabaseCommand>(request);
 
         var addCitiesToDatabaseResult = await mediator.Send(command);
 
         return addCitiesToDatabaseResult.Match(
             addCitiesToDatabaseResult => Ok(mapper.Map<AddCitiesToDatabaseResponse>(addCitiesToDatabaseResult)),
-            errors => base.Problem(errors));
+            Problem);
     }
 }

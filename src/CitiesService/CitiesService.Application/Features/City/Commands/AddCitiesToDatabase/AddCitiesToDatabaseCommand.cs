@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,25 +17,18 @@ using Microsoft.Extensions.Options;
 
 namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 
-public class AddCitiesToDatabaseCommand : IRequest<ErrorOr<AddCitiesToDatabaseResult>>
-{
-}
+public class AddCitiesToDatabaseCommand : IRequest<ErrorOr<AddCitiesToDatabaseResult>>;
 
-public class AddCitiesToDatabaseHandler : IRequestHandler<AddCitiesToDatabaseCommand, ErrorOr<AddCitiesToDatabaseResult>>
+public class AddCitiesToDatabaseHandler(
+    IGenericRepository<CityInfo> cityInfoRepo,
+    IOptions<FileUrlsAndPaths> options,
+    IMapper mapper,
+    HttpClient httpClient) : IRequestHandler<AddCitiesToDatabaseCommand, ErrorOr<AddCitiesToDatabaseResult>>
 {
-    private readonly IGenericRepository<CityInfo> cityInfoRepo;
-    private readonly FileUrlsAndPaths fileUrlsAndPaths;
-    private readonly IMapper mapper;
-
-    public AddCitiesToDatabaseHandler(
-        IGenericRepository<CityInfo> cityInfoRepo,
-        IOptions<FileUrlsAndPaths> options,
-        IMapper mapper)
-    {
-        fileUrlsAndPaths = options.Value;
-        this.cityInfoRepo = cityInfoRepo;
-        this.mapper = mapper;
-    }
+    private readonly IGenericRepository<CityInfo> cityInfoRepo = cityInfoRepo;
+    private readonly FileUrlsAndPaths fileUrlsAndPaths = options.Value;
+    private readonly IMapper mapper = mapper;
+    private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
     public async Task<ErrorOr<AddCitiesToDatabaseResult>> Handle(
         AddCitiesToDatabaseCommand request,
@@ -45,51 +39,60 @@ public class AddCitiesToDatabaseHandler : IRequestHandler<AddCitiesToDatabaseCom
         return new AddCitiesToDatabaseResult { IsSuccess = isSuccess };
     }
 
+    // TODO: add logging
     private async Task<bool> SaveCitiesFromFileToDatabase()
     {
-        var result = false;
-
         var anyCityExists = await cityInfoRepo.CheckIfExists(c => c.Id != default);
-        if (!anyCityExists)
+        if (anyCityExists)
         {
-            DownloadCityFile();
-
-            if (File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath))
-            {
-                using StreamReader streamReader = new(fileUrlsAndPaths.DecompressedCityListFilePath);
-                string json = streamReader.ReadToEnd();
-                List<GetCityResult> citiesFromJson = JsonSerializer.Deserialize<List<GetCityResult>>(
-                    json,
-                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                citiesFromJson ??= new();
-
-                var cityInfos = mapper.Map<List<CityInfo>>(citiesFromJson);
-
-                await cityInfoRepo.CreateRange(cityInfos);
-                result = await cityInfoRepo.Save();
-            }
+            return false;
         }
 
-        return result;
+        var downloadResult = await DownloadCityFileAsync();
+        if (!downloadResult)
+        {
+            return false;
+        }
+
+        using StreamReader streamReader = new(fileUrlsAndPaths.DecompressedCityListFilePath);
+        string? json = streamReader.ReadToEnd();
+
+        // TODO: create accessible globally JsonSerializerOptions (and cache it) (to think about it)
+        List<GetCityResult>? citiesFromJson = JsonSerializer.Deserialize<List<GetCityResult>>(
+            json,
+            new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        citiesFromJson ??= [];
+
+        var cityInfos = mapper.Map<List<CityInfo>>(citiesFromJson);
+
+        await cityInfoRepo.CreateRange(cityInfos);
+        return await cityInfoRepo.Save();
     }
 
-    private bool DownloadCityFile()
+    public async Task<bool> DownloadCityFileAsync()
     {
         if (!File.Exists(fileUrlsAndPaths.CompressedCityListFilePath))
         {
-            using var client = new WebClient(); //TODO: this WebClient is obsolete: update and refactor
-            client.DownloadFile(
-                fileUrlsAndPaths.CityListFileUrl,
-                fileUrlsAndPaths.CompressedCityListFilePath);
+            await DownloadFileAsync(fileUrlsAndPaths.CityListFileUrl, fileUrlsAndPaths.CompressedCityListFilePath);
         }
 
         if (!File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath))
         {
-            var fileInfo = new FileInfo(fileUrlsAndPaths.DecompressedCityListFilePath);
-
+            var fileInfo = new FileInfo(fileUrlsAndPaths.CompressedCityListFilePath);
             GzipHelper.Decompress(fileInfo);
         }
 
         return File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath);
+    }
+
+    private async Task DownloadFileAsync(string requestUri, string filename)
+    {
+        using var response = await _httpClient
+            .GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        await using var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None);
+        await stream.CopyToAsync(fileStream);
     }
 }
