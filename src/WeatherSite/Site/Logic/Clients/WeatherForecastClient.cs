@@ -8,22 +8,16 @@ using WeatherSite.Settings;
 
 namespace WeatherSite.Clients;
 
-public class WeatherForecastClient
+public class WeatherForecastClient(
+    HttpClient httpClient,
+    IOptions<ApiEndpoints> options,
+    JsonSerializerOptions jsonSerializerOptions)
 {
-    #region Properties
 
-    private readonly HttpClient _httpClient;
-    private readonly ApiEndpoints _apiEndpoints;
+    #region Properties
+    private readonly ApiEndpoints _apiEndpoints = options.Value;
 
     #endregion Properties
-
-    public WeatherForecastClient(
-        HttpClient httpClient,
-        IOptions<ApiEndpoints> options)
-    {
-        _httpClient = httpClient;
-        _apiEndpoints = options.Value;
-    }
 
     //public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city)
     //{
@@ -38,9 +32,9 @@ public class WeatherForecastClient
         var query = new { CityId = cityId };
         string url = $"{_apiEndpoints.WeatherServiceApiUrl}GetByCityId";
 
-        var response = await _httpClient.PostAsJsonAsync(url, query);
+        var response = await httpClient.PostAsJsonAsync(url, query);
         var responseJson = await response.Content.ReadAsStringAsync();
-        var weatherForecast = JsonSerializer.Deserialize<WeatherForecast>(responseJson, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        var weatherForecast = JsonSerializer.Deserialize<WeatherForecast>(responseJson, jsonSerializerOptions);
 
         //WeatherForecast weatherForecast = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
 

@@ -2,5 +2,6 @@
 
 public record AddCitiesToDatabaseResponse
 (
-    bool IsSuccess
+    bool IsSuccess,
+    bool IsAlreadyAdded
 );

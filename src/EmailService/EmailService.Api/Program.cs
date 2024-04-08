@@ -1,5 +1,4 @@
 using Common.Presentation;
-using Common.Presentation.Exceptions.Handlers;
 using EmailService.Application;
 using EmailService.Domain.Settings;
 using Microsoft.AspNetCore.Builder;
@@ -13,7 +12,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Host.UseSerilog();
-
+    builder.Services.AddCommonPresentationLayer(builder.Configuration);
     builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 
     builder.Services.AddApplication(builder.Configuration);

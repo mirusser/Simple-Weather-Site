@@ -1,5 +1,4 @@
 using Common.Presentation;
-using Common.Presentation.Exceptions.Handlers;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 {
     builder.Host.UseSerilog();
 
+    builder.Services.AddCommonPresentationLayer(builder.Configuration);
     builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
     builder.Services.Configure<HubMethods>(builder.Configuration.GetSection(nameof(HubMethods)));
 

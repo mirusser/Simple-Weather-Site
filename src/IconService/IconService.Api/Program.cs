@@ -1,5 +1,4 @@
 ﻿using Common.Presentation;
-using Common.Presentation.Exceptions.Handlers;
 using IconService;
 using IconService.Application;
 using IconService.Infrastructure;
@@ -13,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
 
     builder.Services
+        .AddCommonPresentationLayer(builder.Configuration)
         .AddPresentation()
         .AddApplication()
         .AddInfrastructure(builder.Configuration);

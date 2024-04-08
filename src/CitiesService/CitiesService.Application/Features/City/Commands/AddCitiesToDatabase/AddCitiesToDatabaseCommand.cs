@@ -19,35 +19,37 @@ namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 
 public class AddCitiesToDatabaseCommand : IRequest<ErrorOr<AddCitiesToDatabaseResult>>;
 
+// TODO: better httpClient (HttpClientFactory maybe?)
 public class AddCitiesToDatabaseHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
     IOptions<FileUrlsAndPaths> options,
     IMapper mapper,
-    HttpClient httpClient) : IRequestHandler<AddCitiesToDatabaseCommand, ErrorOr<AddCitiesToDatabaseResult>>
+    HttpClient httpClient,
+    JsonSerializerOptions jsonSerializerOptions) : IRequestHandler<AddCitiesToDatabaseCommand, ErrorOr<AddCitiesToDatabaseResult>>
 {
-    private readonly IGenericRepository<CityInfo> cityInfoRepo = cityInfoRepo;
     private readonly FileUrlsAndPaths fileUrlsAndPaths = options.Value;
-    private readonly IMapper mapper = mapper;
     private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
     public async Task<ErrorOr<AddCitiesToDatabaseResult>> Handle(
         AddCitiesToDatabaseCommand request,
         CancellationToken cancellationToken)
     {
-        var isSuccess = await SaveCitiesFromFileToDatabase();
+        var anyCityExists = await cityInfoRepo
+            .CheckIfExists(c => c.Id != default);
 
-        return new AddCitiesToDatabaseResult { IsSuccess = isSuccess };
-    }
-
-    // TODO: add logging
-    private async Task<bool> SaveCitiesFromFileToDatabase()
-    {
-        var anyCityExists = await cityInfoRepo.CheckIfExists(c => c.Id != default);
         if (anyCityExists)
         {
-            return false;
+            return new AddCitiesToDatabaseResult { IsSuccess = false, IsAlreadyAdded = anyCityExists };
         }
 
+        var isSuccess = await SaveCitiesFromFileToDatabase();
+
+        return new AddCitiesToDatabaseResult { IsSuccess = isSuccess, IsAlreadyAdded = anyCityExists };
+    }
+
+    // TODO: add logging, different result ?
+    private async Task<bool> SaveCitiesFromFileToDatabase()
+    {
         var downloadResult = await DownloadCityFileAsync();
         if (!downloadResult)
         {
@@ -57,10 +59,9 @@ public class AddCitiesToDatabaseHandler(
         using StreamReader streamReader = new(fileUrlsAndPaths.DecompressedCityListFilePath);
         string? json = streamReader.ReadToEnd();
 
-        // TODO: create accessible globally JsonSerializerOptions (and cache it) (to think about it)
         List<GetCityResult>? citiesFromJson = JsonSerializer.Deserialize<List<GetCityResult>>(
             json,
-            new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            jsonSerializerOptions);
         citiesFromJson ??= [];
 
         var cityInfos = mapper.Map<List<CityInfo>>(citiesFromJson);

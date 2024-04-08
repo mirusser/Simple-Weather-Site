@@ -2,41 +2,24 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WeatherSite.Clients.Models.Records;
 using WeatherSite.Settings;
 
 namespace WeatherSite.Clients;
 
-public class WeatherHistoryClient
+public class WeatherHistoryClient(
+    HttpClient httpClient,
+    IOptions<ApiEndpoints> options,
+    JsonSerializerOptions jsonSerializerOptions)
 {
-    #region Properties
+    private readonly string url = options.Value.WeatherHistoryServiceApiUrl;
 
-    private readonly HttpClient _httpClient;
-    private readonly ApiEndpoints _apiEndpoints;
-    private readonly ILogger<WeatherHistoryClient> _logger;
-    public string Url { get; set; }
-
-    #endregion Properties
-
-    public WeatherHistoryClient(
-        HttpClient httpClient,
-        IOptions<ApiEndpoints> options,
-        ILogger<WeatherHistoryClient> logger)
+    // TODO: get rid of magic string
+    public async Task<WeatherHistoryForecastPagination> GetWeatherHistoryForecastPagination(
+        int pageNumber = 1,
+        int numberOfEntities = 25)
     {
-        _httpClient = httpClient;
-        _apiEndpoints = options.Value;
-        _logger = logger;
-    }
-
-    public async Task<WeatherHistoryForecastPagination> GetWeatherHistoryForecastPagination(int pageNumber = 1, int numberOfEntities = 25)
-    {
-        //string url = $"{_apiEndpoints.WeatherHistoryServiceApiUrl}{HttpUtility.UrlEncode(numberOfEntities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
-        //var citiesPagination = await _httpClient.GetFromJsonAsync<WeatherHistoryForecastPagination>(url);
-
-        string url = $"{_apiEndpoints.WeatherHistoryServiceApiUrl}GetCityWeatherForecastPagination";
-
         var getCityWeatherForecastPaginationQuery = new
         {
             numberOfEntities,
@@ -45,15 +28,16 @@ public class WeatherHistoryClient
 
         var jsonContent = JsonContent.Create(getCityWeatherForecastPaginationQuery);
 
-        HttpResponseMessage response = await _httpClient.PostAsync(url, jsonContent);
+        HttpResponseMessage response = await httpClient.PostAsync($"{url}GetCityWeatherForecastPagination", jsonContent);
+        response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
         var citiesPagination =
             JsonSerializer
             .Deserialize<WeatherHistoryForecastPagination>(
                 content,
-                new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                jsonSerializerOptions);
 
-        return citiesPagination ?? new(new(), default);
+        return citiesPagination ?? new([], default);
     }
 }

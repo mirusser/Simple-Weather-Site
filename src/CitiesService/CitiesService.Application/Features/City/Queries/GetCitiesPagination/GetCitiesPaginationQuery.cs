@@ -23,27 +23,16 @@ public class GetCitiesPaginationQuery : IRequest<ErrorOr<GetCitiesPaginationResu
     public int PageNumber { get; set; }
 }
 
-public class GetCitiesPaginationHandler : IRequestHandler<GetCitiesPaginationQuery, ErrorOr<GetCitiesPaginationResult>>
+public class GetCitiesPaginationHandler(
+    IGenericRepository<CityInfo> cityInfoRepo,
+    IMapper mapper,
+    IDistributedCache distributedCache,
+    JsonSerializerOptions jsonSerializerOptions) : IRequestHandler<GetCitiesPaginationQuery, ErrorOr<GetCitiesPaginationResult>>
 {
-    private readonly IGenericRepository<CityInfo> cityInfoRepo;
-    private readonly IMapper mapper;
-    private readonly IDistributedCache distributedCache;
-
-    private readonly DistributedCacheEntryOptions _distributedCacheEntryOptions;
-
-    public GetCitiesPaginationHandler(
-        IGenericRepository<CityInfo> cityInfoRepo,
-        IMapper mapper,
-        IDistributedCache distributedCache)
-    {
-        this.mapper = mapper;
-        this.cityInfoRepo = cityInfoRepo;
-        this.distributedCache = distributedCache;
-
-        _distributedCacheEntryOptions = new DistributedCacheEntryOptions() //TODO: move to settings (?) or better move caching to new lib (?)
+    private readonly DistributedCacheEntryOptions _distributedCacheEntryOptions =
+        new DistributedCacheEntryOptions() //TODO: move to settings (?) or better move caching to new lib (?)
             .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
             .SetSlidingExpiration(TimeSpan.FromMinutes(2));
-    }
 
     public async Task<ErrorOr<GetCitiesPaginationResult>> Handle(
         GetCitiesPaginationQuery request,
@@ -66,7 +55,7 @@ public class GetCitiesPaginationHandler : IRequestHandler<GetCitiesPaginationQue
         var cityInfoPaginationDto = await GetCitiesInfoPagination(numberOfCities, pageNumber);
         var cities = cityInfoPaginationDto.CityInfos is not null
             ? mapper.Map<List<GetCityResult>>(cityInfoPaginationDto.CityInfos)
-            : new List<GetCityResult>();
+            : [];
 
         GetCitiesPaginationResult citiesPaginationDto = new()
         {
@@ -84,12 +73,12 @@ public class GetCitiesPaginationHandler : IRequestHandler<GetCitiesPaginationQue
         string serializedCitiesInfoPagination;
         var redisCitiesPaginationDto = await distributedCache.GetAsync(cacheKey);
 
-        CityInfoPaginationDto result = new();
+        CityInfoPaginationDto? result = new();
 
         if (redisCitiesPaginationDto != null)
         {
             serializedCitiesInfoPagination = Encoding.UTF8.GetString(redisCitiesPaginationDto);
-            result = JsonSerializer.Deserialize<CityInfoPaginationDto>(serializedCitiesInfoPagination, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            result = JsonSerializer.Deserialize<CityInfoPaginationDto>(serializedCitiesInfoPagination, jsonSerializerOptions);
 
             result ??= new();
         }
@@ -104,8 +93,7 @@ public class GetCitiesPaginationHandler : IRequestHandler<GetCitiesPaginationQue
             {
                 var howManyToSkip = pageNumber > 1 ? numberOfCities * (pageNumber - 1) : 0;
 
-                result.CityInfos =
-                    cityInfoRepo
+                result.CityInfos = cityInfoRepo
                     .FindAll(orderByExpression: x => x.OrderBy(c => c.Name), takeNumberOfRows: numberOfCities, skipNumberOfRows: howManyToSkip)
                     .ToList();
             }
@@ -114,7 +102,7 @@ public class GetCitiesPaginationHandler : IRequestHandler<GetCitiesPaginationQue
                 JsonSerializer
                 .Serialize(
                     result,
-                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                    jsonSerializerOptions);
             redisCitiesPaginationDto = Encoding.UTF8.GetBytes(serializedCitiesInfoPagination);
             await distributedCache.SetAsync(cacheKey, redisCitiesPaginationDto, _distributedCacheEntryOptions);
         }

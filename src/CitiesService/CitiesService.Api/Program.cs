@@ -2,10 +2,9 @@ using System.Linq;
 using System.Text.Json;
 using CitiesService.Api;
 using CitiesService.Application;
-using Common.Presentation;
-using Common.Presentation.Exceptions.Handlers;
 using CitiesService.Contracts.HealthCheck;
 using CitiesService.Infrastructure;
+using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -18,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
 
     builder.Services
+        .AddCommonPresentationLayer(builder.Configuration)
         .AddPresentation()
         .AddApplicationLayer(builder.Configuration)
         .AddInfrastructure(builder.Configuration);

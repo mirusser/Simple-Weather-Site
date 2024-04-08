@@ -1,5 +1,4 @@
 using Common.Presentation;
-using Common.Presentation.Exceptions.Handlers;
 using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +12,7 @@ using WeatherSite.Settings;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Host.UseSerilog();
+    builder.Services.AddCommonPresentationLayer(builder.Configuration);
 
     builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));
 

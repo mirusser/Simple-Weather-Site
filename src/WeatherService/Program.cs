@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using Common.Application.Mapping;
 using Common.Presentation;
-using Common.Presentation.Exceptions.Handlers;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,6 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
     var executingAssembly = Assembly.GetExecutingAssembly();
     builder.Host.UseSerilog();
 
+    builder.Services.AddCommonPresentationLayer(builder.Configuration);
     builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
 
     builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));

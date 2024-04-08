@@ -1,7 +1,6 @@
 using System.Reflection;
 using Common.Application.Mapping;
 using Common.Presentation;
-using Common.Presentation.Exceptions.Handlers;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,13 +18,14 @@ using WeatherHistoryService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    var executinAssembly = Assembly.GetExecutingAssembly();
+    var executingAssembly = Assembly.GetExecutingAssembly();
     builder.Host.UseSerilog();
 
+    builder.Services.AddCommonPresentationLayer(builder.Configuration);
     builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
 
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executinAssembly));
-    builder.Services.AddMappings(executinAssembly);
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
+    builder.Services.AddMappings(executingAssembly);
 
     builder.Services.AddMassTransit(config =>
     {
