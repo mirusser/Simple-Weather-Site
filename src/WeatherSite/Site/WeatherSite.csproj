@@ -30,7 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj" />
-    <ProjectReference Include="..\..\Common\Common.Shared\Common.Shared.csproj" />
     <ProjectReference Include="..\GrpcCitiesClient\GrpcCitiesClient.csproj" />
   </ItemGroup>
 </Project>

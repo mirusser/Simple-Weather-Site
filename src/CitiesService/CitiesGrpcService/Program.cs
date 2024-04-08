@@ -3,6 +3,7 @@ using CitiesGrpcService.Services;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
 using Common.Application.Mapping;
+using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -24,9 +25,11 @@ var builder = WebApplication.CreateBuilder(args);
     //           .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
     //}));
 
-    builder.Services.AddApplicationLayer(builder.Configuration);
-    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddCommonPresentationLayer(builder.Configuration)
+        .AddApplicationLayer(builder.Configuration)
+        .AddInfrastructure(builder.Configuration);
 
+    builder.Services.AddHttpClient();
     builder.Services.AddMappings(executingAssembly);
 }
 

@@ -2,7 +2,7 @@
   "profiles": {
     "CitiesGrpcService": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
+      "dotnetRunMessages": true,
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5030;https://localhost:5031",
       "environmentVariables": {
