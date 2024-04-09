@@ -4,7 +4,7 @@
 
 - Migrated from .NET 5 to .NET 8
 - Changed folder structure to be more usable and 'friendly'
-- Fixed general errors that prevented from being fully operational when running on Docker
+- Fixed general errors that prevented project from being fully operational when running on Docker
 - Some minor refactor
 - Still there is a lot of refactoring to do till I'm gonna be at least pleased with the state of the code
 
