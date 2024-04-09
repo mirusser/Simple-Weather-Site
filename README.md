@@ -26,6 +26,8 @@
 - Add tests
 - handle more requests/endpoints from openweather api
 - least important but would be nice to redo frontend (tho I lack in that area)
+- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
+- probably not as a microservice but as a another lib: redis cache
 
 ## Setup (writing setup in progress):
 
