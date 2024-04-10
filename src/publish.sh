@@ -86,9 +86,9 @@ docker build -t weathersite .
 docker compose build
 docker compose -p "sws-containers" up -d
 
-echo -e "${GREEN}'Docker Compose' has started the containers in the background.${NC}"
+echo -e "${GREEN}'The containers started in the background.${NC}"
 
-# Make sure that iptables and netstat commands are installed, if not run:
+# Make sure that iptables,iptables-persistent, netstat packages are installed, if not run:
 # sudo apt-get update
 # sudo apt-get install iptables
 # sudo apt-get install net-tools
