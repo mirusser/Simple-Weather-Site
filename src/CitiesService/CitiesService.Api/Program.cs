@@ -4,7 +4,6 @@ using CitiesService.Infrastructure;
 using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
@@ -40,8 +39,6 @@ var app = builder.Build();
 	app.UseCors("AllowAll");
 
 	app.MapControllers();
-	app.MapHealthChecks("/health");
-	app.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
 
 	WebApplicationStartup.Run(app);
 }

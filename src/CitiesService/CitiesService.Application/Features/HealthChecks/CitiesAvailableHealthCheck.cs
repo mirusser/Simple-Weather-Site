@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CitiesService.Application.Features.HealthChecks;
 
-public class CustomHealthCheck(IMediator mediator, ILogger<CustomHealthCheck> logger) : IHealthCheck
+public class CitiesAvailableHealthCheck(IMediator mediator, ILogger<CitiesAvailableHealthCheck> logger) : IHealthCheck
 {
 	public async Task<HealthCheckResult> CheckHealthAsync(
 		HealthCheckContext context,
@@ -25,7 +25,7 @@ public class CustomHealthCheck(IMediator mediator, ILogger<CustomHealthCheck> lo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, $"In {nameof(CustomHealthCheck)}");
+			logger.LogError(ex, $"In {nameof(CitiesAvailableHealthCheck)}");
 
 			return HealthCheckResult.Unhealthy(ex.Message);
 		}
