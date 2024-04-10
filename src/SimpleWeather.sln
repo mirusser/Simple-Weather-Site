@@ -80,7 +80,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Application", "Commo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Presentation", "Common\Common.Presentation\Common.Presentation.csproj", "{FA9E729B-A139-4215-84B4-50827F312596}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Shared", "Common\Common.Shared\Common.Shared.csproj", "{2300BC33-D7E7-4597-85D4-CE49A6DD5461}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Shared", "Common\Common.Shared\Common.Shared.csproj", "{2300BC33-D7E7-4597-85D4-CE49A6DD5461}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Contracts", "Common\Common.Contracts\Common.Contracts.csproj", "{B772B418-B23F-4B34-A414-CD98D2204E05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -192,6 +194,10 @@ Global
 		{2300BC33-D7E7-4597-85D4-CE49A6DD5461}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2300BC33-D7E7-4597-85D4-CE49A6DD5461}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2300BC33-D7E7-4597-85D4-CE49A6DD5461}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B772B418-B23F-4B34-A414-CD98D2204E05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B772B418-B23F-4B34-A414-CD98D2204E05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B772B418-B23F-4B34-A414-CD98D2204E05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B772B418-B23F-4B34-A414-CD98D2204E05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -223,6 +229,7 @@ Global
 		{986B19F2-59BB-4D3E-ABC3-386D269366A0} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
 		{FA9E729B-A139-4215-84B4-50827F312596} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
 		{2300BC33-D7E7-4597-85D4-CE49A6DD5461} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
+		{B772B418-B23F-4B34-A414-CD98D2204E05} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D94D9173-A01D-454A-B7AC-5B639D5F6A0E}

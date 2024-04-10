@@ -1,4 +1,4 @@
-﻿namespace CitiesService.Contracts.HealthCheck;
+﻿namespace Common.Contracts.HealthCheck;
 
 public class IndividualHealthCheckResponse
 {

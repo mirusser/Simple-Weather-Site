@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Common.Application;
 
 namespace CitiesService.Application;
 
@@ -59,6 +60,8 @@ public static class DependencyInjection
 
     public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app)
     {
-        return app;
+		app.UseCommonHealthChecks();
+
+		return app;
     }
 }
