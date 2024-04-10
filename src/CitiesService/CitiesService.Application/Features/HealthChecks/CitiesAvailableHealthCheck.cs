@@ -8,7 +8,9 @@ using Microsoft.Extensions.Logging;
 
 namespace CitiesService.Application.Features.HealthChecks;
 
-public class CitiesAvailableHealthCheck(IMediator mediator, ILogger<CitiesAvailableHealthCheck> logger) : IHealthCheck
+public class CitiesAvailableHealthCheck(
+	IMediator mediator, 
+	ILogger<CitiesAvailableHealthCheck> logger) : IHealthCheck
 {
 	public async Task<HealthCheckResult> CheckHealthAsync(
 		HealthCheckContext context,
