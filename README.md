@@ -4,7 +4,7 @@
 
 - Migrated from .NET 5 to .NET 8
 - Changed folder structure to be more usable and 'friendly'
-- Fixed general errors that prevented from being fully operational when running on Docker
+- Fixed general errors that prevented project from being fully operational when running on Docker
 - Some minor refactor
 - Still there is a lot of refactoring to do till I'm gonna be at least pleased with the state of the code
 
@@ -26,6 +26,8 @@
 - Add tests
 - handle more requests/endpoints from openweather api
 - least important but would be nice to redo frontend (tho I lack in that area)
+- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
+- probably not as a microservice but as a another lib: redis cache
 
 ## Setup (writing setup in progress):
 
