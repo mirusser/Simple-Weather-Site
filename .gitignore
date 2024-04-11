@@ -480,3 +480,4 @@ src/WeatherService/appsettings.Development.json
 .mono/
 src/WeatherSite/Site/libman.json
 src/WeatherSite/Site/favicon.ico
+/src/HangfireService/HangfireService/appsettings.Development.json
