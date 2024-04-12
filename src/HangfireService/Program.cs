@@ -6,6 +6,7 @@ using Serilog;
 using Polly;
 using Hangfire;
 using Common.Presentation;
+using HangfireService.Features.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -45,7 +46,10 @@ var app = builder.Build();
 
 	app.MapControllers();
 
-	app.UseHangfireDashboard("/dashboard");
+	app.UseHangfireDashboard("/dashboard", new DashboardOptions()
+	{
+		Authorization = [new AuthorizationFilter()]
+	});
 
 	app.MapHealthChecks("/health");
 }
