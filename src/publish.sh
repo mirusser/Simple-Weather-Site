@@ -75,6 +75,13 @@ cd "$BASE_DIR/SignalRServer" || exit
 dotnet publish -c Release -o "$BASE_DIR/SignalRServer/deploy"
 docker build -t signalrserver .
 
+# HangfireService
+rm -rf "$BASE_DIR/HangfireService/deploy"
+mkdir -p "$BASE_DIR/HangfireService/deploy"
+cd "$BASE_DIR/HangfireService" || exit
+dotnet publish -c Release -o "$BASE_DIR/HangfireService/deploy"
+docker build -t hangfireservice .
+
 # WeatherSite
 rm -rf "$BASE_DIR/WeatherSite/Site/deploy"
 mkdir -p "$BASE_DIR/WeatherSite/Site/deploy"
