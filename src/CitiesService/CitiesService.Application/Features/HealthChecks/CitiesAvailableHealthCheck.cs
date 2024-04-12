@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace CitiesService.Application.Features.HealthChecks;
 
 public class CitiesAvailableHealthCheck(
-	IMediator mediator, 
+	IMediator mediator,
 	ILogger<CitiesAvailableHealthCheck> logger) : IHealthCheck
 {
 	public async Task<HealthCheckResult> CheckHealthAsync(
@@ -27,9 +27,9 @@ public class CitiesAvailableHealthCheck(
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, $"In {nameof(CitiesAvailableHealthCheck)}");
+			logger.LogError(ex, "In {HealthCheck}", [nameof(CitiesAvailableHealthCheck)]);
 
-			return HealthCheckResult.Unhealthy(ex.Message);
+			return HealthCheckResult.Unhealthy(nameof(CitiesAvailableHealthCheck), ex);
 		}
 	}
 }

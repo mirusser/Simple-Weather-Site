@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Mime;
+using System.Text.Json;
 using Common.Contracts.HealthCheck;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -21,15 +22,18 @@ public static class ServiceRegistration
 
 	private static readonly Func<HttpContext, HealthReport, Task> responseWriter = async (context, report) =>
 	{
-		context.Response.ContentType = "application/json";
+		context.Response.ContentType = MediaTypeNames.Application.Json;
 		var response = new HealthCheckResponse(
 			Status: report.Status.ToString(),
 			HealthChecks: report.Entries.Select(x => new IndividualHealthCheckResponse(
 				Status: x.Value.Status.ToString(),
 				Component: x.Key,
 				Description: x.Value.Description,
-				Exception: x.Value.Exception)),
+				ExceptionMessage: x.Value.Exception?.Message)),
 			HealthCheckDuration: report.TotalDuration);
-		await context.Response.WriteAsync(JsonSerializer.Serialize(response)).ConfigureAwait(false);
+
+		await context.Response.WriteAsync(
+			JsonSerializer.Serialize(response),
+			context.RequestAborted);
 	};
 }

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Mime;
 using System.Text.Json;
 using ErrorOr;
 using FluentValidation;
@@ -46,7 +47,7 @@ public class ExceptionHandlerMiddleware(
 		var response = Error.Failure(code: errorCode, description: exception.Message);
 		var payload = JsonSerializer.Serialize(response, jsonSerializerOptions);
 
-		context.Response.ContentType = "application/json";
+		context.Response.ContentType = MediaTypeNames.Application.Json;
 		context.Response.StatusCode = (int)statusCode;
 
 		await context.Response.WriteAsync(payload);

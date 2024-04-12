@@ -4,4 +4,4 @@ public record IndividualHealthCheckResponse(
 	string? Status,
 	string? Component,
 	string? Description,
-	Exception? Exception);
+	string? ExceptionMessage);
