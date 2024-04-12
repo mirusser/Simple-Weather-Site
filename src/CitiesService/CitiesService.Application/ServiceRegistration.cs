@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using CitiesService.Application.Features.Listeners;
 using CitiesService.Domain.Settings;
 using Common.Application;
 using Common.Application.Behaviors;
@@ -29,6 +30,8 @@ public static class ServiceRegistration
 			configuration
 				.GetSection(nameof(RabbitMQSettings))
 				.Bind(rabbitMQSettings);
+
+			config.AddConsumer<JobListener>();
 
 			config.SetKebabCaseEndpointNameFormatter();
 			config.UsingRabbitMq((ctx, cfg) =>

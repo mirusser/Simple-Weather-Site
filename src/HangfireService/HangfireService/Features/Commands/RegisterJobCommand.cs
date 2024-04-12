@@ -19,14 +19,21 @@ public class RegisterJobHandler(
 {
 	public Task Handle(RegisterJobCommand request, CancellationToken cancellationToken)
 	{
-		var jobCommand = GetJobCommand(request.JobType, request.JobName, request.ServiceName, request.Url);
+		var jobCommand = GetJobCommand(
+			request.JobType,
+			request.JobName,
+			request.ServiceName,
+			request.Url);
 
-		recurringJobManager.AddOrUpdate(request.JobName, () => mediator.Send(jobCommand, cancellationToken), request.CronExpression);
+		recurringJobManager.AddOrUpdate(
+			request.JobName,
+			() => mediator.Send(jobCommand, cancellationToken),
+			request.CronExpression);
 
 		return Task.CompletedTask;
 	}
 
-	private IRequest GetJobCommand(JobType jobType, string jobName, string serviceName, string? url) 
+	private IRequest GetJobCommand(JobType jobType, string jobName, string serviceName, string? url)
 		=> jobType switch
 		{
 			JobType.RunJob => new RunJobCommand() { JobName = jobName, ServiceName = serviceName },

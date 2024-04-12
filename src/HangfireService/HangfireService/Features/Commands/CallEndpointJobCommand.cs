@@ -12,8 +12,9 @@ public class CallEndpointJobCommand : IRequest
 
 public class CallEndpointJobHandler(ICallEndpointClient callEndpointClient) : IRequestHandler<CallEndpointJobCommand>
 {
+	// TODO: implement handling the response
 	public async Task Handle(CallEndpointJobCommand request, CancellationToken cancellationToken)
 	{
-		await callEndpointClient.GetMethodAsync(request.Url, cancellationToken);
+		var response = await callEndpointClient.GetMethodAsync(request.Url, cancellationToken);
 	}
 }
