@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Common.Presentation;
 
-public static class DependencyInjection
+public static class ServiceRegistration
 {
     public static IServiceCollection AddCommonPresentationLayer(this IServiceCollection services, IConfiguration configuration)
     {
