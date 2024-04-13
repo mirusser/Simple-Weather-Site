@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-using Common.Application;
+using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
 using Common.Presentation;

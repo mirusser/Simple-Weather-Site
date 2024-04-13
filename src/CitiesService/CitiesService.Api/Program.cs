@@ -4,8 +4,6 @@ using CitiesService.Infrastructure;
 using Common.Presentation;
 using Common.Shared;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,19 +19,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-	if (builder.Environment.IsDevelopment())
-	{
-		app.UseDeveloperExceptionPage();
-	}
-
 	app
+	.UseStaticFiles() // TODO: remove after this issue is fixed: https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/issues/2130 (also wwwroot directory)
 	.UseDefaultExceptionHandler()
 	.UseDefaultSwagger()
-	.UseApplicationLayer()
 	.UseHttpsRedirection()
 	.UseRouting()
 	.UseAuthorization()
-	.UseCors("AllowAll");
+	.UseCors("AllowAll")
+	.UseApplicationLayer();
 
 	app.MapControllers();
 	app.UseServiceStartupPage(builder.Environment);

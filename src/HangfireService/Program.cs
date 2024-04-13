@@ -5,10 +5,10 @@ using HangfireService.Settings;
 using Serilog;
 using Polly;
 using Hangfire;
-using Common.Application;
 using Common.Presentation;
 using Common.Shared;
 using HangfireService.Features.Filters;
+using Common.Application.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -45,12 +45,13 @@ var app = builder.Build();
 	.UseCommonHealthChecks();
 
 	app.MapControllers();
-	app.UseServiceStartupPage(builder.Environment);
 
 	app.UseHangfireDashboard("/dashboard", new DashboardOptions()
 	{
 		Authorization = [new AuthorizationFilter()]
 	});
+
+	app.UseServiceStartupPage(builder.Environment);
 }
 
 await app.RunWithLoggerAsync();

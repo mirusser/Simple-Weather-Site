@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Common.Application.Mapping;
 
-public static class DependencyInjection
+public static class ServiceRegistration
 {
     public static IServiceCollection AddMappings(this IServiceCollection services, Assembly? executingAssembly = null)
     {
