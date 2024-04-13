@@ -477,8 +477,8 @@ src/WeatherService/appsettings.Development.json
 /src/EmailService/EmailService.Api/deploy
 /src/IconService/IconService.Api/appsettings.Development.json
 /src/IconService/IconService.Api/deploy
+/src/HangfireService/deploy
 .mono/
 src/WeatherSite/Site/libman.json
 src/WeatherSite/Site/favicon.ico
-/src/HangfireService/HangfireService/appsettings.Development.json
 /src/HangfireService/appsettings.Development.json

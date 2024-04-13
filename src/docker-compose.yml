@@ -107,6 +107,19 @@ services:
       - default
       - overlaynetwork
 
+  hangfireservice:
+    image: hangfireservice
+    container_name: hangfireservice
+    hostname: hangfireservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8089:80
+    networks:
+      - default
+      - overlaynetwork
+
 networks:
   default:
     driver: bridge
