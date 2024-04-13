@@ -11,11 +11,15 @@
 ### TODOs:
 
 - general refactor
+  - _in progress_
 - Implement proper exception handling in each microservice and weather site
+  - _in progress_
 - In each microservice add proper logging (error, warning) using seq I think
+  - _in progress_
 - Weather site: make proper user interface, add messages/alerts to user on what is going on (alerts on success/failure) and proper visualisation of weather forecast (like proper images and visualisation of data)
 - Implement proper healthchecks for each microservice, and implement hangfire job in weather site that will check health of each microservice from time to time, and if any will be unhealthy send mail to me with info about it (add microservice for sending emails?)
-  test test test test test
+  - _in progress_
+- add OAuth
 
 ### Features that I may add:
 
@@ -28,15 +32,14 @@
 - least important but would be nice to redo frontend (tho I lack in that area)
 - in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
 - probably not as a microservice but as a another lib: redis cache
-- add OAuth
 
-### Alternative Tools (to look up):
+### Things to check out:
 
 - **Prometheus and Grafana:** For more complex scenarios, especially when you need more than just health status (e.g., metrics and detailed monitoring), using Prometheus for collecting metrics and Grafana for visualization can be a powerful combination. You would use Prometheus exporters to expose metrics from your services, including health check statuses, and then aggregate and visualize them in Grafana.
 
 - **Consul:** Offers service discovery and health checking capabilities. You can use Consul to keep track of the health of various services in your infrastructure. It requires more setup and infrastructure changes but is powerful for microservices architectures.
 
-## Setup (writing setup in progress):
+## Setup (in progress...):
 
 1. Get api key from: [openweathermap.org](https://openweathermap.org/) (getting this key may take up to few hours)
 2. Create user secrets in WeatherService project: `dotnet user-secrets init`
