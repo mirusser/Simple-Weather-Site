@@ -10,7 +10,7 @@ public class CallEndpointJobCommand : IRequest
 	public string Url { get; set; } = null!;
 }
 
-public class CallEndpointJobHandler(ICallEndpointClient callEndpointClient) : IRequestHandler<CallEndpointJobCommand>
+public class CallEndpointJobHandler(IHangfireHttpClient callEndpointClient) : IRequestHandler<CallEndpointJobCommand>
 {
 	// TODO: implement handling the response
 	public async Task Handle(CallEndpointJobCommand request, CancellationToken cancellationToken)

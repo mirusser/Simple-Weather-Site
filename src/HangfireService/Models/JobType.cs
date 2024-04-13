@@ -3,5 +3,6 @@
 public enum JobType
 {
 	RunJob,
-	CallEndpointJob
+	CallEndpointJob,
+	CallHealthCheck
 }

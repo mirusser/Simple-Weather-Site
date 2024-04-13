@@ -26,19 +26,16 @@ var app = builder.Build();
 		app.UseDeveloperExceptionPage();
 	}
 
-	app.UseDefaultExceptionHandler();
-	app.UseDefaultSwagger();
-	app.UseApplicationLayer();
-
-	app.UseHttpsRedirection();
-	app.UseRouting();
-
-	app.UseAuthorization();
-
-	app.UseCors("AllowAll");
+	app
+	.UseDefaultExceptionHandler()
+	.UseDefaultSwagger()
+	.UseApplicationLayer()
+	.UseHttpsRedirection()
+	.UseRouting()
+	.UseAuthorization()
+	.UseCors("AllowAll");
 
 	app.MapControllers();
-
 	app.UseServiceStartupPage(builder.Environment);
 }
 

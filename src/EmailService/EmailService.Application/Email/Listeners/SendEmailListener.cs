@@ -1,36 +1,37 @@
-﻿using System.Threading.Tasks;
+﻿using EmailService.Domain.Settings;
 using EmailService.Features.Commands;
 using MapsterMapper;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MQModels.Email;
 
 namespace EmailService.Listeners;
 
-public class SendEmailListener : IConsumer<SendEmail>
+public class SendEmailListener(
+	IMediator mediator,
+	IMapper mapper,
+	IOptions<MailSettings> options,
+	ILogger<SendEmailListener> logger) : IConsumer<SendEmail>
 {
-    private readonly IMediator _mediator;
-    private readonly IMapper _mapper;
-    private readonly ILogger<SendEmailListener> _logger;
+	public async Task Consume(ConsumeContext<SendEmail> context)
+	{
+		logger.LogInformation("Got {SendEmail} to consume", nameof(SendEmail));
 
-    public SendEmailListener(
-        IMediator mediator,
-        IMapper mapper,
-        ILogger<SendEmailListener> logger)
-    {
-        _mediator = mediator;
-        _mapper = mapper;
-        _logger = logger;
-    }
+		var sendEmailCommand = mapper.Map<SendEmailCommand>(context.Message);
 
-    public async Task Consume(ConsumeContext<SendEmail> context)
-    {
-        _logger.LogInformation("Got 'SendEmail' to consume");
+		if (!string.IsNullOrWhiteSpace(sendEmailCommand.To))
+		{
+			sendEmailCommand.To = options.Value.DefaultEmailReciever;
+		}
 
-        var sendEmailCommand = _mapper.Map<SendEmailCommand>(context.Message);
+		if (!string.IsNullOrEmpty(sendEmailCommand.From))
+		{
+			sendEmailCommand.From = options.Value.From;
+		}
 
-        //TODO: maybe do something with response here
-        var response = await _mediator.Send(sendEmailCommand);
-    }
+		//TODO: maybe do something with response here
+		var response = await mediator.Send(sendEmailCommand);
+	}
 }

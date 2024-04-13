@@ -15,7 +15,8 @@ public class RegisterJobCommand : IRequest
 
 public class RegisterJobHandler(
 	IRecurringJobManager recurringJobManager,
-	IMediator mediator) : IRequestHandler<RegisterJobCommand>
+	IMediator mediator,
+	ILogger<RegisterJobHandler> logger) : IRequestHandler<RegisterJobCommand>
 {
 	public Task Handle(RegisterJobCommand request, CancellationToken cancellationToken)
 	{
@@ -30,6 +31,11 @@ public class RegisterJobHandler(
 			() => mediator.Send(jobCommand, cancellationToken),
 			request.CronExpression);
 
+		logger.LogInformation(
+			"Added (or updated) job; name:{Name}, service:{ServiceName}, url: {Url}",
+			request.JobName,
+			request.ServiceName,
+			request.Url);
 		return Task.CompletedTask;
 	}
 
@@ -38,6 +44,7 @@ public class RegisterJobHandler(
 		{
 			JobType.RunJob => new RunJobCommand() { JobName = jobName, ServiceName = serviceName },
 			JobType.CallEndpointJob => new CallEndpointJobCommand() { JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
+			JobType.CallHealthCheck => new CallHealthCheckJobCommand() { JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
 			_ => throw new ArgumentException($"Wrong argument: {nameof(JobType)}, value: {jobType}"),
 		};
 }
