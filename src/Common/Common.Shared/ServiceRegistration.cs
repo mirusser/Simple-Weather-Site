@@ -11,7 +11,7 @@ public static class ServiceRegistration
 {
 	public static IServiceCollection AddSharedLayer(this IServiceCollection services, IConfiguration configuration)
 	{
-		// in .NET 9 and later you could use: JsonSerializerOptions.Default
+		// TODO: in .NET 9 and later you could use: JsonSerializerOptions.Default
 		//https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/configure-options?pivots=dotnet-8-0
 		services.AddSingleton<JsonSerializerOptions>(_ => new(JsonSerializerDefaults.Web));
 
@@ -31,6 +31,7 @@ public static class ServiceRegistration
 
 	/// <summary>
 	/// Page with basic environment information about the service
+	/// To ease getting environment config data
 	/// </summary>
 	public static IEndpointRouteBuilder UseServiceStartupPage(this IEndpointRouteBuilder app, IHostEnvironment environment)
 	{

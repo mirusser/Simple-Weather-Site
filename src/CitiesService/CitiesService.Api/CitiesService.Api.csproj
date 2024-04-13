@@ -9,21 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="deploy\**" />
-    <Content Remove="deploy\**" />
-    <EmbeddedResource Remove="deploy\**" />
-    <None Remove="deploy\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="publish.bat" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="DownloadedCities\" />
   </ItemGroup>
 

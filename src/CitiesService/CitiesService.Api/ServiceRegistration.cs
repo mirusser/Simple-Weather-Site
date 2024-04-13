@@ -1,5 +1,6 @@
 ﻿using CitiesService.Application.Features.HealthChecks;
 using CitiesService.Infrastructure.Contexts;
+using Common.Application.HealthChecks;
 using Common.Contracts.HealthCheck;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -11,7 +12,6 @@ public static class ServiceRegistration
 	public static IServiceCollection AddPresentation(this IServiceCollection services)
 	{
 		services.AddControllers();
-
 		services.AddCors(options =>
 		{
 			options.AddPolicy("AllowAll",
@@ -26,7 +26,7 @@ public static class ServiceRegistration
 
 		services.AddHttpClient();
 
-		services.AddHealthChecks()
+		services.AddCommonHealthChecks()
 			.AddDbContextCheck<ApplicationDbContext>(
 				name: "SQL health check",
 				failureStatus: HealthStatus.Unhealthy,

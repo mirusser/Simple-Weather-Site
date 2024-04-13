@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using CitiesService.Application.Features.Listeners;
 using CitiesService.Domain.Settings;
-using Common.Application;
 using Common.Application.Behaviors;
+using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using FluentValidation;
 using MassTransit;
