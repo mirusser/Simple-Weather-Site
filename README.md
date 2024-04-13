@@ -30,6 +30,12 @@
 - probably not as a microservice but as a another lib: redis cache
 - add OAuth
 
+### Alternative Tools (to look up):
+
+- **Prometheus and Grafana:** For more complex scenarios, especially when you need more than just health status (e.g., metrics and detailed monitoring), using Prometheus for collecting metrics and Grafana for visualization can be a powerful combination. You would use Prometheus exporters to expose metrics from your services, including health check statuses, and then aggregate and visualize them in Grafana.
+
+- **Consul:** Offers service discovery and health checking capabilities. You can use Consul to keep track of the health of various services in your infrastructure. It requires more setup and infrastructure changes but is powerful for microservices architectures.
+
 ## Setup (writing setup in progress):
 
 1. Get api key from: [openweathermap.org](https://openweathermap.org/) (getting this key may take up to few hours)
