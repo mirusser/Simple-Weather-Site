@@ -18,83 +18,83 @@ using WeatherHistoryService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    var executingAssembly = Assembly.GetExecutingAssembly();
-    builder.Host.UseSerilog();
+	var executingAssembly = Assembly.GetExecutingAssembly();
+	builder.Host.UseSerilog();
 
-    builder.Services.AddCommonPresentationLayer(builder.Configuration);
-    builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
+	builder.Services.AddCommonPresentationLayer(builder.Configuration);
+	builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
 
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
-    builder.Services.AddMappings(executingAssembly);
+	builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
+	builder.Services.AddMappings(executingAssembly);
 
-    builder.Services.AddMassTransit(config =>
-    {
-        RabbitMQSettings rabbitMQSettings = new();
-        builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+	builder.Services.AddMassTransit(config =>
+	{
+		RabbitMQSettings rabbitMQSettings = new();
+		builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
 
-        config.AddConsumer<GotWeatherForecastListener>();
-        config.SetKebabCaseEndpointNameFormatter();
+		config.AddConsumer<GotWeatherForecastListener>();
+		config.SetKebabCaseEndpointNameFormatter();
 
-        config.UsingRabbitMq((ctx, cfg) =>
-        {
-            cfg.Host(rabbitMQSettings.Host);
-            cfg.ConfigureEndpoints(ctx);
-        });
-    });
-    builder.Services.AddOptions<MassTransitHostOptions>()
-    .Configure(options =>
-    {
-        // if specified, waits until the bus is started before
-        // returning from IHostedService.StartAsync
-        // default is false
-        options.WaitUntilStarted = true;
+		config.UsingRabbitMq((ctx, cfg) =>
+		{
+			cfg.Host(rabbitMQSettings.Host);
+			cfg.ConfigureEndpoints(ctx);
+		});
+	});
+	builder.Services.AddOptions<MassTransitHostOptions>()
+	.Configure(options =>
+	{
+		// if specified, waits until the bus is started before
+		// returning from IHostedService.StartAsync
+		// default is false
+		options.WaitUntilStarted = true;
 
-        // if specified, limits the wait time when starting the bus
-        //options.StartTimeout = TimeSpan.FromSeconds(10);
+		// if specified, limits the wait time when starting the bus
+		//options.StartTimeout = TimeSpan.FromSeconds(10);
 
-        // if specified, limits the wait time when stopping the bus
-        //options.StopTimeout = TimeSpan.FromSeconds(30);
-    });
+		// if specified, limits the wait time when stopping the bus
+		//options.StopTimeout = TimeSpan.FromSeconds(30);
+	});
 
-    builder.Services.AddControllers();
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
-    });
+	builder.Services.AddControllers();
+	builder.Services.AddSwaggerGen(c =>
+	{
+		c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
+	});
 
-    builder.Services.AddHealthChecks();
+	builder.Services.AddHealthChecks();
 
-    //register services
-    builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
-    builder.Services.AddScoped<ICityWeatherForecastService, CityWeatherForecastService>();
+	//register services
+	builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
+	builder.Services.AddScoped<ICityWeatherForecastService, CityWeatherForecastService>();
 }
 
 var app = builder.Build();
 {
-    if (builder.Environment.IsDevelopment())
-    {
-        app.UseDeveloperExceptionPage();
-    }
+	if (builder.Environment.IsDevelopment())
+	{
+		app.UseDeveloperExceptionPage();
+	}
 
-    #region Swagger
+	#region Swagger
 
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeatherHistoryService v1"));
+	app.UseSwagger();
+	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeatherHistoryService v1"));
 
-    #endregion Swagger
+	#endregion Swagger
 
-    app.UseServiceExceptionHandler();
-    app.UseHttpsRedirection();
-    app.UseRouting();
+	app.UseDefaultExceptionHandler();
+	app.UseHttpsRedirection();
+	app.UseRouting();
 
-    app.UseAuthorization();
+	app.UseAuthorization();
 
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-        endpoints.MapHealthChecks("/health");
-        endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
-    });
-
-    WebApplicationStartup.Run(app);
+	app.UseEndpoints(endpoints =>
+	{
+		endpoints.MapControllers();
+		endpoints.MapHealthChecks("/health");
+		endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
+	});
 }
+
+await app.RunWithLoggerAsync();

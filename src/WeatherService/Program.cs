@@ -81,7 +81,7 @@ var app = builder.Build();
 		app.UseDeveloperExceptionPage();
 	}
 
-	app.UseServiceExceptionHandler();
+	app.UseDefaultExceptionHandler();
 
 	#region Swagger
 
@@ -96,6 +96,6 @@ var app = builder.Build();
 
 	app.MapControllers();
 	app.UseCommonHealthChecks();
-
-	WebApplicationStartup.Run(app);
 }
+
+await app.RunWithLoggerAsync();

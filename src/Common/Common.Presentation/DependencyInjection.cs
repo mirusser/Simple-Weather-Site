@@ -15,6 +15,6 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IApplicationBuilder UseServiceExceptionHandler(this IApplicationBuilder builder)
+    public static IApplicationBuilder UseDefaultExceptionHandler(this IApplicationBuilder builder)
         => builder.UseMiddleware(typeof(ExceptionHandlerMiddleware));
 }

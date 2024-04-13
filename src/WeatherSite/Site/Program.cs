@@ -11,49 +11,49 @@ using WeatherSite.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    builder.Host.UseSerilog();
-    builder.Services.AddCommonPresentationLayer(builder.Configuration);
+	builder.Host.UseSerilog();
+	builder.Services.AddCommonPresentationLayer(builder.Configuration);
 
-    builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));
+	builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));
 
-    builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
-    builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+	builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+	builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
-    builder.Services.AddHttpClient<WeatherForecastClient>();
-    builder.Services.AddHttpClient<CityClient>();
-    builder.Services.AddHttpClient<WeatherHistoryClient>();
-    builder.Services.AddHttpClient<IconClient>();
+	builder.Services.AddHttpClient<WeatherForecastClient>();
+	builder.Services.AddHttpClient<CityClient>();
+	builder.Services.AddHttpClient<WeatherHistoryClient>();
+	builder.Services.AddHttpClient<IconClient>();
 
-    builder.Services.AddGrpcCitiesClient(builder.Configuration);
+	builder.Services.AddGrpcCitiesClient(builder.Configuration);
 }
 
 var app = builder.Build();
 {
-    if (builder.Environment.IsDevelopment())
-    {
-        app.UseDeveloperExceptionPage();
-    }
-    else
-    {
-        app.UseExceptionHandler("/Home/Error");
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-        app.UseHsts();
-    }
+	if (builder.Environment.IsDevelopment())
+	{
+		app.UseDeveloperExceptionPage();
+	}
+	else
+	{
+		app.UseExceptionHandler("/Home/Error");
+		// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+		app.UseHsts();
+	}
 
-    app.UseServiceExceptionHandler();
-    //app.UseHttpsRedirection();
-    app.UseStaticFiles();
+	app.UseDefaultExceptionHandler();
+	//app.UseHttpsRedirection();
+	app.UseStaticFiles();
 
-    app.UseRouting();
+	app.UseRouting();
 
-    app.UseAuthorization();
+	app.UseAuthorization();
 
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=WeatherPrediction}/{action=Index}/{id?}");
-    });
-
-    WebApplicationStartup.Run(app);
+	app.UseEndpoints(endpoints =>
+	{
+		endpoints.MapControllerRoute(
+			name: "default",
+			pattern: "{controller=WeatherPrediction}/{action=Index}/{id?}");
+	});
 }
+
+await app.RunWithLoggerAsync();

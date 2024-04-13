@@ -1,56 +1,44 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace Common.Presentation;
 
 public static class WebApplicationStartup
 {
-    public static void Run(WebApplication? app)
-    {
-        CreateLogger();
+	public static async Task RunWithLoggerAsync(this WebApplication app)
+	{
+		InitializeLogger(app);
 
-        var executingAssemblyName = Assembly
-            .GetEntryAssembly()
-            .GetName()
-            .Name;
+		var executingAssemblyName = GetExecutingAssemblyName();
 
-        try
-        {
-            Log.Information($"{executingAssemblyName} is starting (Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")})");
+		try
+		{
+			Log.Information(
+				"{Name} is starting (Environment: {Environment})",
+				executingAssemblyName,
+				app.Environment.EnvironmentName);
 
-            app.Run();
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, $"{executingAssemblyName} failed to start");
-        }
-        finally
-        {
-            Log.CloseAndFlush();
-        }
-    }
+			await app.RunAsync();
+		}
+		catch (Exception ex)
+		{
+			Log.Fatal(ex, "{Name} failed to start", executingAssemblyName);
+		}
+		finally
+		{
+			Log.CloseAndFlush();
+		}
+	}
 
-    private static void CreateLogger()
-    {
-        var environmentName = Environment
-            .GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+	private static void InitializeLogger(WebApplication app)
+	{
+		Log.Logger = new LoggerConfiguration()
+			.ReadFrom.Configuration(app.Configuration)
+			.Enrich.WithProperty("Environment", app.Environment.EnvironmentName)
+			.CreateLogger();
+	}
 
-        //Read configuration from appSettings
-        var config = new ConfigurationBuilder()
-            .AddJsonFile(
-                path: $"appsettings.{environmentName}.json",
-                optional: false,
-                reloadOnChange: true)
-            .Build();
-
-        //Initialize Logger (Serilog)
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(config)
-            .Enrich.WithProperty(
-                "Environment",
-                environmentName)
-            .CreateLogger();
-    }
+	private static string GetExecutingAssemblyName()
+		=> Assembly.GetEntryAssembly()?.GetName().Name ?? "Unknown Application";
 }

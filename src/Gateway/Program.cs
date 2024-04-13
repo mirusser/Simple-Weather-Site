@@ -44,5 +44,5 @@ var app = builder.Build();
 
     await app.UseOcelot();
 
-    WebApplicationStartup.Run(app);
+	await app.RunWithLoggerAsync();
 }

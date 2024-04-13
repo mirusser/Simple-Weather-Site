@@ -2,6 +2,7 @@ using CitiesService.Api;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
 using Common.Presentation;
+using Common.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -25,10 +26,8 @@ var app = builder.Build();
 		app.UseDeveloperExceptionPage();
 	}
 
-	app.UseServiceExceptionHandler();
-	app.UseSwagger();
-	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CitiesService v1"));
-
+	app.UseDefaultExceptionHandler();
+	app.UseDefaultSwagger();
 	app.UseApplicationLayer();
 
 	app.UseHttpsRedirection();
@@ -40,5 +39,7 @@ var app = builder.Build();
 
 	app.MapControllers();
 
-	WebApplicationStartup.Run(app);
+	app.UseServiceStartupPage(builder.Environment);
 }
+
+await app.RunWithLoggerAsync();

@@ -12,79 +12,79 @@ using SignalRServer.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    builder.Host.UseSerilog();
+	builder.Host.UseSerilog();
 
-    builder.Services.AddCommonPresentationLayer(builder.Configuration);
-    builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
-    builder.Services.Configure<HubMethods>(builder.Configuration.GetSection(nameof(HubMethods)));
+	builder.Services.AddCommonPresentationLayer(builder.Configuration);
+	builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
+	builder.Services.Configure<HubMethods>(builder.Configuration.GetSection(nameof(HubMethods)));
 
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowAll",
-            builder =>
-            {
-                builder
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .SetIsOriginAllowed((_) => true)
-                .AllowCredentials();
-            });
-    });
+	builder.Services.AddCors(options =>
+	{
+		options.AddPolicy("AllowAll",
+			builder =>
+			{
+				builder
+				.AllowAnyHeader()
+				.AllowAnyMethod()
+				.SetIsOriginAllowed((_) => true)
+				.AllowCredentials();
+			});
+	});
 
-    builder.Services.AddSignalR();
+	builder.Services.AddSignalR();
 
-    builder.Services.AddMassTransit(config =>
-    {
-        RabbitMQSettings rabbitMQSettings = new();
-        builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+	builder.Services.AddMassTransit(config =>
+	{
+		RabbitMQSettings rabbitMQSettings = new();
+		builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
 
-        config.AddConsumer<CreatedCityWeatherForecastSearchListener>();
-        config.SetKebabCaseEndpointNameFormatter();
+		config.AddConsumer<CreatedCityWeatherForecastSearchListener>();
+		config.SetKebabCaseEndpointNameFormatter();
 
-        config.UsingRabbitMq((ctx, cfg) =>
-        {
-            cfg.Host(rabbitMQSettings.Host);
-            cfg.ConfigureEndpoints(ctx);
-        });
-    });
+		config.UsingRabbitMq((ctx, cfg) =>
+		{
+			cfg.Host(rabbitMQSettings.Host);
+			cfg.ConfigureEndpoints(ctx);
+		});
+	});
 
-    builder.Services.AddOptions<MassTransitHostOptions>()
-    .Configure(options =>
-    {
-        // if specified, waits until the bus is started before
-        // returning from IHostedService.StartAsync
-        // default is false
-        options.WaitUntilStarted = true;
+	builder.Services.AddOptions<MassTransitHostOptions>()
+	.Configure(options =>
+	{
+		// if specified, waits until the bus is started before
+		// returning from IHostedService.StartAsync
+		// default is false
+		options.WaitUntilStarted = true;
 
-        // if specified, limits the wait time when starting the bus
-        //options.StartTimeout = TimeSpan.FromSeconds(10);
+		// if specified, limits the wait time when starting the bus
+		//options.StartTimeout = TimeSpan.FromSeconds(10);
 
-        // if specified, limits the wait time when stopping the bus
-        //options.StopTimeout = TimeSpan.FromSeconds(30);
-    });
+		// if specified, limits the wait time when stopping the bus
+		//options.StopTimeout = TimeSpan.FromSeconds(30);
+	});
 
-    builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
+	builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
 }
 
 var app = builder.Build();
 {
-    app.UseServiceExceptionHandler();
+	app.UseDefaultExceptionHandler();
 
-    app.UseCors("AllowAll");
+	app.UseCors("AllowAll");
 
-    app.UseHttpsRedirection();
+	app.UseHttpsRedirection();
 
-    app.UseRouting();
+	app.UseRouting();
 
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}");
-    });
+	app.UseEndpoints(endpoints =>
+	{
+		endpoints.MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}");
+	});
 
-    //app.UseSignalR(routes =>
-    //{
-    //    routes.MapHub<TestHub>("/test");
-    //});
-
-    WebApplicationStartup.Run(app);
+	//app.UseSignalR(routes =>
+	//{
+	//    routes.MapHub<TestHub>("/test");
+	//});
 }
+
+await app.RunWithLoggerAsync();
