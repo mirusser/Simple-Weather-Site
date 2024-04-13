@@ -25,68 +25,69 @@ fi
 # Define a base directory variable for easier path management
 # Change path to reflect your local path 
 BASE_DIR="/home/arnie/Repos/Projects/Simple-Weather-Site/src"
+PUBLISH_DIR="/home/arnie/Publish/SimpleWeather"
 
 # CitiesGrpcService
-rm -rf "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
-mkdir -p "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
+rm -rf "$PUBLISH_DIR/CitiesService/CitiesGrpcService/deploy"
+mkdir -p "$PUBLISH_DIR/CitiesService/CitiesGrpcService/deploy"
 cd "$BASE_DIR/CitiesService/CitiesGrpcService" || exit
-dotnet publish -c Release -o "$BASE_DIR/CitiesService/CitiesGrpcService/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/CitiesService/CitiesGrpcService/deploy"
 docker build -t citiesgrpcservice .
 
 # CitiesService
-rm -rf "$BASE_DIR/CitiesService/CitiesService.Api/deploy"
-mkdir -p "$BASE_DIR/CitiesService/CitiesService.Api/deploy"
+rm -rf "$PUBLISH_DIR/CitiesService/CitiesService.Api/deploy"
+mkdir -p "$PUBLISH_DIR/CitiesService/CitiesService.Api/deploy"
 cd "$BASE_DIR/CitiesService/CitiesService.Api" || exit
-dotnet publish -c Release -o "$BASE_DIR/CitiesService/CitiesService.Api/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/CitiesService/CitiesService.Api/deploy"
 docker build -t citiesservice .
 
 # WeatherService
-rm -rf "$BASE_DIR/WeatherService/deploy"
-mkdir -p "$BASE_DIR/WeatherService/deploy"
+rm -rf "$PUBLISH_DIR/WeatherService/deploy"
+mkdir -p "$PUBLISH_DIR/WeatherService/deploy"
 cd "$BASE_DIR/WeatherService" || exit
-dotnet publish -c Release -o "$BASE_DIR/WeatherService/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/WeatherService/deploy"
 docker build -t weatherservice .
 
 # WeatherHistoryService
-rm -rf "$BASE_DIR/WeatherHistoryService/deploy"
-mkdir -p "$BASE_DIR/WeatherHistoryService/deploy"
+rm -rf "$PUBLISH_DIR/WeatherHistoryService/deploy"
+mkdir -p "$PUBLISH_DIR/WeatherHistoryService/deploy"
 cd "$BASE_DIR/WeatherHistoryService" || exit
-dotnet publish -c Release -o "$BASE_DIR/WeatherHistoryService/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/WeatherHistoryService/deploy"
 docker build -t weatherhistoryservice .
 
 # EmailService
-rm -rf "$BASE_DIR/EmailService/EmailService.Api/deploy"
-mkdir -p "$BASE_DIR/EmailService/EmailService.Api/deploy"
+rm -rf "$PUBLISH_DIR/EmailService/EmailService.Api/deploy"
+mkdir -p "$PUBLISH_DIR/EmailService/EmailService.Api/deploy"
 cd "$BASE_DIR/EmailService/EmailService.Api" || exit
-dotnet publish -c Release -o "$BASE_DIR/EmailService/EmailService.Api/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/EmailService/EmailService.Api/deploy"
 docker build -t emailservice .
 
 # IconService
-rm -rf "$BASE_DIR/IconService/IconService.Api/deploy"
-mkdir -p "$BASE_DIR/IconService/IconService.Api/deploy"
+rm -rf "$PUBLISH_DIR/IconService/IconService.Api/deploy"
+mkdir -p "$PUBLISH_DIR/IconService/IconService.Api/deploy"
 cd "$BASE_DIR/IconService/IconService.Api" || exit
-dotnet publish -c Release -o "$BASE_DIR/IconService/IconService.Api/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/IconService/IconService.Api/deploy"
 docker build -t iconservice .
 
 # SignalRServer
-rm -rf "$BASE_DIR/SignalRServer/deploy"
-mkdir -p "$BASE_DIR/SignalRServer/deploy"
+rm -rf "$PUBLISH_DIR/SignalRServer/deploy"
+mkdir -p "$PUBLISH_DIR/SignalRServer/deploy"
 cd "$BASE_DIR/SignalRServer" || exit
-dotnet publish -c Release -o "$BASE_DIR/SignalRServer/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/SignalRServer/deploy"
 docker build -t signalrserver .
 
 # HangfireService
-rm -rf "$BASE_DIR/HangfireService/deploy"
-mkdir -p "$BASE_DIR/HangfireService/deploy"
+rm -rf "$PUBLISH_DIR/HangfireService/deploy"
+mkdir -p "$PUBLISH_DIR/HangfireService/deploy"
 cd "$BASE_DIR/HangfireService" || exit
-dotnet publish -c Release -o "$BASE_DIR/HangfireService/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/HangfireService/deploy"
 docker build -t hangfireservice .
 
 # WeatherSite
-rm -rf "$BASE_DIR/WeatherSite/Site/deploy"
-mkdir -p "$BASE_DIR/WeatherSite/Site/deploy"
+rm -rf "$PUBLISH_DIR/WeatherSite/Site/deploy"
+mkdir -p "$PUBLISH_DIR/WeatherSite/Site/deploy"
 cd "$BASE_DIR/WeatherSite/Site" || exit
-dotnet publish -c Release -o "$BASE_DIR/WeatherSite/Site/deploy"
+dotnet publish -c Release --property:PublishDir="$PUBLISH_DIR/WeatherSite/Site/deploy"
 docker build -t weathersite .
 
 # Build and run with docker-compose
