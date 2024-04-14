@@ -1,0 +1,20 @@
+{
+  "HealthChecksUI": {
+    "HealthChecks": [
+      {
+        "Name": "Cities Service",
+        "Uri": "http://citiesservice/health"
+      }
+    ],
+    "Webhooks": [],
+    "EvaluationTimeOnSeconds": 10,
+    "MinimumSecondsBetweenFailureNotifications": 60
+  }
+}
+
+// configuration file for healthchecksui container
+// file name: appsettings.json
+//
+//  in docker compose (example volumes location):
+//  volumes:
+//    - /home/arnie/volumes/healthchecks/data/appsettings.json:/app/appsettings.json

@@ -92,6 +92,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.ExtensionMethods", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Domain", "Common\Common.Domain\Common.Domain.csproj", "{071A46CD-AD95-467B-A178-2D3203176F49}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_additional", "_additional", "{112C556E-CA0E-4272-BEC0-245D729100B1}"
+	ProjectSection(SolutionItems) = preProject
+		..\AdditionalInfo\healthchecks-appsettings.json = ..\AdditionalInfo\healthchecks-appsettings.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
