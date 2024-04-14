@@ -2,8 +2,36 @@
   "HealthChecksUI": {
     "HealthChecks": [
       {
-        "Name": "Cities Service",
+        "Name": "citiesservice",
         "Uri": "http://citiesservice/health"
+      },
+      {
+        "Name": "weatherservice",
+        "Uri": "http://weatherservice/health"
+      },
+      {
+        "Name": "weatherhistoryservice",
+        "Uri": "http://weatherhistoryservice/health"
+      },
+      {
+        "Name": "weathersite",
+        "Uri": "http://weathersite/health"
+      },
+      {
+        "Name": "iconservice",
+        "Uri": "http://iconservice/health"
+      },
+      {
+        "Name": "signalrserver",
+        "Uri": "http://signalrserver/health"
+      },
+      {
+        "Name": "emailservice",
+        "Uri": "http://emailservice/health"
+      },
+      {
+        "Name": "hangfireservice",
+        "Uri": "http://hangfireservice/health"
       }
     ],
     "Webhooks": [],

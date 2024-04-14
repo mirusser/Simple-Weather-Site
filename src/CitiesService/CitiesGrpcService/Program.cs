@@ -41,9 +41,7 @@ var app = builder.Build();
         app.UseDeveloperExceptionPage();
     }
 
-    app
-    .UseRouting()
-    .UseCommonHealthChecks();
+    app.UseRouting();
 
 	//Configure to user cors, needs: Grpc.AspNetCore.Web package
 	//app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true }); // Must be added between UseRouting and UseEndpoints
