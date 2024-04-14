@@ -20,14 +20,6 @@ public static class ServiceRegistration
 
 		var builder = services.AddHealthChecks();
 
-		services
-			.AddHealthChecksUI(setup =>
-			{
-				setup.SetEvaluationTimeInSeconds(500);
-				setup.AddHealthCheckEndpoint(executingAssemblyName, $"{baseUrl}/health");
-			})
-			.AddInMemoryStorage();
-
 		return builder;
 	}
 
@@ -37,12 +29,6 @@ public static class ServiceRegistration
 		{
 			Predicate = _ => true,
 			ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-		});
-
-		app.UseHealthChecksUI(options =>
-		{
-			options.UIPath = "/health-ui";
-			options.UseRelativeApiPath = false;
 		});
 
 		return app;

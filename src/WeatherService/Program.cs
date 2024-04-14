@@ -67,7 +67,7 @@ var builder = WebApplication.CreateBuilder(args);
 		 .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(10, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
 		 .AddTransientHttpErrorPolicy(builder => builder.CircuitBreakerAsync(3, TimeSpan.FromSeconds(10)));
 
-	builder.Services.AddHealthChecks()
+	builder.Services.AddCommonHealthChecks(builder.Configuration)
 		.AddCheck<OpenWeatherExternalEndpointHealthCheck>(
 			name: "OpenWeather",
 			failureStatus: HealthStatus.Degraded,
@@ -91,8 +91,9 @@ var app = builder.Build();
 	#endregion Swagger
 
 	//app.UseHttpsRedirection();
-	app.UseRouting();
-	app.UseCommonHealthChecks();
+	app
+	.UseRouting()
+	.UseCommonHealthChecks();
 	app.UseAuthorization();
 
 	app.MapControllers();

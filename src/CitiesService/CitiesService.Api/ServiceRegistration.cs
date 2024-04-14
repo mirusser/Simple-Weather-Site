@@ -10,7 +10,10 @@ namespace CitiesService.Api;
 
 public static class ServiceRegistration
 {
-	public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
+	// TODO: fix magic strings
+	public static IServiceCollection AddPresentation(
+		this IServiceCollection services,
+		IConfiguration configuration)
 	{
 		services.AddControllers();
 		services.AddCors(options =>

@@ -59,6 +59,8 @@ public static class ServiceRegistration
 
 		services.AddMappings(executingAssembly);
 
+		services.AddCommonHealthChecks(configuration);
+
 		return services;
 	}
 

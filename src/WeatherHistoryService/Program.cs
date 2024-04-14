@@ -15,6 +15,7 @@ using WeatherHistoryService.Mongo;
 using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
 using WeatherHistoryService.Settings;
+using Common.Application.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -62,7 +63,7 @@ var builder = WebApplication.CreateBuilder(args);
 		c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
 	});
 
-	builder.Services.AddHealthChecks();
+	builder.Services.AddCommonHealthChecks(builder.Configuration);
 
 	//register services
 	builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
@@ -85,7 +86,9 @@ var app = builder.Build();
 
 	app.UseDefaultExceptionHandler();
 	app.UseHttpsRedirection();
-	app.UseRouting();
+	app
+	.UseRouting()
+	.UseCommonHealthChecks();
 
 	app.UseAuthorization();
 

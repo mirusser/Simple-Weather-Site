@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Serilog;
 
 namespace Common.Presentation;
@@ -10,7 +9,7 @@ public static class WebApplicationStartup
 	{
 		InitializeLogger(app);
 
-		var executingAssemblyName = GetExecutingAssemblyName();
+		var executingAssemblyName = ExtensionMethods.AssemblyExtensions.GetProjectName();
 
 		try
 		{
@@ -27,7 +26,7 @@ public static class WebApplicationStartup
 		}
 		finally
 		{
-			Log.CloseAndFlush();
+			await Log.CloseAndFlushAsync();
 		}
 	}
 
@@ -38,7 +37,4 @@ public static class WebApplicationStartup
 			.Enrich.WithProperty("Environment", app.Environment.EnvironmentName)
 			.CreateLogger();
 	}
-
-	private static string GetExecutingAssemblyName()
-		=> Assembly.GetEntryAssembly()?.GetName().Name ?? "Unknown Application";
 }

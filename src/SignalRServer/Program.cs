@@ -9,6 +9,7 @@ using SignalRServer.Listeners;
 using SignalRServer.Services;
 using SignalRServer.Services.Contracts;
 using SignalRServer.Settings;
+using Common.Application.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -64,6 +65,7 @@ var builder = WebApplication.CreateBuilder(args);
 	});
 
 	builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
+	builder.Services.AddCommonHealthChecks(builder.Configuration);
 }
 
 var app = builder.Build();
@@ -73,8 +75,10 @@ var app = builder.Build();
 	app.UseCors("AllowAll");
 
 	app.UseHttpsRedirection();
+	app
+	.UseRouting()
+	.UseCommonHealthChecks();
 
-	app.UseRouting();
 
 	app.UseEndpoints(endpoints =>
 	{

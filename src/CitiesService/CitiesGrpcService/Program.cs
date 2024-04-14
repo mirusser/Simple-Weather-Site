@@ -2,6 +2,7 @@
 using CitiesGrpcService.Services;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
+using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
@@ -40,13 +41,15 @@ var app = builder.Build();
         app.UseDeveloperExceptionPage();
     }
 
-    app.UseRouting();
+    app
+    .UseRouting()
+    .UseCommonHealthChecks();
 
-    //Configure to user cors, needs: Grpc.AspNetCore.Web package
-    //app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true }); // Must be added between UseRouting and UseEndpoints
-    //app.UseCors();
+	//Configure to user cors, needs: Grpc.AspNetCore.Web package
+	//app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true }); // Must be added between UseRouting and UseEndpoints
+	//app.UseCors();
 
-    app.UseEndpoints(endpoints =>
+	app.UseEndpoints(endpoints =>
     {
         //To use cors
         //endpoints.MapGrpcService<GreeterService>().RequireCors("AllowAll");

@@ -1,14 +1,14 @@
 using System.Reflection;
-using HangfireService.Clients.Contracts;
-using HangfireService.Clients;
-using HangfireService.Settings;
-using Serilog;
-using Polly;
-using Hangfire;
+using Common.Application.HealthChecks;
 using Common.Presentation;
 using Common.Shared;
+using Hangfire;
+using HangfireService.Clients;
+using HangfireService.Clients.Contracts;
 using HangfireService.Features.Filters;
-using Common.Application.HealthChecks;
+using HangfireService.Settings;
+using Polly;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -20,7 +20,8 @@ var builder = WebApplication.CreateBuilder(args);
 		.AddCommonPresentationLayer(builder.Configuration)
 		.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly))
 		.AddCustomMassTransit(builder.Configuration)
-		.AddHangfireServices(builder.Configuration);
+		.AddHangfireServices(builder.Configuration)
+		.AddCommonHealthChecks(builder.Configuration);
 
 	builder.Services.AddControllers();
 
@@ -41,8 +42,8 @@ var app = builder.Build();
 	.UseDefaultSwagger()
 	.UseHttpsRedirection()
 	.UseRouting()
-	.UseAuthorization()
-	.UseCommonHealthChecks();
+	.UseCommonHealthChecks()
+	.UseAuthorization();
 
 	app.MapControllers();
 

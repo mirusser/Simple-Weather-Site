@@ -1,3 +1,4 @@
+using Common.Application.HealthChecks;
 using Common.Presentation;
 using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.AddHttpClient<IconClient>();
 
 	builder.Services.AddGrpcCitiesClient(builder.Configuration);
+	builder.Services.AddCommonHealthChecks(builder.Configuration);
 }
 
 var app = builder.Build();
@@ -44,7 +46,9 @@ var app = builder.Build();
 	//app.UseHttpsRedirection();
 	app.UseStaticFiles();
 
-	app.UseRouting();
+	app
+	.UseRouting()
+	.UseCommonHealthChecks();
 
 	app.UseAuthorization();
 

@@ -1,4 +1,5 @@
-﻿using Common.Presentation;
+﻿using Common.Application.HealthChecks;
+using Common.Presentation;
 using IconService;
 using IconService.Application;
 using IconService.Infrastructure;
@@ -14,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services
 		.AddCommonPresentationLayer(builder.Configuration)
 		.AddPresentation()
-		.AddApplication()
+		.AddApplication(builder.Configuration)
 		.AddInfrastructure(builder.Configuration);
 }
 
@@ -32,7 +33,9 @@ var app = builder.Build();
 
 	//app.UseHttpsRedirection();
 
-	app.UseRouting();
+	app
+	.UseRouting()
+	.UseCommonHealthChecks();
 
 	app.UseAuthorization();
 

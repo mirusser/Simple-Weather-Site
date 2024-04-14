@@ -1,3 +1,4 @@
+using Common.Application.HealthChecks;
 using Common.Presentation;
 using EmailService.Application;
 using EmailService.Domain.Settings;
@@ -35,9 +36,11 @@ var app = builder.Build();
 	app.UseSwagger();
 	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EmailService v1"));
 
-	//app.UseHttpsRedirection();
+	app.UseHttpsRedirection();
 
-	app.UseRouting();
+	app
+	.UseRouting()
+	.UseCommonHealthChecks();
 
 	app.UseAuthorization();
 
