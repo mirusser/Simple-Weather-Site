@@ -18,6 +18,7 @@ public static class ServiceRegistration
 	public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
 	{
 		var executingAssembly = Assembly.GetExecutingAssembly();
+
 		services.AddValidatorsFromAssembly(executingAssembly);
 		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -61,7 +62,7 @@ public static class ServiceRegistration
 		return services;
 	}
 
-	public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app)
+	public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app, IConfiguration configuration)
 	{
 		app.UseCommonHealthChecks();
 

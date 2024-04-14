@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common.Contracts\Common.Contracts.csproj" />
+    <ProjectReference Include="..\Common.Domain\Common.Domain.csproj" />
     <ProjectReference Include="..\Common.ExtensionMethods\Common.ExtensionMethods.csproj" />
   </ItemGroup>
   

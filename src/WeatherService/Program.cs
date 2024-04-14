@@ -92,10 +92,10 @@ var app = builder.Build();
 
 	//app.UseHttpsRedirection();
 	app.UseRouting();
+	app.UseCommonHealthChecks();
 	app.UseAuthorization();
 
 	app.MapControllers();
-	app.UseCommonHealthChecks();
 }
 
 await app.RunWithLoggerAsync();

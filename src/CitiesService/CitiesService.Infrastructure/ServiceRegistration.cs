@@ -11,34 +11,34 @@ namespace CitiesService.Infrastructure;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<FileUrlsAndPaths>(configuration.GetSection(nameof(FileUrlsAndPaths)));
-        services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));
+	public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.Configure<FileUrlsAndPaths>(configuration.GetSection(nameof(FileUrlsAndPaths)));
+		services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));
 
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString(nameof(ConnectionStrings.DefaultConnection)),
-            b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+		services.AddDbContext<ApplicationDbContext>(options =>
+			options.UseSqlServer(configuration.GetConnectionString(nameof(ConnectionStrings.DefaultConnection)),
+			b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-        services.AddTransient<ApplicationDbContext>();
+		services.AddTransient<ApplicationDbContext>();
 
-        #region Caching
+		#region Caching
 
-        services.AddMemoryCache();
+		services.AddMemoryCache();
 
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = configuration.GetSection(nameof(ConnectionStrings)).GetValue<string>(nameof(ConnectionStrings.RedisConnection));
-        });
+		services.AddStackExchangeRedisCache(options =>
+		{
+			options.Configuration = configuration.GetSection(nameof(ConnectionStrings)).GetValue<string>(nameof(ConnectionStrings.RedisConnection));
+		});
 
-        #endregion Caching
+		#endregion Caching
 
-        #region Repositories
+		#region Repositories
 
-        services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
+		services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
 
-        #endregion Repositories
+		#endregion Repositories
 
-        return services;
-    }
+		return services;
+	}
 }

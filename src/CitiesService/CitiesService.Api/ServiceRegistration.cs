@@ -2,6 +2,7 @@
 using CitiesService.Infrastructure.Contexts;
 using Common.Application.HealthChecks;
 using Common.Contracts.HealthCheck;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -9,7 +10,7 @@ namespace CitiesService.Api;
 
 public static class ServiceRegistration
 {
-	public static IServiceCollection AddPresentation(this IServiceCollection services)
+	public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddControllers();
 		services.AddCors(options =>
@@ -26,7 +27,7 @@ public static class ServiceRegistration
 
 		services.AddHttpClient();
 
-		services.AddCommonHealthChecks()
+		services.AddCommonHealthChecks(configuration)
 			.AddDbContextCheck<ApplicationDbContext>(
 				name: "SQL health check",
 				failureStatus: HealthStatus.Unhealthy,

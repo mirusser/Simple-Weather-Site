@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 	builder.Services
 		.AddCommonPresentationLayer(builder.Configuration)
-		.AddPresentation()
+		.AddPresentation(builder.Configuration)
 		.AddApplicationLayer(builder.Configuration)
 		.AddInfrastructure(builder.Configuration);
 }
@@ -27,7 +27,7 @@ var app = builder.Build();
 	.UseRouting()
 	.UseAuthorization()
 	.UseCors("AllowAll")
-	.UseApplicationLayer();
+	.UseApplicationLayer(builder.Configuration);
 
 	app.MapControllers();
 	app.UseServiceStartupPage(builder.Environment);
