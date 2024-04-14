@@ -2,7 +2,7 @@
 
 # There are so many comments here, 
 # cause I'm not really familiar with bash scripting
-# and I'm now writing it often - mea culpa
+# and I'm not writing it often - mea culpa
 
 # This script is meant to run locally for dev purposes
 # (Run with sudo)
