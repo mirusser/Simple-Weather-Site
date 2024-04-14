@@ -42,6 +42,7 @@ public static class ServiceRegistration
 		app.UseHealthChecksUI(options =>
 		{
 			options.UIPath = "/health-ui";
+			options.UseRelativeApiPath = false;
 		});
 
 		return app;
