@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using CitiesService.ApplicationCommon.Interfaces.Persistance;
+using CitiesService.ApplicationCommon.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 using CitiesService.Domain.Entities;
 using Google.Protobuf.Collections;

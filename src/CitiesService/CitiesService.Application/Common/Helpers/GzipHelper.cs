@@ -1,33 +1,52 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
-namespace CitiesService.ApplicationCommon.Helpers;
+namespace CitiesService.Application.Common.Helpers;
 
 public static class GzipHelper
 {
-    public static void Compress(FileInfo fileToCompress)
-    {
-        using FileStream originalFileStream = fileToCompress.OpenRead();
+	public static async Task CompressAsync(
+		FileInfo fileToCompress,
+		ILogger? logger = null,
+		CancellationToken cancellationToken = default)
+	{
+		await using FileStream originalFileStream = fileToCompress.OpenRead();
 
-        if ((File.GetAttributes(fileToCompress.FullName) & FileAttributes.Hidden) != FileAttributes.Hidden & fileToCompress.Extension != ".gz")
-        {
-            using FileStream compressedFileStream = File.Create(fileToCompress.FullName + ".gz");
-            using GZipStream compressionStream = new(compressedFileStream, CompressionMode.Compress);
-            originalFileStream.CopyTo(compressionStream);
-            //Console.WriteLine("Compressed {0} from {1} to {2} bytes.",
-            //    fileToCompress.Name, fileToCompress.Length.ToString(), compressedFileStream.Length.ToString());
-        }
-    }
+		if ((File.GetAttributes(fileToCompress.FullName) & FileAttributes.Hidden) == FileAttributes.Hidden
+			|| fileToCompress.Extension == ".gz")
+		{
+			return;
+		}
 
-    public static void Decompress(FileInfo fileToDecompress)
-    {
-        using FileStream originalFileStream = fileToDecompress.OpenRead();
-        string currentFileName = fileToDecompress.FullName;
-        string newFileName = currentFileName.Remove(currentFileName.Length - fileToDecompress.Extension.Length);
+		await using FileStream compressedFileStream = File.Create(fileToCompress.FullName + ".gz");
+		await using GZipStream compressionStream = new(compressedFileStream, CompressionMode.Compress);
+		await originalFileStream.CopyToAsync(compressionStream, cancellationToken);
 
-        using FileStream decompressedFileStream = File.Create(newFileName);
-        using GZipStream decompressionStream = new(originalFileStream, CompressionMode.Decompress);
-        decompressionStream.CopyTo(decompressedFileStream);
-        //Console.WriteLine("Decompressed: {0}", fileToDecompress.Name);
-    }
+		logger?.LogInformation(
+			"Compressed {FileName} from {FileLength} to {CompressedFileLength} bytes.",
+			fileToCompress.Name,
+			fileToCompress.Length.ToString(),
+			compressedFileStream.Length.ToString());
+	}
+
+	public static async Task DecompressAsync(
+		FileInfo fileToDecompress,
+		ILogger? logger = null,
+		CancellationToken cancellationToken = default)
+	{
+		await using FileStream originalFileStream = fileToDecompress.OpenRead();
+		string currentFileName = fileToDecompress.FullName;
+		string newFileName = currentFileName.Remove(currentFileName.Length - fileToDecompress.Extension.Length);
+
+		await using FileStream decompressedFileStream = File.Create(newFileName);
+		await using GZipStream decompressionStream = new(originalFileStream, CompressionMode.Decompress);
+		await decompressionStream.CopyToAsync(decompressedFileStream, cancellationToken);
+
+		logger?.LogInformation(
+			"Decompressed: {FileName}",
+			fileToDecompress.Name);
+	}
 }

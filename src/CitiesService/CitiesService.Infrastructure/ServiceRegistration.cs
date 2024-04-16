@@ -1,4 +1,4 @@
-﻿using CitiesService.ApplicationCommon.Interfaces.Persistance;
+﻿using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
 using CitiesService.Infrastructure.Contexts;
@@ -28,7 +28,9 @@ public static class ServiceRegistration
 
 		services.AddStackExchangeRedisCache(options =>
 		{
-			options.Configuration = configuration.GetSection(nameof(ConnectionStrings)).GetValue<string>(nameof(ConnectionStrings.RedisConnection));
+			options.Configuration = configuration
+				.GetSection(nameof(ConnectionStrings))
+				.GetValue<string>(nameof(ConnectionStrings.RedisConnection));
 		});
 
 		#endregion Caching

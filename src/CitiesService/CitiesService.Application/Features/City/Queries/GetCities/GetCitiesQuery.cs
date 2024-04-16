@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
-using CitiesService.ApplicationCommon.Interfaces.Persistance;
 using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
 using ErrorOr;
@@ -19,91 +18,81 @@ namespace CitiesService.Application.Features.City.Queries.GetCities;
 
 public class GetCitiesQuery : IRequest<ErrorOr<GetCitiesResult>>
 {
-    public string CityName { get; set; } = null!;
-    public int Limit { get; set; } = 10;
+	public string CityName { get; set; } = null!;
+	public int Limit { get; set; }
 }
 
-public class GetCitiesHandler
-    : IRequestHandler<GetCitiesQuery, ErrorOr<GetCitiesResult>>
+public class GetCitiesHandler(
+		IGenericRepository<CityInfo> cityInfoRepo,
+		IMapper mapper,
+		IMemoryCache memoryCache)
+	: IRequestHandler<GetCitiesQuery, ErrorOr<GetCitiesResult>>
 {
-    private readonly IGenericRepository<CityInfo> cityInfoRepo;
-    private readonly IMapper mapper;
-    private readonly IMemoryCache memoryCache;
+	//TODO: add options to settings (?)
+	private readonly MemoryCacheEntryOptions cacheExpiryOptions = new()
+	{
+		AbsoluteExpiration = DateTime.Now.AddMinutes(5),
+		Priority = CacheItemPriority.High,
+		SlidingExpiration = TimeSpan.FromMinutes(2)
+	};
 
-    private readonly MemoryCacheEntryOptions cacheExpiryOptions; //TODO: add options to settings (?)
+	public async Task<ErrorOr<GetCitiesResult>> Handle(
+		GetCitiesQuery request,
+		CancellationToken cancellationToken)
+	{
+		request.CityName = request.CityName.TrimStart().TrimEnd();
 
-    public GetCitiesHandler(
-        IGenericRepository<CityInfo> cityInfoRepo,
-        IMapper mapper,
-        IMemoryCache memoryCache)
-    {
-        this.cityInfoRepo = cityInfoRepo;
-        this.mapper = mapper;
-        this.memoryCache = memoryCache;
+		var cities = await GetCitiesByNameAsync(
+			request.CityName,
+			request.Limit,
+			cancellationToken);
 
-        cacheExpiryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTime.Now.AddMinutes(5),
-            Priority = CacheItemPriority.High,
-            SlidingExpiration = TimeSpan.FromMinutes(2)
-        };
-    }
+		return cities is null || cities.Count == 0
+			? (ErrorOr<GetCitiesResult>)Errors.City.CityNotFound
+			: (ErrorOr<GetCitiesResult>)new GetCitiesResult { Cities = cities };
+	}
 
-    public async Task<ErrorOr<GetCitiesResult>> Handle(
-        GetCitiesQuery request,
-        CancellationToken cancellationToken)
-    {
-        //TODO: move this to validator
-        if (string.IsNullOrEmpty(request.CityName) ||
-            string.IsNullOrEmpty(request.CityName.TrimStart()) ||
-            string.IsNullOrEmpty(request.CityName.TrimEnd()))
-        {
-            return new(); //TODO
-        }
+	// TODO: Use redis cache
+	private async Task<List<GetCityResult>?> GetCitiesByNameAsync(
+		string cityName,
+		int limit = 10,
+		CancellationToken cancellationToken = default)
+	{
+		if (limit <= 0)
+		{
+			return [];
+		}
 
-        request.CityName = request.CityName.TrimStart().TrimEnd();
+		var cacheKey = $"GetCitiesByName-{nameof(cityName)}-{cityName}-{nameof(limit)}-{limit}";
 
-        var cities = await GetCitiesByName(request.CityName, request.Limit);
+		if (memoryCache.TryGetValue(cacheKey, out List<GetCityResult>? cities)
+			&& cities is not null)
+		{
+			return cities;
+		}
 
-        if (cities is null)
-        {
-            return Errors.City.CityNotFound;
-        }
+		var cityInfoQuery = cityInfoRepo.FindAll(
+			c => c.Name.Contains(cityName),
+			orderByExpression: x => x.OrderBy(c => c.Id),
+			takeNumberOfRows: limit);
 
-        return new GetCitiesResult { Cities = cities };
-    }
+		var citiesExist = await cityInfoQuery
+			.AnyAsync(cancellationToken);
 
-    private async Task<List<GetCityResult>?> GetCitiesByName(string cityName, int limit = 10)
-    {
-        var cities = new List<GetCityResult>();
+		if (!citiesExist)
+		{
+			return cities;
+		}
 
-        var cacheKey = $"GetCitiesByName-{nameof(cityName)}-{cityName}-{nameof(limit)}-{limit}";
+		var cityInfoList = await cityInfoQuery
+			.GroupBy(x => x.Name)
+			.Select(x => x.First())
+			.ToListAsync(cancellationToken);
 
-        if (memoryCache.TryGetValue(cacheKey, out cities) && cities is not null)
-        {
-            return cities;
-        }
+		cities = mapper.Map<List<GetCityResult>>(cityInfoList);
 
-        if (limit <= 0)
-        {
-            return new List<GetCityResult>();
-        }
+		memoryCache.Set(cacheKey, cities, cacheExpiryOptions);
 
-        var cityInfos = cityInfoRepo.FindAll(
-            c => c.Name.Contains(cityName),
-            orderByExpression: x => x.OrderBy(c => c.Id),
-            takeNumberOfRows: limit);
-
-        if (cityInfos?.Any() == true)
-        {
-            var cityInfoList = await cityInfos.ToListAsync();
-            cityInfoList = cityInfoList.GroupBy(x => x.Name).Select(x => x.First()).ToList();
-
-            cities = mapper.Map<List<GetCityResult>>(cityInfoList);
-
-            memoryCache.Set(cacheKey, cities, cacheExpiryOptions);
-        }
-
-        return cities;
-    }
+		return cities;
+	}
 }

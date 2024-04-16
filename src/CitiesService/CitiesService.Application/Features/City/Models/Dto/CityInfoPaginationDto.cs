@@ -5,6 +5,6 @@ namespace CitiesService.Application.Features.City.Models.Dto;
 
 public class CityInfoPaginationDto
 {
-    public List<CityInfo> CityInfos { get; set; } = new List<CityInfo>();
+	public List<CityInfo> CityInfos { get; set; } = [];
     public int NumberOfAllCities { get; set; }
 }

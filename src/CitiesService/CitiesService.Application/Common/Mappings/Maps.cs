@@ -24,8 +24,7 @@ public class CityMappingConfig : IRegister
         config.NewConfig<CityInfo, GetCityResult>()
             .Map(dest => dest.Id, src => src.CityId)
             .Map(dest => dest.Country, src => src.CountryCode)
-            .Map(dest => dest.Coord.Lat, src => src.Lat)
-            .Map(dest => dest.Coord.Lon, src => src.Lon);
+			.AfterMapping((src, dest) => EnsureCoordIsNotNull(src, dest));
 
         config.NewConfig<GetCitiesRequest, GetCitiesQuery>();
         config.NewConfig<GetCitiesPaginationRequest, GetCitiesPaginationQuery>();
@@ -35,4 +34,12 @@ public class CityMappingConfig : IRegister
         config.NewConfig<GetCitiesPaginationResult, GetCitiesPaginationResponse>();
         config.NewConfig<AddCitiesToDatabaseResult, AddCitiesToDatabaseResponse>();
     }
+
+	private void EnsureCoordIsNotNull(CityInfo src, GetCityResult dest)
+	{
+		dest.Coord ??= new();
+
+		dest.Coord.Lat = src.Lat;
+		dest.Coord.Lon = src.Lon;
+	}
 }

@@ -2,7 +2,7 @@
 
 public class FileUrlsAndPaths
 {
-    public string CityListFileUrl { get; set; }
-    public string CompressedCityListFilePath { get; set; }
-    public string DecompressedCityListFilePath { get; set; }
+    public string CityListFileUrl { get; set; } = null!;
+    public string CompressedCityListFilePath { get; set; } = null!;
+    public string DecompressedCityListFilePath { get; set; } = null!;
 }

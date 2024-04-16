@@ -2,30 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace CitiesService.ApplicationCommon.Interfaces.Persistance;
+namespace CitiesService.Application.Common.Interfaces.Persistence;
 
 public interface IGenericRepository<T> where T : class
 {
     IQueryable<T> FindAll(
-        Expression<Func<T, bool>> searchExpression = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
+        Expression<Func<T, bool>> searchExpression,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,
         int skipNumberOfRows = default,
         int takeNumberOfRows = default,
-        List<string> includes = null);
+        List<string>? includes = null);
 
-    Task<T> Find(Expression<Func<T, bool>> searchExpression = null, List<string> includes = null);
+    Task<T> FindAsync(Expression<Func<T, bool>> searchExpression, List<string>? includes = null, CancellationToken cancellationToken = default);
 
-    Task<bool> CheckIfExists(Expression<Func<T, bool>> searchExpression = null);
+    Task<bool> CheckIfExistsAsync(Expression<Func<T, bool>> searchExpression, CancellationToken cancellationToken = default);
 
-    Task<bool> Create(T entity);
+    Task<bool> CreateAsync(T entity, CancellationToken cancellationToken = default);
 
-    Task CreateRange(IEnumerable<T> entities);
+    Task CreateRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
 
     bool Update(T entity);
 
     bool Delete(T entity);
 
-    Task<bool> Save();
+    Task<bool> SaveAsync(CancellationToken cancellationToken = default);
 }

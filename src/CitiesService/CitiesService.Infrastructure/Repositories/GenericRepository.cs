@@ -2,116 +2,119 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
-using CitiesService.ApplicationCommon.Interfaces.Persistance;
+using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Infrastructure.Repositories;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T>(ApplicationDbContext context) : IGenericRepository<T> where T : class
 {
-    private readonly ApplicationDbContext _context;
-    private readonly DbSet<T> _db;
+	private readonly DbSet<T> db = context.Set<T>();
 
-    public GenericRepository(ApplicationDbContext context)
-    {
-        _context = context;
-        _db = _context.Set<T>();
-    }
+	public IQueryable<T> FindAll(
+		Expression<Func<T, bool>> searchExpression = null,
+		Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
+		int skipNumberOfRows = default,
+		int takeNumberOfRows = default,
+		List<string> includes = null)
+	{
+		IQueryable<T> query = db;
 
-    public IQueryable<T> FindAll(
-        Expression<Func<T, bool>> searchExpression = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
-        int skipNumberOfRows = default,
-        int takeNumberOfRows = default,
-        List<string> includes = null)
-    {
-        IQueryable<T> query = _db;
+		if (searchExpression != null)
+		{
+			query = query.Where(searchExpression);
+		}
 
-        if (searchExpression != null)
-        {
-            query = query.Where(searchExpression);
-        }
+		if (includes?.Count > 0)
+		{
+			foreach (var table in includes)
+			{
+				query = query.Include(table);
+			}
+		}
 
-        if (includes?.Count > 0)
-        {
-            foreach (var table in includes)
-            {
-                query = query.Include(table);
-            }
-        }
+		if (orderByExpression != null)
+		{
+			query = orderByExpression(query);
+		}
 
-        if (orderByExpression != null)
-        {
-            query = orderByExpression(query);
-        }
+		if (skipNumberOfRows > 0)
+		{
+			query = query.Skip(skipNumberOfRows);
+		}
 
-        if (skipNumberOfRows > 0)
-        {
-            query = query.Skip(skipNumberOfRows);
-        }
+		if (takeNumberOfRows > 0)
+		{
+			query = query.Take(takeNumberOfRows);
+		}
 
-        if (takeNumberOfRows > 0)
-        {
-            query = query.Take(takeNumberOfRows);
-        }
+		return query;
+	}
 
-        return query;
-    }
+	public async Task<T> FindAsync(
+		Expression<Func<T, bool>> searchExpression = null,
+		List<string> includes = null,
+		CancellationToken cancellationToken = default)
+	{
+		IQueryable<T> query = db;
 
-    public async Task<T> Find(Expression<Func<T, bool>> searchExpression = null, List<string> includes = null)
-    {
-        IQueryable<T> query = _db;
+		if (includes?.Count > 0)
+		{
+			foreach (var table in includes)
+			{
+				query = query.Include(table);
+			}
+		}
 
-        if (includes?.Count > 0)
-        {
-            foreach (var table in includes)
-            {
-                query = query.Include(table);
-            }
-        }
+		return await query.FirstOrDefaultAsync(searchExpression, cancellationToken);
+	}
 
-        return await query.FirstOrDefaultAsync(searchExpression);
-    }
+	public async Task<bool> CheckIfExistsAsync(
+		Expression<Func<T, bool>> searchExpression = null,
+		CancellationToken cancellationToken = default)
+	{
+		IQueryable<T> query = db;
 
-    public async Task<bool> CheckIfExists(Expression<Func<T, bool>> searchExpression = null)
-    {
-        IQueryable<T> query = _db;
+		return await query.AnyAsync(searchExpression, cancellationToken);
+	}
 
-        return await query.AnyAsync(searchExpression);
-    }
+	public async Task<bool> CreateAsync(
+		T entity,
+		CancellationToken cancellationToken = default)
+	{
+		var entityEntry = await db.AddAsync(entity, cancellationToken);
 
-    public async Task<bool> Create(T entity)
-    {
-        var entityEntry = await _db.AddAsync(entity);
+		return entityEntry.State == EntityState.Added;
+	}
 
-        return entityEntry.State == EntityState.Added;
-    }
+	public async Task CreateRangeAsync(
+		IEnumerable<T> entities,
+		CancellationToken cancellationToken = default)
+	{
+		await db.AddRangeAsync(entities, cancellationToken);
+	}
 
-    public async Task CreateRange(IEnumerable<T> entities)
-    {
-        await _db.AddRangeAsync(entities);
-    }
+	public bool Delete(T entity)
+	{
+		var entityEntry = db.Remove(entity);
 
-    public bool Delete(T entity)
-    {
-        var entityEntry = _db.Remove(entity);
+		return entityEntry.State == EntityState.Deleted;
+	}
 
-        return entityEntry.State == EntityState.Deleted;
-    }
+	public bool Update(T entity)
+	{
+		var entityEntry = db.Update(entity);
 
-    public bool Update(T entity)
-    {
-        var entityEntry = _db.Update(entity);
+		return entityEntry.State == EntityState.Modified;
+	}
 
-        return entityEntry.State == EntityState.Modified;
-    }
+	public async Task<bool> SaveAsync(CancellationToken cancellationToken = default)
+	{
+		var numberOfRowsAffected = await context.SaveChangesAsync(cancellationToken);
 
-    public async Task<bool> Save()
-    {
-        var numberOfRowsAffected = await _context.SaveChangesAsync();
-
-        return numberOfRowsAffected > 0;
-    }
+		return numberOfRowsAffected > 0;
+	}
 }

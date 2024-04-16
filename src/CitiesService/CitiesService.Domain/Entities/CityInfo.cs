@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CitiesService.Domain.Entities;
 
@@ -7,19 +8,24 @@ public class CityInfo
     [Key]
     public int Id { get; set; }
 
-    //This is a city id from json file
-    [Required]
+
+	/// <summary>
+	/// This is a `city id` from json file
+	/// </summary>
+	[Required]
     public decimal CityId { get; set; }
 
     [Required]
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    public string State { get; set; }
+    public string? State { get; set; }
 
     [Required]
-    public string CountryCode { get; set; }
+    public string CountryCode { get; set; } = null!;
 
-    public decimal Lon { get; set; }
+	[Column(TypeName = "decimal(18, 2)")]
+	public decimal Lon { get; set; }
 
-    public decimal Lat { get; set; }
+	[Column(TypeName = "decimal(18, 2)")]
+	public decimal Lat { get; set; }
 }

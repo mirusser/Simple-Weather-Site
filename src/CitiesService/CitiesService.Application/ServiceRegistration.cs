@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using CitiesService.Application.Features.Listeners;
 using CitiesService.Domain.Settings;
 using Common.Application.Behaviors;
 using Common.Application.HealthChecks;
@@ -32,7 +31,8 @@ public static class ServiceRegistration
 				.GetSection(nameof(RabbitMQSettings))
 				.Bind(rabbitMQSettings);
 
-			config.AddConsumer<JobListener>();
+			// TODO: after adding a job uncomment the lines
+			//config.AddConsumer<JobListener>();
 
 			config.SetKebabCaseEndpointNameFormatter();
 			config.UsingRabbitMq((ctx, cfg) =>
