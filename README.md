@@ -7,6 +7,7 @@
 - Fixed general errors that prevented project from being fully operational when running on Docker
 - Some minor refactor
 - Still there is a lot of refactoring to do till I'm gonna be at least pleased with the state of the code
+- Added health checks for each app and configured Watchdog
 
 ### TODOs:
 
@@ -14,7 +15,7 @@
   - _in progress_
 - Implement proper exception handling in each microservice and weather site
   - _in progress_
-- In each microservice add proper logging (error, warning) using seq I think
+- In each microservice add proper logging (error, warning, info) using seq I think
   - _in progress_
 - Weather site: make proper user interface, add messages/alerts to user on what is going on (alerts on success/failure) and proper visualisation of weather forecast (like proper images and visualisation of data)
 - Implement proper healthchecks for each microservice, and implement hangfire job in weather site that will check health of each microservice from time to time, and if any will be unhealthy send mail to me with info about it (add microservice for sending emails?)
@@ -23,15 +24,17 @@
 
 ### Features that I may add:
 
+- Setup build on jenkins
+- Add tests
+- Migrate to aws, and implement with usage of aws services
 - It would be nice to be able to dowlnoad historic data in various of file types (e.g. pdg, excel, csv, html, etc)
 - Configurable via page (something like mini admin panel, at least for urls to be configurable during runtime)
-- Setup build on jenkins
-- Migrate to aws, and implement with usage of aws services
-- Add tests
+- probably not as a microservice but as a another lib: redis cache
+- automatic backup of databases
+- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
+- feature: unod (dunno what I can undo yet, TODO: think about it)
 - handle more requests/endpoints from openweather api
 - least important but would be nice to redo frontend (tho I lack in that area)
-- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
-- probably not as a microservice but as a another lib: redis cache
 
 ### Things to check out:
 
