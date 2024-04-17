@@ -8,27 +8,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EmailService.Controllers;
 
-public class MailController : ApiController
+public class MailController(
+	ISender mediator,
+	IMapper mapper) : ApiController
 {
-    private readonly IMediator _mediator;
-    private readonly IMapper mapper;
+	[HttpPost]
+	public async Task<IActionResult> SendEmail(SendEmailRequest request)
+	{
+		var command = mapper.Map<SendEmailCommand>(request);
+		var sendEmailResult = await mediator.Send(command);
 
-    public MailController(
-        IMediator mediator,
-        IMapper mapper)
-    {
-        _mediator = mediator;
-        this.mapper = mapper;
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> SendEmail(SendEmailRequest request)
-    {
-        var command = mapper.Map<SendEmailCommand>(request);
-        var sendEmailResult = await _mediator.Send(command);
-
-        return sendEmailResult.Match(
-            sendEmailResult => Ok(mapper.Map<SendEmailResponse>(sendEmailResult)),
-            errors => base.Problem(errors));
-    }
+		return sendEmailResult.Match(
+			sendEmailResult => Ok(mapper.Map<SendEmailResponse>(sendEmailResult)),
+			Problem);
+	}
 }
