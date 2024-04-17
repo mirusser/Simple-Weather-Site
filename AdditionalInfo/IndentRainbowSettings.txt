@@ -1,0 +1,9 @@
+Solid
+#FFD700,#DA70D6,#87CEFA,#FFD700,#DA70D6,#87CEFA,#FFD700,#DA70D6,#87CEFA,#FFD700
+False
+0.05
+Alternating
+True
+#40a80000
+xml:2;csproj:2;json:2
+4

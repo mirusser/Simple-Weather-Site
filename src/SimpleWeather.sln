@@ -90,12 +90,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HangfireService", "Hangfire
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.ExtensionMethods", "Common\Common.ExtensionMethods\Common.ExtensionMethods.csproj", "{61265782-9FEB-4295-8829-658695242911}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Domain", "Common\Common.Domain\Common.Domain.csproj", "{071A46CD-AD95-467B-A178-2D3203176F49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Domain", "Common\Common.Domain\Common.Domain.csproj", "{071A46CD-AD95-467B-A178-2D3203176F49}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_additional", "_additional", "{112C556E-CA0E-4272-BEC0-245D729100B1}"
 	ProjectSection(SolutionItems) = preProject
 		..\AdditionalInfo\healthchecks-appsettings.json = ..\AdditionalInfo\healthchecks-appsettings.json
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authorization", "Authorization", "{B05DE9D2-FECA-4000-A4D6-E2FD674470B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JwtAuth", "Authorization\JwtAuth\JwtAuth.csproj", "{982CEBDD-336E-45C3-89C6-DE5EE9EDD911}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionSettings", "SolutionSettings", "{8524934F-2EDF-4F41-87A4-D739F4E350F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -223,6 +229,10 @@ Global
 		{071A46CD-AD95-467B-A178-2D3203176F49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{071A46CD-AD95-467B-A178-2D3203176F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{071A46CD-AD95-467B-A178-2D3203176F49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{982CEBDD-336E-45C3-89C6-DE5EE9EDD911}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{982CEBDD-336E-45C3-89C6-DE5EE9EDD911}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{982CEBDD-336E-45C3-89C6-DE5EE9EDD911}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{982CEBDD-336E-45C3-89C6-DE5EE9EDD911}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -258,6 +268,8 @@ Global
 		{A9D4DD9D-E08D-4B5A-B2BB-AB7F7646451F} = {665A0713-11E9-4607-A920-DC9BA19A050D}
 		{61265782-9FEB-4295-8829-658695242911} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
 		{071A46CD-AD95-467B-A178-2D3203176F49} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
+		{982CEBDD-336E-45C3-89C6-DE5EE9EDD911} = {B05DE9D2-FECA-4000-A4D6-E2FD674470B4}
+		{8524934F-2EDF-4F41-87A4-D739F4E350F1} = {112C556E-CA0E-4272-BEC0-245D729100B1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D94D9173-A01D-454A-B7AC-5B639D5F6A0E}
