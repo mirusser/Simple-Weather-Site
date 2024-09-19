@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using CitiesService.ApplicationCommon.Interfaces.Persistence;
+using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 using CitiesService.Domain.Entities;
 using Google.Protobuf.Collections;
@@ -32,7 +32,7 @@ public class CitiesService : Cities.CitiesBase
         CitiesPaginationInfoRequest request,
         ServerCallContext context)
     {
-        var countOfAllCities = await cityInfoRepo.FindAll().CountAsync();
+        var countOfAllCities = await cityInfoRepo.FindAll(searchExpression: _ => true).CountAsync();
         var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities, };
 
         return citiesPaginationInfoReply;

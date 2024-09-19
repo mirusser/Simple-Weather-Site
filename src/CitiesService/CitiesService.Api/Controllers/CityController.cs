@@ -6,6 +6,7 @@ using CitiesService.Contracts.City;
 using Common.Presentation.Controllers;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,10 @@ public class CityController(
 	ISender mediator,
 	IMapper mapper) : ApiController
 {
+	//TODO: add custom authorize attribute and/or authorization handler:
+	// https://stackoverflow.com/questions/35609632/asp-net-5-authorize-against-two-or-more-policies-or-combined-policy
 	[HttpPost]
+	[Authorize(Policy = "ApiScope")]
 	public async Task<IActionResult> GetCitiesByName(GetCitiesRequest request)
 	{
 		var query = mapper.Map<GetCitiesQuery>(request);

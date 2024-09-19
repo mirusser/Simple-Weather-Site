@@ -1,0 +1,64 @@
+<Solution>
+  <Folder Name="/_build/">
+    <File Path="docker-compose.yml" />
+    <File Path="publish.bat" />
+    <File Path="publish.sh" />
+  </Folder>
+  <Folder Name="/_additional/SolutionSettings/" />
+  <Folder Name="/_additional/">
+    <File Path="..\AdditionalInfo\healthchecks-appsettings.json" />
+  </Folder>
+  <Folder Name="/WeatherSite/">
+    <Project Path="WeatherSite\GrpcCitiesClient\GrpcCitiesClient.csproj" />
+    <Project Path="WeatherSite\Site\WeatherSite.csproj" />
+  </Folder>
+  <Folder Name="/WeatherService/">
+    <Project Path="WeatherService\WeatherService.csproj" />
+  </Folder>
+  <Folder Name="/WeatherHistoryService/">
+    <Project Path="WeatherHistoryService\WeatherHistoryService.csproj" />
+  </Folder>
+  <Folder Name="/SignalRServer/">
+    <Project Path="SignalRServer\SignalRServer.csproj" />
+  </Folder>
+  <Folder Name="/MQModels/">
+    <Project Path="MQModels\MQModels.csproj" />
+  </Folder>
+  <Folder Name="/IconService/">
+    <Project Path="IconService\IconService.Api\IconService.Api.csproj" />
+    <Project Path="IconService\IconService.Application\IconService.Application.csproj" />
+    <Project Path="IconService\IconService.Contracts\IconService.Contracts.csproj" />
+    <Project Path="IconService\IconService.Domain\IconService.Domain.csproj" />
+    <Project Path="IconService\IconService.Infrastructure\IconService.Infrastructure.csproj" />
+    <Project Path="IconService\IconService.Test\IconService.Test.csproj" />
+  </Folder>
+  <Folder Name="/HangfireService/">
+    <Project Path="HangfireService\HangfireService.csproj" />
+  </Folder>
+  <Folder Name="/Gateway/">
+    <Project Path="Gateway\Gateway.csproj" />
+  </Folder>
+  <Folder Name="/EmailService/">
+    <Project Path="EmailService\EmailService.Api\EmailService.Api.csproj" />
+    <Project Path="EmailService\EmailService.Application\EmailService.Application.csproj" />
+    <Project Path="EmailService\EmailService.Contracts\EmailService.Contracts.csproj" />
+    <Project Path="EmailService\EmailService.Domain\EmailService.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Commons/">
+    <Project Path="Common\Common.Application\Common.Application.csproj" />
+    <Project Path="Common\Common.Contracts\Common.Contracts.csproj" />
+    <Project Path="Common\Common.Domain\Common.Domain.csproj" />
+    <Project Path="Common\Common.ExtensionMethods\Common.ExtensionMethods.csproj" />
+    <Project Path="Common\Common.Presentation\Common.Presentation.csproj" />
+    <Project Path="Common\Common.Shared\Common.Shared.csproj" />
+  </Folder>
+  <Folder Name="/CitiesService/">
+    <Project Path="CitiesService\CitiesGrpcService\CitiesGrpcService.csproj" />
+    <Project Path="CitiesService\CitiesService.Api\CitiesService.Api.csproj" />
+    <Project Path="CitiesService\CitiesService.Application\CitiesService.Application.csproj" />
+    <Project Path="CitiesService\CitiesService.Contracts\CitiesService.Contracts.csproj" />
+    <Project Path="CitiesService\CitiesService.Domain\CitiesService.Domain.csproj" />
+    <Project Path="CitiesService\CitiesService.Infrastructure\CitiesService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Authorization/" />
+</Solution>

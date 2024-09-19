@@ -1,5 +1,7 @@
 using Common.Application.HealthChecks;
 using Common.Presentation;
+using Common.Presentation.Http;
+using Common.Presentation.Settings;
 using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,14 +18,19 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.AddCommonPresentationLayer(builder.Configuration);
 
 	builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));
+	builder.Services.Configure<ApiConsumerAuthSettings>(builder.Configuration.GetSection(nameof(ApiConsumerAuthSettings)));
 
 	builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 	builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
+	builder.Services.AddTransient<BearerTokenHandler>();
+
 	builder.Services.AddHttpClient<WeatherForecastClient>();
-	builder.Services.AddHttpClient<CityClient>();
 	builder.Services.AddHttpClient<WeatherHistoryClient>();
 	builder.Services.AddHttpClient<IconClient>();
+
+	builder.Services.AddHttpClient<CityClient>()
+		.AddHttpMessageHandler<BearerTokenHandler>();
 
 	builder.Services.AddGrpcCitiesClient(builder.Configuration);
 	builder.Services.AddCommonHealthChecks(builder.Configuration);

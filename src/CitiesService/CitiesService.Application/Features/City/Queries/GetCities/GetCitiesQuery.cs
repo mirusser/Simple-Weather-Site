@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CitiesService.Application.Common.Interfaces.Persistence;
@@ -8,11 +10,13 @@ using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
 using ErrorOr;
+using IdentityModel.Client;
 using MapsterMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace CitiesService.Application.Features.City.Queries.GetCities;
 
@@ -25,7 +29,8 @@ public class GetCitiesQuery : IRequest<ErrorOr<GetCitiesResult>>
 public class GetCitiesHandler(
 		IGenericRepository<CityInfo> cityInfoRepo,
 		IMapper mapper,
-		IMemoryCache memoryCache)
+		IMemoryCache memoryCache,
+		ILogger<GetCitiesHandler> logger)
 	: IRequestHandler<GetCitiesQuery, ErrorOr<GetCitiesResult>>
 {
 	//TODO: add options to settings (?)
