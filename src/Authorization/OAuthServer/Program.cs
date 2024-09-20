@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 		.GetSection(nameof(Settings))
 		.Bind(settings);
 
-	var clients = settings.Clients?.Select(c => new Client() 
+	var clients = settings.Clients?.Select(c => new Client()
 	{
 		ClientId = c.ClientId,
 		AllowedGrantTypes = GrantTypes.ClientCredentials,
@@ -42,13 +42,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-	if (app.Environment.IsDevelopment())
-	{
-		app.UseSwagger();
-		app.UseSwaggerUI();
-	}
+	app.UseSwagger();
+	app.UseSwaggerUI();
 
-	app.UseHttpsRedirection();
+	if (app.Environment.IsProduction())
+	{
+		app.UseHttpsRedirection();
+	}
 
 	app.UseIdentityServer();
 

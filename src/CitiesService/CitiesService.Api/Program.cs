@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
@@ -41,16 +42,20 @@ var builder = WebApplication.CreateBuilder(args);
 				ValidateIssuerSigningKey = true,
 				ClockSkew = TimeSpan.Zero
 			};
-			options.RequireHttpsMetadata = false;
+
+			if (!builder.Environment.IsProduction())
+			{
+				options.RequireHttpsMetadata = false;
+			}
 		});
 
 	builder.Services.AddAuthorizationBuilder()
 		.AddPolicy("ApiScope", policy =>
 		{
 			policy.RequireAuthenticatedUser();
-			foreach(var claim in apiResourceAuthSettings.RequiredClaims)
+			foreach (var claim in apiResourceAuthSettings.RequiredClaims)
 			{
-				foreach(var allowedValue in claim.AllowedValues)
+				foreach (var allowedValue in claim.AllowedValues)
 				{
 					policy.RequireClaim(claim.ClaimType, allowedValue);
 				}
