@@ -484,3 +484,4 @@ src/WeatherSite/Site/favicon.ico
 /src/HangfireService/appsettings.Development.json
 /src/Authorization/OAuthServer/appsettings.Development.json
 /src/WeatherSite/appsettings.Development.json
+/src/WeatherSite/Site/appsettings.development.json
