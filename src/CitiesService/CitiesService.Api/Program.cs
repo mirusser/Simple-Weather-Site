@@ -41,6 +41,7 @@ var builder = WebApplication.CreateBuilder(args);
 				ValidateIssuerSigningKey = true,
 				ClockSkew = TimeSpan.Zero
 			};
+			options.RequireHttpsMetadata = false;
 		});
 
 	builder.Services.AddAuthorizationBuilder()

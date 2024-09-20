@@ -5,7 +5,8 @@
 # and I'm not writing it often - mea culpa
 
 # This script is meant to run locally for dev purposes
-# (Run with sudo)
+# Run with sudo (in folder with file), use this command:
+# sudo ./publish.sh
 
 # Colors for better readability
 GREEN='\033[0;32m' # for success messages
@@ -117,6 +118,7 @@ check_dependencies
 
 create_network
 
+build_and_dockerize "/Authorization/OAuthServer" "oauthserver"
 build_and_dockerize "/CitiesService/CitiesService.Api" "citiesservice"
 build_and_dockerize "/CitiesService/CitiesGrpcService" "citiesgrpcservice"
 build_and_dockerize "/WeatherService" "weatherservice"

@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  oauthserver:
+    image: oauthserver
+    container_name: oauthserver
+    hostname: oauthserver
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8079:80
+    networks:
+      - default
+      - overlaynetwork
+
   citiesservice:
     image: citiesservice
     container_name: citiesservice
