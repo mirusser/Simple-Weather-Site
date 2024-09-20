@@ -3,4 +3,4 @@ WORKDIR /app
 COPY deploy .
 ENV ASPNETCORE_URLS http://*:80
 ENV ASPNETCORE_ENVIRONMENT Docker
-ENTRYPOINT ["dotnet", "JwtAuth.Api.dll"]
+ENTRYPOINT ["dotnet", "OAuthServer.Api.dll"]
