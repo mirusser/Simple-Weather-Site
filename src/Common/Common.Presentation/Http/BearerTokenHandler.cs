@@ -17,32 +17,39 @@ public class BearerTokenHandler(
 		HttpRequestMessage request,
 		CancellationToken cancellationToken)
 	{
-		var token = await GetTokenAsync(cancellationToken);
+		var getTokenResult = await TryGetTokenAsync(cancellationToken);
 
-		if (!token.IsError && token.AccessToken is not null)
+		if (getTokenResult.IsSuccess
+			&& getTokenResult.TokenResponse?.IsError == false
+			&& getTokenResult.TokenResponse?.AccessToken is not null)
 		{
-			request.SetBearerToken(token.AccessToken);
+			request.SetBearerToken(getTokenResult.TokenResponse.AccessToken);
 		}
 		else
 		{
-			logger.LogError("{Error}: {ErrorType} {ErrorDescription}", token.Error, token.ErrorType, token.ErrorDescription);
+			logger.LogError(
+				"{Error}: {ErrorType} {ErrorDescription}",
+				getTokenResult.TokenResponse?.Error,
+				getTokenResult.TokenResponse?.ErrorType,
+				getTokenResult.TokenResponse?.ErrorDescription);
 		}
 
 		return await base.SendAsync(request, cancellationToken);
 	}
 
 	//TODO: caching
-	private async Task<TokenResponse> GetTokenAsync(CancellationToken cancellationToken = default)
+	private async Task<(bool IsSuccess, TokenResponse? TokenResponse)> TryGetTokenAsync(CancellationToken cancellationToken = default)
 	{
+		TokenResponse? tokenResponse = null;
 		var discoveryDocument = await httpClient
 			.GetDiscoveryDocumentAsync(settings.AuthorityUrl, cancellationToken: cancellationToken);
 
-		if (discoveryDocument.IsError)
+		if (!ValidateDiscoveryDocument())
 		{
-			logger.LogError("{Error}", discoveryDocument.Error);
+			return (false, tokenResponse);
 		}
 
-		var tokenResponse = await httpClient
+		tokenResponse = await httpClient
 			.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
 			{
 				Address = discoveryDocument.TokenEndpoint,
@@ -54,8 +61,34 @@ public class BearerTokenHandler(
 		if (tokenResponse.IsError)
 		{
 			logger.LogError("{Error}", tokenResponse.Error);
+			return (false, tokenResponse);
 		}
 
-		return tokenResponse;
+		return (true, tokenResponse);
+
+		bool ValidateDiscoveryDocument()
+		{
+			var result = true;
+
+			if (discoveryDocument.IsError)
+			{
+				result = false;
+				logger.LogError("{Error}", discoveryDocument.Error);
+			}
+
+			if (discoveryDocument.Issuer != settings.AuthorityUrl)
+			{
+				result = false;
+				logger.LogError("Issuer: {Issuer} different than authority url: {Authority}", discoveryDocument.Issuer, settings.AuthorityUrl);
+			}
+
+			if (string.IsNullOrEmpty(discoveryDocument.TokenEndpoint))
+			{
+				result = false;
+				logger.LogError($"{nameof(discoveryDocument.TokenEndpoint)} is null or empty");
+			}
+
+			return result;
+		}
 	}
 }
