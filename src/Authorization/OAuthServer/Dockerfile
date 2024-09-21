@@ -13,7 +13,7 @@ COPY localhost.pfx /https/
 # Set environment variables
 ENV ASPNETCORE_URLS=https://+:443;http://+:80
 ENV ASPNETCORE_ENVIRONMENT=Docker
-ENV ASPNETCORE_Kestrel__Certificates__Default__Password="your_pfx_password"
+ENV ASPNETCORE_Kestrel__Certificates__Default__Password="zaq1@WSX"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/https/localhost.pfx
 
 # Set the entry point to run your app

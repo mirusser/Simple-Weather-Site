@@ -486,3 +486,6 @@ src/WeatherSite/Site/favicon.ico
 /src/WeatherSite/appsettings.Development.json
 /src/WeatherSite/Site/appsettings.development.json
 /src/Authorization/OAuthServer/deploy
+src/Authorization/OAuthServer/openssl.cnf
+src/Authorization/OAuthServer/localhost.key
+src/Authorization/OAuthServer/localhost.crt

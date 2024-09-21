@@ -13,9 +13,9 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/localhost.pfx
     ports:
       - 8079:443
-      - 8080:80
+      - 8078:80
     volumes:
-      - ./localhost.pfx:/https/localhost.pfx  # Mount the .pfx file into the container
+      - ./Authorization/OAuthServer/localhost.pfx:/https/localhost.pfx  # Mount the .pfx file into the container
     networks:
       - default
       - overlaynetwork

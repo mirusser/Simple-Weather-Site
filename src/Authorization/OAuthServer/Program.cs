@@ -1,3 +1,4 @@
+using System.Net;
 using Duende.IdentityServer.Models;
 using OAuthServer;
 
@@ -6,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 	// Configure Kestrel to use HTTPS
 	builder.WebHost.ConfigureKestrel(serverOptions =>
 	{
-		serverOptions.Listen(IPAddress.Loopback, 5001, listenOptions =>
+		serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
 		{
 			listenOptions.UseHttps("localhost.pfx", "zaq1@WSX"); //use your_pfx_password
 		});
