@@ -8,8 +8,14 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=zaq1@WSX
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/localhost.pfx
     ports:
-      - 8079:80
+      - 8079:443
+      - 8080:80
+    volumes:
+      - ./localhost.pfx:/https/localhost.pfx  # Mount the .pfx file into the container
     networks:
       - default
       - overlaynetwork

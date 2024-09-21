@@ -57,7 +57,7 @@ var app = builder.Build();
 	.UseRouting()
 	.UseCommonHealthChecks();
 
-	app.UseAuthorization();
+	//app.UseAuthorization();
 
 	app.UseEndpoints(endpoints =>
 	{

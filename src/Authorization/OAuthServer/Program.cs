@@ -3,6 +3,15 @@ using OAuthServer;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+	// Configure Kestrel to use HTTPS
+	builder.WebHost.ConfigureKestrel(serverOptions =>
+	{
+		serverOptions.Listen(IPAddress.Loopback, 5001, listenOptions =>
+		{
+			listenOptions.UseHttps("localhost.pfx", "zaq1@WSX"); //use your_pfx_password
+		});
+	});
+
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGen();
 
@@ -44,11 +53,6 @@ var app = builder.Build();
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
-
-	if (app.Environment.IsProduction())
-	{
-		app.UseHttpsRedirection();
-	}
 
 	app.UseIdentityServer();
 
