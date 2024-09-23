@@ -41,8 +41,12 @@ public class BearerTokenHandler(
 	private async Task<(bool IsSuccess, TokenResponse? TokenResponse)> TryGetTokenAsync(CancellationToken cancellationToken = default)
 	{
 		TokenResponse? tokenResponse = null;
+
+		DiscoveryDocumentRequest discoveryRequest = new() { Address = settings.AuthorityUrl };
+		discoveryRequest.Policy.RequireHttps = false; // TODO: change for prod
+
 		var discoveryDocument = await httpClient
-			.GetDiscoveryDocumentAsync(settings.AuthorityUrl, cancellationToken: cancellationToken);
+			.GetDiscoveryDocumentAsync(discoveryRequest, cancellationToken: cancellationToken);
 
 		if (!ValidateDiscoveryDocument())
 		{
