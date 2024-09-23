@@ -15,7 +15,7 @@ services:
       - 8079:443
       - 8078:80
     volumes:
-      - ./Authorization/OAuthServer/localhost.pfx:/https/localhost.pfx  # Mount the .pfx file into the container
+      - ./Authorization/OAuthServer/localhost.pfx:/https/localhost.pfx # Mount the .pfx file into the container
     networks:
       - default
       - overlaynetwork
@@ -27,14 +27,20 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=zaq1@WSX
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/localhost.pfx
     ports:
+      - 8181:443
       - 8081:80
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:80/health']
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
+    volumes:
+      - ./CitiesService/CitiesService.Api/cert/localhost.pfx:/https/localhost.pfx # Mount the .pfx file into the container
+    # healthcheck:
+    #   test: ['CMD', 'curl', '-f', 'http://localhost:8081/health']
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 10s
     networks:
       - default
       - overlaynetwork

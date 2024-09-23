@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using CitiesService.Api;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
@@ -7,6 +8,7 @@ using Common.Presentation.Settings;
 using Common.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +17,21 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+	if (builder.Environment.EnvironmentName == "Docker")
+	{
+		builder.WebHost.ConfigureKestrel(serverOptions =>
+		{
+			// Configure Kestrel to use HTTPS
+			serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
+			{
+				listenOptions.UseHttps("cert/localhost.pfx", "zaq1@WSX"); //use your_pfx_password
+			});
+
+			// Configure Kestrel to use HTTP on port 80
+			serverOptions.Listen(IPAddress.Any, 80);
+		});
+	}
+
 	builder.Host.UseSerilog();
 
 	builder.Services

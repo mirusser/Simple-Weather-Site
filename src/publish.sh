@@ -83,35 +83,47 @@ build_and_run_docker_compose(){
     { echo -e "${RED}=> Docker compose failed.${NC}"; exit 1; }
 }
 
-forward_ports(){
+update_iptables() {
+    local port=$1
+    if ! iptables -C INPUT -p tcp --dport $port -j ACCEPT 2>/dev/null; then
+        echo -e "${YELLOW}Port $port is not allowed in iptables. Adding rule to allow it.${NC}"
+        iptables -I INPUT -p tcp --dport $port -j ACCEPT
+    else
+        echo -e "${BLUE}Port $port is already allowed in iptables.${NC}"
+    fi
+}
 
-    # Define an array of ports to check
-    ports=(5672 27017 6379 5432 5341 1435 1433 9200 9300)
-    
-    # Loop through each port in the array
-    for PORT in "${ports[@]}"; do
-        echo "Checking port: $PORT"
-        
-        # Check if the port is already allowed in the iptables firewall
-        if ! iptables -C INPUT -p tcp --dport $PORT -j ACCEPT 2>/dev/null; then
-            echo -e "${YELLOW}Port $PORT is not allowed in iptables. Adding rule to allow it.${NC}"
-            iptables -I INPUT -p tcp --dport $PORT -j ACCEPT
+check_port_binding() {
+    local port=$1
+    # Check if the port is listening and capture the output of ss related to this port
+    local listening_info=$(ss -tuln | grep ":$port")
 
-            # Save the iptables rule (uncomment the line corresponding to your system)
-            iptables-save > /etc/iptables/rules.v4 # Debian/Ubuntu
-            # service iptables save # CentOS/RHEL
-            # systemctl restart iptables # If your system uses systemd and iptables
+    if [ -z "$listening_info" ]; then
+        echo -e "${RED}Port $port is not listening. You might need to start the service that uses this port.${NC}"
+    else
+        echo -e "${GREEN}Port $port is listening.${NC}"
+        # Check if the service is bound to localhost or all interfaces
+        if echo "$listening_info" | grep -q "127.0.0.1"; then
+            echo -e "${YELLOW}Port $port is bound to localhost only.${NC}"
+        elif echo "$listening_info" | grep -q "0.0.0.0"; then
+            echo -e "${GREEN}Port $port is bound to all interfaces (0.0.0.0).${NC}"
         else
-            echo -e "${BLUE}Port $PORT is already allowed in iptables.${NC}"
+            echo -e "${BLUE}Port $port is bound to a specific external interface.${NC}"
         fi
-    
-        # Check if the port is listening
-        if ! netstat -tuln | grep -q ":$PORT"; then
-            echo -e "${RED}Port $PORT is not listening. You might need to start the service that uses this port.${NC}"
-        else
-            echo -e "${GREEN}Port $PORT is listening.${NC}"
-        fi
+    fi
+}
+
+forward_ports() {
+    local ports=(5672 27017 6379 5432 5341 1435 1433 9200 9300 8079 8078 8181 8081)
+    for port in "${ports[@]}"; do
+        echo "Checking port: $port"
+        update_iptables $port
+        check_port_binding $port
     done
+    # Save iptables rules once after all updates (uncomment the line corresponding to your system)
+    iptables-save > /etc/iptables/rules.v4
+    # service iptables save # CentOS/RHEL
+    # systemctl restart iptables # If your system uses systemd and iptables
 }
 
 check_dependencies

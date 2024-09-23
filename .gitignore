@@ -489,3 +489,6 @@ src/WeatherSite/Site/favicon.ico
 src/Authorization/OAuthServer/openssl.cnf
 src/Authorization/OAuthServer/localhost.key
 src/Authorization/OAuthServer/localhost.crt
+src/CitiesService/CitiesService.Api/cert/openssl.cnf
+src/CitiesService/CitiesService.Api/cert/localhost.key
+src/CitiesService/CitiesService.Api/cert/localhost.crt

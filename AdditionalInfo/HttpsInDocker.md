@@ -65,11 +65,18 @@ In `Program.cs` file, use this code:
 // Configure Kestrel to use HTTPS
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    // you can use any port, 443 is an example port (default port for https)
-    serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
+  // you can use any port, 443 is an example port (default port for https)
+  serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
 	{
+    //if file is located in root directory
 		listenOptions.UseHttps("localhost.pfx", "zaq1@WSX"); //use your .pfx password
+
+    //if file is located in 'cert' directory
+    //listenOptions.UseHttps("cert/localhost.pfx", "zaq1@WSX");
 	});
+
+  // Configure Kestrel to use HTTP on port 80
+  serverOptions.Listen(IPAddress.Any, 80);
 });
 ```
 
@@ -77,12 +84,25 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 
 In `.csproj` include:
 
+If in root directory
+
 ```
 <ItemGroup>
   <None Update="localhost.pfx">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
 </ItemGroup>
+```
+
+If in `cert` directory
+
+```
+  <ItemGroup>
+    <Folder Include="cert\" />
+    <None Update="cert\localhost.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 ```
 
 ### 5. Configure `Dockerfile`
@@ -99,6 +119,8 @@ COPY deploy .
 
 # Copy the .pfx certificate into the container
 COPY localhost.pfx /https/
+# If in 'cert' directory:
+# COPY cert/localhost.pfx /https/
 
 # Set environment variables
 ENV ASPNETCORE_URLS=https://+:443;http://+:80
@@ -141,5 +163,11 @@ networks:
     name: overlaynetwork
     external: true
 ```
+
 ---
-For reference look up `OAuthServer` project
+
+For reference look up `OAuthServer` or `CitiesService.Api` projects
+
+---
+
+Remember to forward appropiate ports (add to `iptables`)
