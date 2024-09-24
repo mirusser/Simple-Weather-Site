@@ -22,7 +22,8 @@ public static class WebApplicationStartup
 		}
 		catch (Exception ex)
 		{
-			Log.Fatal(ex, "{Name} failed to start", executingAssemblyName);
+			Log.Fatal(ex, "{Name} fatal exception during execution", executingAssemblyName);
+			throw;
 		}
 		finally
 		{
