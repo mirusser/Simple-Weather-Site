@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Application.Common.Interfaces.Persistence;
+using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
+using Common.Infrastructure.Extensions;
 using ErrorOr;
 using MapsterMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 
@@ -27,14 +24,8 @@ public class GetCitiesPaginationQuery : IRequest<ErrorOr<GetCitiesPaginationResu
 public class GetCitiesPaginationHandler(
 	IGenericRepository<CityInfo> cityInfoRepo,
 	IMapper mapper,
-	IDistributedCache distributedCache,
-	JsonSerializerOptions jsonSerializerOptions) : IRequestHandler<GetCitiesPaginationQuery, ErrorOr<GetCitiesPaginationResult>>
+	IDistributedCache distributedCache) : IRequestHandler<GetCitiesPaginationQuery, ErrorOr<GetCitiesPaginationResult>>
 {
-	private readonly DistributedCacheEntryOptions _distributedCacheEntryOptions =
-		new DistributedCacheEntryOptions() //TODO: move to settings (?) or better move caching to new lib (?)
-			.SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
-			.SetSlidingExpiration(TimeSpan.FromMinutes(2));
-
 	public async Task<ErrorOr<GetCitiesPaginationResult>> Handle(
 		GetCitiesPaginationQuery request,
 		CancellationToken cancellationToken)
@@ -77,35 +68,29 @@ public class GetCitiesPaginationHandler(
 		return citiesPaginationDto;
 	}
 
-	// TODO: uses redis caching
 	private async Task<CityInfoPaginationDto> GetCitiesInfoPaginationAsync(
 		int numberOfCities = 25,
 		int pageNumber = 1,
 		CancellationToken cancellationToken = default)
 	{
 		var cacheKey = $"GetCitiesPagination-{nameof(numberOfCities)}-{numberOfCities}-{nameof(pageNumber)}-{pageNumber}";
-		string serializedCitiesInfoPagination;
-		var redisCitiesPaginationDto = await distributedCache.GetAsync(cacheKey, cancellationToken);
 
-		CityInfoPaginationDto? result = new();
+		var (isSuccess, resultFromCache) = await distributedCache
+			.TryGetValueAsync<CityInfoPaginationDto>(cacheKey, cancellationToken);
 
-		if (redisCitiesPaginationDto is not null)
+		if (isSuccess && resultFromCache is not null)
 		{
-			serializedCitiesInfoPagination = Encoding.UTF8.GetString(redisCitiesPaginationDto);
-			result = JsonSerializer.Deserialize<CityInfoPaginationDto>(
-				serializedCitiesInfoPagination,
-				jsonSerializerOptions);
-
-			result ??= new();
-
-			return result;
+			return resultFromCache;
 		}
 
-		result.NumberOfAllCities = await cityInfoRepo
-			.FindAll(
-				searchExpression: _ => true,
-				orderByExpression: x => x.OrderBy(c => c.Name))
-			.CountAsync(cancellationToken);
+		CityInfoPaginationDto? result = new()
+		{
+			NumberOfAllCities = await cityInfoRepo
+				.FindAll(
+					searchExpression: _ => true,
+					orderByExpression: ci => ci.OrderBy(c => c.Name))
+				.CountAsync(cancellationToken)
+		};
 
 		if (pageNumber >= 1 && numberOfCities >= 1)
 		{
@@ -122,17 +107,7 @@ public class GetCitiesPaginationHandler(
 				.ToListAsync(cancellationToken);
 		}
 
-		serializedCitiesInfoPagination = JsonSerializer.Serialize(
-			result,
-			jsonSerializerOptions);
-
-		redisCitiesPaginationDto = Encoding.UTF8.GetBytes(serializedCitiesInfoPagination);
-
-		await distributedCache.SetAsync(
-			cacheKey,
-			redisCitiesPaginationDto,
-			_distributedCacheEntryOptions,
-			cancellationToken);
+		await distributedCache.SetAsync(cacheKey, result, cancellationToken);
 
 		return result;
 	}

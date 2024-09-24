@@ -104,6 +104,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JwtAuth", "Authorization\Jw
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuthServer", "Authorization\OAuthServer\OAuthServer.csproj", "{A4BB3041-D755-4C3E-9F0D-79C13F8C0B04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Infrastructure", "Common\Common.Infrastructure\Common.Infrastructure.csproj", "{DC5DAE25-8552-45CA-98C3-7D8B02466250}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -238,6 +240,10 @@ Global
 		{A4BB3041-D755-4C3E-9F0D-79C13F8C0B04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4BB3041-D755-4C3E-9F0D-79C13F8C0B04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4BB3041-D755-4C3E-9F0D-79C13F8C0B04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC5DAE25-8552-45CA-98C3-7D8B02466250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC5DAE25-8552-45CA-98C3-7D8B02466250}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC5DAE25-8552-45CA-98C3-7D8B02466250}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC5DAE25-8552-45CA-98C3-7D8B02466250}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -276,6 +282,7 @@ Global
 		{8524934F-2EDF-4F41-87A4-D739F4E350F1} = {112C556E-CA0E-4272-BEC0-245D729100B1}
 		{A1E82EF1-14C9-40D8-9CF5-816ECC89CB1B} = {B05DE9D2-FECA-4000-A4D6-E2FD674470B4}
 		{A4BB3041-D755-4C3E-9F0D-79C13F8C0B04} = {B05DE9D2-FECA-4000-A4D6-E2FD674470B4}
+		{DC5DAE25-8552-45CA-98C3-7D8B02466250} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D94D9173-A01D-454A-B7AC-5B639D5F6A0E}

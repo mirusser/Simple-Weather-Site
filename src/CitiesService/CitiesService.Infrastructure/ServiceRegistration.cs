@@ -3,6 +3,8 @@ using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
 using CitiesService.Infrastructure.Contexts;
 using CitiesService.Infrastructure.Repositories;
+using Common.Infrastructure;
+using Common.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,18 +24,7 @@ public static class ServiceRegistration
 
 		services.AddTransient<ApplicationDbContext>();
 
-		#region Caching
-
-		services.AddMemoryCache();
-
-		services.AddStackExchangeRedisCache(options =>
-		{
-			options.Configuration = configuration
-				.GetSection(nameof(ConnectionStrings))
-				.GetValue<string>(nameof(ConnectionStrings.RedisConnection));
-		});
-
-		#endregion Caching
+		services.AddCommonInfrastructure(configuration);
 
 		#region Repositories
 

@@ -2,6 +2,6 @@
 
 public record GetCitiesPaginationRequest
 (
-    int NumberOfCities,
-    int PageNumber
+    int NumberOfCities = 10,
+    int PageNumber = 1
 );

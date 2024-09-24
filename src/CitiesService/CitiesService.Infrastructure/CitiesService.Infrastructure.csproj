@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Common.Infrastructure\Common.Infrastructure.csproj" />
     <ProjectReference Include="..\CitiesService.Application\CitiesService.Application.csproj" />
     <ProjectReference Include="..\CitiesService.Domain\CitiesService.Domain.csproj" />
   </ItemGroup>
