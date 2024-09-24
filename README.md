@@ -8,6 +8,7 @@
 - Some minor refactor
 - Still there is a lot of refactoring to do till I'm gonna be at least pleased with the state of the code
 - Added health checks for each app and configured Watchdog
+- Added (a little janky but still) OAuth identity server (using duende package for test purposes)
 
 ### TODOs:
 
@@ -20,7 +21,6 @@
 - Weather site: make proper user interface, add messages/alerts to user on what is going on (alerts on success/failure) and proper visualisation of weather forecast (like proper images and visualisation of data)
 - Implement proper healthchecks for each microservice, and implement hangfire job in weather site that will check health of each microservice from time to time, and if any will be unhealthy send mail to me with info about it (add microservice for sending emails?)
   - _in progress_
-- add OAuth
 
 ### Features that I may add:
 
@@ -34,7 +34,7 @@
 - in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
 - feature: unod (dunno what I can undo yet, TODO: think about it)
 - handle more requests/endpoints from openweather api
-- least important but would be nice to redo frontend (tho I lack in that area)
+- least important but would be nice to redo frontend (tho I lack in that area, maybe use blazor)
 
 ### Things to check out:
 
