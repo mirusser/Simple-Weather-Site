@@ -1,4 +1,7 @@
-﻿using Common.Presentation.Settings;
+﻿using System.Threading;
+using Common.ExtensionMethods;
+using Common.Infrastructure.Managers.Contracts;
+using Common.Presentation.Settings;
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -6,18 +9,20 @@ using Microsoft.Extensions.Options;
 namespace Common.Presentation.Http;
 
 public class BearerTokenHandler(
-	ILogger<BearerTokenHandler> logger,
 	HttpClient httpClient,
+	ICacheManager cache,
+	ILogger<BearerTokenHandler> logger,
 	IOptions<ApiConsumerAuthSettings> options) : DelegatingHandler
 {
 	private readonly HttpClient httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 	private readonly ApiConsumerAuthSettings settings = options.Value;
+	private readonly string applicationName = AssemblyExtensions.GetProjectName();
 
 	protected override async Task<HttpResponseMessage> SendAsync(
 		HttpRequestMessage request,
 		CancellationToken cancellationToken)
 	{
-		var getTokenResult = await TryGetTokenAsync(cancellationToken);
+		var getTokenResult = await TryGetTokenFromCacheAsync(cancellationToken);
 
 		if (getTokenResult.IsSuccess
 			&& getTokenResult.TokenResponse?.IsError == false
@@ -37,7 +42,28 @@ public class BearerTokenHandler(
 		return await base.SendAsync(request, cancellationToken);
 	}
 
-	//TODO: caching
+	private async Task<(bool IsSuccess, TokenResponse? TokenResponse)> TryGetTokenFromCacheAsync(CancellationToken cancellationToken = default)
+	{
+		var cacheKey = $"{applicationName}-access-token";
+
+		(bool isSuccess, TokenResponse? tokenResponse) = await cache
+			.TryGetValueAsync<TokenResponse?>(cacheKey, cancellationToken);
+
+		if (isSuccess && tokenResponse is not null)
+		{
+			return (isSuccess, tokenResponse);
+		}
+
+		(isSuccess, tokenResponse) = await TryGetTokenAsync(cancellationToken);
+
+		if (isSuccess)
+		{
+			await cache.SetAsync(cacheKey, tokenResponse, cancellationToken);
+		}
+
+		return (isSuccess, tokenResponse);
+	}
+
 	private async Task<(bool IsSuccess, TokenResponse? TokenResponse)> TryGetTokenAsync(CancellationToken cancellationToken = default)
 	{
 		TokenResponse? tokenResponse = null;
@@ -59,7 +85,7 @@ public class BearerTokenHandler(
 				Address = discoveryDocument.TokenEndpoint,
 				ClientId = settings.ClientId,
 				ClientSecret = settings.ClientSecret,
-				Scope = settings.Scope
+				Scope = settings.Scope,
 			}, cancellationToken: cancellationToken);
 
 		if (tokenResponse.IsError)

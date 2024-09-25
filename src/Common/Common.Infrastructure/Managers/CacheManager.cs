@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
+using Common.Infrastructure.Managers.Contracts;
 
-namespace Common.Infrastructure.Extensions;
+namespace Common.Infrastructure.Managers;
 
-public static class DistributedCacheExtensions
+public class CacheManager(IDistributedCache cache) : ICacheManager
 {
-	private static JsonSerializerOptions serializerOptions = new()
+	private static string versionKey = "v1";
+
+	private static readonly JsonSerializerOptions serializerOptions = new()
 	{
 		PropertyNamingPolicy = null,
 		WriteIndented = true,
@@ -20,13 +20,12 @@ public static class DistributedCacheExtensions
 	};
 
 	//TODO: get options from settings
-	private static DistributedCacheEntryOptions options =
+	private static readonly DistributedCacheEntryOptions options =
 		new DistributedCacheEntryOptions()
-			.SetAbsoluteExpiration(TimeSpan.FromMinutes(10))
+			.SetAbsoluteExpiration(TimeSpan.FromMinutes(30))
 			.SetSlidingExpiration(TimeSpan.FromMinutes(2));
 
-	public static async Task SetAsync<T>(
-		this IDistributedCache cache,
+	public async Task SetAsync<T>(
 		string key,
 		T value,
 		CancellationToken cancellationToken = default)
@@ -34,16 +33,17 @@ public static class DistributedCacheExtensions
 		var serialized = JsonSerializer.Serialize(value, serializerOptions);
 		var bytes = Encoding.UTF8.GetBytes(serialized);
 
+		key = SetFullKey(key);
 		await cache.SetAsync(key, bytes, options, cancellationToken);
 		return;
 	}
 
-	public static async Task<(bool IsSuccess, T? Value)> TryGetValueAsync<T>(
-		this IDistributedCache cache,
+	public async Task<(bool IsSuccess, T? Value)> TryGetValueAsync<T>(
 		string key,
 		CancellationToken cancellationToken = default)
 	{
 		T? value = default;
+		key = SetFullKey(key);
 
 		var val = await cache.GetAsync(key, cancellationToken);
 
@@ -57,13 +57,14 @@ public static class DistributedCacheExtensions
 		return (true, value);
 	}
 
-	public static async Task<T?> GetOrSetAsync<T>(
-		this IDistributedCache cache,
+	public async Task<T?> GetOrSetAsync<T>(
 		string key,
 		Func<Task<T>> task,
 		CancellationToken cancellationToken = default)
 	{
-		var (isSuccess, value) = await cache.TryGetValueAsync<T?>(key, cancellationToken);
+		key = SetFullKey(key);
+
+		(bool isSuccess, T? value) = await TryGetValueAsync<T>(key, cancellationToken);
 
 		if (isSuccess)
 		{
@@ -74,9 +75,17 @@ public static class DistributedCacheExtensions
 
 		if (value is not null)
 		{
-			await cache.SetAsync<T>(key, value, cancellationToken);
+			await SetAsync<T>(key, value, cancellationToken);
 		}
 
 		return value;
 	}
+
+	public void InvalidateCache()
+	{
+		versionKey = $"v{DateTime.UtcNow.Ticks}";
+	}
+
+	private string SetFullKey(string key)
+		=> $"{versionKey}{key}";
 }

@@ -9,6 +9,7 @@ using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
+using Common.Infrastructure.Managers.Contracts;
 using ErrorOr;
 using IdentityModel.Client;
 using MapsterMapper;
@@ -29,18 +30,10 @@ public class GetCitiesQuery : IRequest<ErrorOr<GetCitiesResult>>
 public class GetCitiesHandler(
 		IGenericRepository<CityInfo> cityInfoRepo,
 		IMapper mapper,
-		IMemoryCache memoryCache,
+		ICacheManager cache,
 		ILogger<GetCitiesHandler> logger)
 	: IRequestHandler<GetCitiesQuery, ErrorOr<GetCitiesResult>>
 {
-	//TODO: add options to settings (?)
-	private readonly MemoryCacheEntryOptions cacheExpiryOptions = new()
-	{
-		AbsoluteExpiration = DateTime.Now.AddMinutes(5),
-		Priority = CacheItemPriority.High,
-		SlidingExpiration = TimeSpan.FromMinutes(2)
-	};
-
 	public async Task<ErrorOr<GetCitiesResult>> Handle(
 		GetCitiesQuery request,
 		CancellationToken cancellationToken)
@@ -57,7 +50,6 @@ public class GetCitiesHandler(
 			: (ErrorOr<GetCitiesResult>)new GetCitiesResult { Cities = cities };
 	}
 
-	// TODO: Use redis cache
 	private async Task<List<GetCityResult>?> GetCitiesByNameAsync(
 		string cityName,
 		int limit = 10,
@@ -70,10 +62,12 @@ public class GetCitiesHandler(
 
 		var cacheKey = $"GetCitiesByName-{nameof(cityName)}-{cityName}-{nameof(limit)}-{limit}";
 
-		if (memoryCache.TryGetValue(cacheKey, out List<GetCityResult>? cities)
-			&& cities is not null)
+		var (isSuccess, citiesFromCache) = await cache
+			.TryGetValueAsync<List<GetCityResult>?>(cacheKey, cancellationToken);
+
+		if (isSuccess && citiesFromCache is not null)
 		{
-			return cities;
+			return citiesFromCache;
 		}
 
 		var cityInfoQuery = cityInfoRepo.FindAll(
@@ -86,7 +80,7 @@ public class GetCitiesHandler(
 
 		if (!citiesExist)
 		{
-			return cities;
+			return [];
 		}
 
 		var cityInfoList = await cityInfoQuery
@@ -94,9 +88,9 @@ public class GetCitiesHandler(
 			.Select(x => x.First())
 			.ToListAsync(cancellationToken);
 
-		cities = mapper.Map<List<GetCityResult>>(cityInfoList);
+		var cities = mapper.Map<List<GetCityResult>>(cityInfoList);
 
-		memoryCache.Set(cacheKey, cities, cacheExpiryOptions);
+		await cache.SetAsync(cacheKey, cities, cancellationToken);
 
 		return cities;
 	}

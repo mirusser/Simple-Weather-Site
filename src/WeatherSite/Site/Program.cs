@@ -1,4 +1,5 @@
 using Common.Application.HealthChecks;
+using Common.Infrastructure;
 using Common.Presentation;
 using Common.Presentation.Http;
 using Common.Presentation.Settings;
@@ -15,6 +16,7 @@ using WeatherSite.Settings;
 var builder = WebApplication.CreateBuilder(args);
 {
 	builder.Host.UseSerilog();
+	builder.Services.AddCommonInfrastructure(builder.Configuration);
 	builder.Services.AddCommonPresentationLayer(builder.Configuration);
 
 	builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));

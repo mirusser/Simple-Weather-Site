@@ -6,8 +6,16 @@ using Microsoft.Extensions.Logging;
 
 namespace CitiesService.Application.Common.Helpers;
 
+/// <summary>
+/// Provides methods for compressing and decompressing files using the GZip compression algorithm.
+/// </summary>
 public static class GzipHelper
 {
+	private const string fileExtension = ".gz";
+
+	/// <summary>
+	/// Compresses a specified file using GZip compression if the file is not hidden and does not already have a .gz extension.
+	/// </summary>
 	public static async Task CompressAsync(
 		FileInfo fileToCompress,
 		ILogger? logger = null,
@@ -16,12 +24,12 @@ public static class GzipHelper
 		await using FileStream originalFileStream = fileToCompress.OpenRead();
 
 		if ((File.GetAttributes(fileToCompress.FullName) & FileAttributes.Hidden) == FileAttributes.Hidden
-			|| fileToCompress.Extension == ".gz")
+			|| fileToCompress.Extension == fileExtension)
 		{
 			return;
 		}
 
-		await using FileStream compressedFileStream = File.Create(fileToCompress.FullName + ".gz");
+		await using FileStream compressedFileStream = File.Create($"fileToCompress.FullName{fileExtension}");
 		await using GZipStream compressionStream = new(compressedFileStream, CompressionMode.Compress);
 		await originalFileStream.CopyToAsync(compressionStream, cancellationToken);
 
@@ -32,6 +40,9 @@ public static class GzipHelper
 			compressedFileStream.Length.ToString());
 	}
 
+	/// <summary>
+	/// Decompresses a specified GZip-compressed file back to its original format.
+	/// </summary>
 	public static async Task DecompressAsync(
 		FileInfo fileToDecompress,
 		ILogger? logger = null,

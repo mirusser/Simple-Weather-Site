@@ -4,18 +4,20 @@ using OAuthServer;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-	builder.WebHost.ConfigureKestrel(serverOptions =>
+	if (builder.Environment.EnvironmentName == "Docker")
 	{
-		// Configure Kestrel to use HTTPS
-		serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
+		builder.WebHost.ConfigureKestrel(serverOptions =>
 		{
-			listenOptions.UseHttps("localhost.pfx", "zaq1@WSX"); //use your_pfx_password
+			// Configure Kestrel to use HTTPS
+			serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
+			{
+				listenOptions.UseHttps("localhost.pfx", "zaq1@WSX"); //use your_pfx_password
+			});
+
+			// Configure Kestrel to use HTTP on port 80
+			serverOptions.Listen(IPAddress.Any, 80);
 		});
-
-		// Configure Kestrel to use HTTP on port 80
-		serverOptions.Listen(IPAddress.Any, 80);
-	});
-
+	}
 
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGen();
@@ -34,7 +36,7 @@ var builder = WebApplication.CreateBuilder(args);
 				new Secret(c.ClientSecret.Sha256())
 			},
 		AllowedScopes = c.AllowedScopes,
-		AlwaysSendClientClaims = true
+		AlwaysSendClientClaims = true,
 	});
 
 	var apiScopes = settings.Scopes.Select(s => new ApiScope(s.Name, s.DisplayName));

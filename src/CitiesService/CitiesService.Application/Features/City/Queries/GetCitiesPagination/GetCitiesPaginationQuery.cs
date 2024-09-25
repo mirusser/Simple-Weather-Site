@@ -6,7 +6,7 @@ using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
-using Common.Infrastructure.Extensions;
+using Common.Infrastructure.Managers.Contracts;
 using ErrorOr;
 using MapsterMapper;
 using MediatR;
@@ -24,7 +24,7 @@ public class GetCitiesPaginationQuery : IRequest<ErrorOr<GetCitiesPaginationResu
 public class GetCitiesPaginationHandler(
 	IGenericRepository<CityInfo> cityInfoRepo,
 	IMapper mapper,
-	IDistributedCache distributedCache) : IRequestHandler<GetCitiesPaginationQuery, ErrorOr<GetCitiesPaginationResult>>
+	ICacheManager cache) : IRequestHandler<GetCitiesPaginationQuery, ErrorOr<GetCitiesPaginationResult>>
 {
 	public async Task<ErrorOr<GetCitiesPaginationResult>> Handle(
 		GetCitiesPaginationQuery request,
@@ -75,7 +75,7 @@ public class GetCitiesPaginationHandler(
 	{
 		var cacheKey = $"GetCitiesPagination-{nameof(numberOfCities)}-{numberOfCities}-{nameof(pageNumber)}-{pageNumber}";
 
-		var (isSuccess, resultFromCache) = await distributedCache
+		var (isSuccess, resultFromCache) = await cache
 			.TryGetValueAsync<CityInfoPaginationDto>(cacheKey, cancellationToken);
 
 		if (isSuccess && resultFromCache is not null)
@@ -107,7 +107,7 @@ public class GetCitiesPaginationHandler(
 				.ToListAsync(cancellationToken);
 		}
 
-		await distributedCache.SetAsync(cacheKey, result, cancellationToken);
+		await cache.SetAsync(cacheKey, result, cancellationToken);
 
 		return result;
 	}
