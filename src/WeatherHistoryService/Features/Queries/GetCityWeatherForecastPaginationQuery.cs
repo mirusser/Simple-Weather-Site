@@ -8,23 +8,20 @@ namespace WeatherHistoryService.Features.Queries;
 
 public class GetCityWeatherForecastPaginationQuery : IRequest<CityWeatherForecastPaginationDto>
 {
-    public int NumberOfEntities { get; set; }
-    public int PageNumber { get; set; }
+	public int NumberOfEntities { get; set; }
+	public int PageNumber { get; set; }
 }
 
-public class GetCityWeatherForecastPaginationHandler : IRequestHandler<GetCityWeatherForecastPaginationQuery, CityWeatherForecastPaginationDto>
+public class GetCityWeatherForecastPaginationHandler(ICityWeatherForecastService cityWeatherForecastService)
+	: IRequestHandler<GetCityWeatherForecastPaginationQuery, CityWeatherForecastPaginationDto>
 {
-    private readonly ICityWeatherForecastService _cityWeatherForecastService;
+	public async Task<CityWeatherForecastPaginationDto> Handle(
+		GetCityWeatherForecastPaginationQuery request,
+		CancellationToken cancellationToken)
+	{
+		var cityWeatherForecastPaginationDto = await cityWeatherForecastService
+			.GetCityWeatherForecastPaginationAsync(request.NumberOfEntities, request.PageNumber, cancellationToken);
 
-    public GetCityWeatherForecastPaginationHandler(ICityWeatherForecastService cityWeatherForecastService)
-    {
-        _cityWeatherForecastService = cityWeatherForecastService;
-    }
-
-    public async Task<CityWeatherForecastPaginationDto> Handle(GetCityWeatherForecastPaginationQuery request, CancellationToken cancellationToken)
-    {
-        var cityWeatherForecastPaginationDto = await _cityWeatherForecastService.GetCityWeatherForecastPagination(request.NumberOfEntities, request.PageNumber);
-
-        return cityWeatherForecastPaginationDto;
-    }
+		return cityWeatherForecastPaginationDto;
+	}
 }

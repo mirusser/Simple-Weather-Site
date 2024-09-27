@@ -5,20 +5,19 @@ using WeatherHistoryService.Mongo;
 
 namespace WeatherHistoryService.Services;
 
-public class MongoCollectionFactory<TMongoDocument> : IMongoCollectionFactory<TMongoDocument> where TMongoDocument : class
+public class MongoCollectionFactory<TMongoDocument>(IOptions<MongoSettings> settings)
+	: IMongoCollectionFactory<TMongoDocument> where TMongoDocument : class
 {
-    private readonly MongoSettings _settings;
+    private readonly MongoSettings settings = settings.Value;
 
-    public MongoCollectionFactory(IOptions<MongoSettings> settings)
+	public IMongoCollection<TMongoDocument> Create(string? collectionName = null)
     {
-        _settings = settings.Value;
-    }
+        collectionName = !string.IsNullOrEmpty(collectionName) 
+            ? collectionName 
+            : typeof(TMongoDocument).Name;
 
-    public IMongoCollection<TMongoDocument> Create(string? collectionName = null)
-    {
-        collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : typeof(TMongoDocument).Name;
-        var client = new MongoClient(_settings.ConnectionString);
-        var database = client.GetDatabase(_settings.Database);
+        var client = new MongoClient(settings.ConnectionString);
+        var database = client.GetDatabase(settings.Database);
 
         if (!database.ListCollectionNames().ToList().Any(c => c == collectionName))
         {

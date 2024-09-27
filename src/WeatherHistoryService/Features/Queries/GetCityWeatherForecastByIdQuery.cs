@@ -11,18 +11,15 @@ public class GetCityWeatherForecastByIdQuery : IRequest<CityWeatherForecastDocum
     public string Id { get; set; } = null!;
 }
 
-public class GetCityWeatherForecastByIdHandler : IRequestHandler<GetCityWeatherForecastByIdQuery, CityWeatherForecastDocument?>
+public class GetCityWeatherForecastByIdHandler(ICityWeatherForecastService cityWeatherForecastService) 
+    : IRequestHandler<GetCityWeatherForecastByIdQuery, CityWeatherForecastDocument?>
 {
-    private readonly ICityWeatherForecastService _cityWeatherForecastService;
-
-    public GetCityWeatherForecastByIdHandler(ICityWeatherForecastService cityWeatherForecastService)
+	public async Task<CityWeatherForecastDocument?> Handle(
+        GetCityWeatherForecastByIdQuery request, 
+        CancellationToken cancellationToken)
     {
-        _cityWeatherForecastService = cityWeatherForecastService;
-    }
-
-    public async Task<CityWeatherForecastDocument?> Handle(GetCityWeatherForecastByIdQuery request, CancellationToken cancellationToken)
-    {
-        var cityWeatherForecast = await _cityWeatherForecastService.GetAsync(request.Id);
+        var cityWeatherForecast = await cityWeatherForecastService
+            .GetAsync(request.Id, cancellationToken);
 
         return cityWeatherForecast;
     }
