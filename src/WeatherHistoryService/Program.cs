@@ -16,6 +16,7 @@ using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
 using WeatherHistoryService.Settings;
 using Common.Application.HealthChecks;
+using Common.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -58,11 +59,7 @@ var builder = WebApplication.CreateBuilder(args);
 	});
 
 	builder.Services.AddControllers();
-	builder.Services.AddSwaggerGen(c =>
-	{
-		c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
-	});
-
+	builder.Services.AddSharedLayer(builder.Configuration);
 	builder.Services.AddCommonHealthChecks(builder.Configuration);
 
 	//register services
@@ -77,13 +74,7 @@ var app = builder.Build();
 		app.UseDeveloperExceptionPage();
 	}
 
-	#region Swagger
-
-	app.UseSwagger();
-	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeatherHistoryService v1"));
-
-	#endregion Swagger
-
+	app.UseDefaultScalar();
 	app.UseDefaultExceptionHandler();
 	app.UseHttpsRedirection();
 	app

@@ -4,6 +4,7 @@ using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
 using Common.Presentation;
+using Common.Shared;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -60,9 +61,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 	builder.Services.AddMappings(executingAssembly);
 
+	builder.Services.AddSharedLayer(builder.Configuration);
 	builder.Services.AddControllers();
-	builder.Services.AddSwaggerGen(c => c.SwaggerDoc("v1", new() { Title = "WeatherService", Version = "v1" }));
 
+	// TODO: use resilience pipeline from commons
 	builder.Services.AddHttpClient<WeatherClient>()
 		 .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(10, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
 		 .AddTransientHttpErrorPolicy(builder => builder.CircuitBreakerAsync(3, TimeSpan.FromSeconds(10)));
@@ -83,12 +85,7 @@ var app = builder.Build();
 
 	app.UseDefaultExceptionHandler();
 
-	#region Swagger
-
-	app.UseSwagger();
-	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeatherService v1"));
-
-	#endregion Swagger
+	app.UseDefaultScalar();
 
 	//app.UseHttpsRedirection();
 	app

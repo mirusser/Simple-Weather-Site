@@ -1,5 +1,6 @@
 ﻿using Common.Application.HealthChecks;
 using Common.Presentation;
+using Common.Shared;
 using IconService;
 using IconService.Application;
 using IconService.Infrastructure;
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Host.UseSerilog();
 
 	builder.Services
+		.AddSharedLayer(builder.Configuration)
 		.AddCommonPresentationLayer(builder.Configuration)
 		.AddPresentation()
 		.AddApplication(builder.Configuration)
@@ -25,11 +27,9 @@ var app = builder.Build();
 	{
 		app.UseDeveloperExceptionPage();
 	}
-
+	
 	app.UseDefaultExceptionHandler();
-
-	app.UseSwagger();
-	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "IconService v1"));
+	app.UseDefaultScalar();
 
 	//app.UseHttpsRedirection();
 

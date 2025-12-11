@@ -17,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Host.UseSerilog();
 
 	builder.Services
+		.AddSharedLayer(builder.Configuration)
 		.AddCommonPresentationLayer(builder.Configuration)
 		.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly))
 		.AddCustomMassTransit(builder.Configuration)
@@ -25,6 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 	builder.Services.AddControllers();
 
+	// TODO: use pipeline resilience from commons
 	builder.Services.AddHttpClient<IHangfireHttpClient, HangfireHttpClient>()
 		.AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(10, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
 		.AddTransientHttpErrorPolicy(builder => builder.CircuitBreakerAsync(3, TimeSpan.FromSeconds(10)));
@@ -37,9 +39,10 @@ var app = builder.Build();
 		app.UseDeveloperExceptionPage();
 	}
 
+	app.UseDefaultScalar();
+	
 	app
 	.UseDefaultExceptionHandler()
-	.UseDefaultSwagger()
 	.UseHttpsRedirection()
 	.UseRouting()
 	.UseCommonHealthChecks()

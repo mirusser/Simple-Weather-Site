@@ -5,7 +5,6 @@ using Common.Presentation.Http;
 using Common.Presentation.Settings;
 using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
