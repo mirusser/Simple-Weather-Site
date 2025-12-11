@@ -10,99 +10,141 @@ using CitiesService.Application.Common.Helpers;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
+using Common.Infrastructure.Settings;
 using ErrorOr;
 using MapsterMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly.Registry;
 
 namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 
 public class AddCitiesToDatabaseCommand : IRequest<ErrorOr<AddCitiesToDatabaseResult>>;
 
-// TODO: better httpClient (HttpClientFactory maybe?)
 public class AddCitiesToDatabaseHandler(
-	IGenericRepository<CityInfo> cityInfoRepo,
-	IOptions<FileUrlsAndPaths> options,
-	IMapper mapper,
-	HttpClient httpClient,
-	ILogger<AddCitiesToDatabaseHandler> logger,
-	JsonSerializerOptions jsonSerializerOptions) : IRequestHandler<AddCitiesToDatabaseCommand, ErrorOr<AddCitiesToDatabaseResult>>
+    IGenericRepository<CityInfo> cityInfoRepo,
+    IOptions<FileUrlsAndPaths> fileUrlsAndPathsOptions,
+    IOptions<ResiliencePipeline> resiliencePipelineOptions,
+    IMapper mapper,
+    IHttpClientFactory clientFactory,
+    ResiliencePipelineProvider<string> pipelineProvider,
+    ILogger<AddCitiesToDatabaseHandler> logger,
+    JsonSerializerOptions jsonSerializerOptions)
+    : IRequestHandler<AddCitiesToDatabaseCommand, ErrorOr<AddCitiesToDatabaseResult>>
 {
-	private readonly FileUrlsAndPaths fileUrlsAndPaths = options.Value;
-	private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    private readonly FileUrlsAndPaths fileUrlsAndPaths = fileUrlsAndPathsOptions.Value;
 
-	public async Task<ErrorOr<AddCitiesToDatabaseResult>> Handle(
-		AddCitiesToDatabaseCommand request,
-		CancellationToken cancellationToken)
-	{
-		var anyCityExists = await cityInfoRepo
-			.CheckIfExistsAsync(c => c.Id != default, cancellationToken);
+    public async Task<ErrorOr<AddCitiesToDatabaseResult>> Handle(
+        AddCitiesToDatabaseCommand request,
+        CancellationToken cancellationToken)
+    {
+        var anyCityExists = await cityInfoRepo
+            .CheckIfExistsAsync(c => c.Id != 0, cancellationToken);
 
-		if (anyCityExists)
-		{
-			return new AddCitiesToDatabaseResult { IsSuccess = false, IsAlreadyAdded = anyCityExists };
-		}
+        if (anyCityExists)
+        {
+            return new AddCitiesToDatabaseResult { IsSuccess = false, IsAlreadyAdded = anyCityExists };
+        }
 
-		var isSuccess = await SaveCitiesFromFileToDatabase(cancellationToken);
+        var isSuccess = await SaveCitiesFromFileToDatabase(cancellationToken);
 
-		return new AddCitiesToDatabaseResult { IsSuccess = isSuccess, IsAlreadyAdded = anyCityExists };
-	}
+        return new AddCitiesToDatabaseResult { IsSuccess = isSuccess, IsAlreadyAdded = anyCityExists };
+    }
 
-	private async Task<bool> SaveCitiesFromFileToDatabase(CancellationToken cancellationToken)
-	{
-		var downloadResult = await DownloadCityFileAsync(cancellationToken);
-		if (!downloadResult)
-		{
-			return false;
-		}
+    private async Task<bool> SaveCitiesFromFileToDatabase(CancellationToken cancellationToken)
+    {
+        var downloadResult = await SaveCitiesToFileAsync(cancellationToken);
+        if (!downloadResult)
+        {
+            return false;
+        }
 
-		using StreamReader streamReader = new(fileUrlsAndPaths.DecompressedCityListFilePath);
-		string? json = streamReader.ReadToEnd();
+        using StreamReader streamReader = new(fileUrlsAndPaths.DecompressedCityListFilePath);
+        var json = await streamReader.ReadToEndAsync(cancellationToken);
 
-		List<GetCityResult>? citiesFromJson = JsonSerializer.Deserialize<List<GetCityResult>>(
-			json,
-			jsonSerializerOptions);
-		citiesFromJson ??= [];
+        var citiesFromJson = JsonSerializer.Deserialize<List<GetCityResult>>(
+            json,
+            jsonSerializerOptions);
+        citiesFromJson ??= [];
 
-		var cityInfo = mapper.Map<List<CityInfo>>(citiesFromJson);
+        var cityInfo = mapper.Map<List<CityInfo>>(citiesFromJson);
 
-		await cityInfoRepo.CreateRangeAsync(cityInfo, cancellationToken);
-		return await cityInfoRepo.SaveAsync(cancellationToken);
-	}
+        await cityInfoRepo.CreateRangeAsync(cityInfo, cancellationToken);
+        return await cityInfoRepo.SaveAsync(cancellationToken);
+    }
 
-	private async Task<bool> DownloadCityFileAsync(CancellationToken cancellationToken)
-	{
-		if (!File.Exists(fileUrlsAndPaths.CompressedCityListFilePath))
-		{
-			await DownloadFileAsync(
-				fileUrlsAndPaths.CityListFileUrl,
-				fileUrlsAndPaths.CompressedCityListFilePath,
-				cancellationToken);
-		}
+    private async Task<bool> SaveCitiesToFileAsync(CancellationToken cancellationToken)
+    {
+        if (!File.Exists(fileUrlsAndPaths.CompressedCityListFilePath))
+        {
+            var directory = Path.GetDirectoryName(fileUrlsAndPaths.CompressedCityListFilePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
-		if (!File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath))
-		{
-			var fileInfo = new FileInfo(fileUrlsAndPaths.CompressedCityListFilePath);
-			await GzipHelper.DecompressAsync(fileInfo, logger, cancellationToken);
-		}
+            await DownloadFileAsync(
+                fileUrlsAndPaths.CityListFileUrl,
+                fileUrlsAndPaths.CompressedCityListFilePath,
+                cancellationToken);
+        }
 
-		return File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath);
-	}
+        if (!File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath))
+        {
+            var directory = Path.GetDirectoryName(fileUrlsAndPaths.DecompressedCityListFilePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
-	private async Task DownloadFileAsync(
-		string requestUri,
-		string filename,
-		CancellationToken cancellationToken)
-	{
-		using var response = await _httpClient.GetAsync(
-			requestUri,
-			HttpCompletionOption.ResponseHeadersRead,
-			cancellationToken);
-		response.EnsureSuccessStatusCode();
+            var fileInfo = new FileInfo(fileUrlsAndPaths.CompressedCityListFilePath);
+            await GzipHelper.DecompressAsync(fileInfo, logger, cancellationToken);
+        }
 
-		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		await using FileStream fileStream = new(filename, FileMode.Create, FileAccess.Write, FileShare.None);
-		await stream.CopyToAsync(fileStream, cancellationToken);
-	}
+        return File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath);
+    }
+
+    private async Task DownloadFileAsync(
+        string requestUri,
+        string filename,
+        CancellationToken cancellationToken)
+    {
+        var client = clientFactory.CreateClient();
+        var pipeline = pipelineProvider.GetPipeline(resiliencePipelineOptions.Value.Name);
+        HttpResponseMessage? response = null;
+        
+        try
+        {
+            response = await pipeline.ExecuteAsync(
+                async token => await client.GetAsync(requestUri, token),
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                logger.LogError(
+                    "Failed to download file from {RequestUri}. Status: {StatusCode} ({ReasonPhrase}). Body: {Body}",
+                    requestUri,
+                    (int)response.StatusCode,
+                    response.ReasonPhrase,
+                    body);
+                return;
+            }
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            await using FileStream fileStream = new(filename, FileMode.Create, FileAccess.Write, FileShare.None);
+            await stream.CopyToAsync(fileStream, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error downloading file from {RequestUri}", requestUri);
+            throw;
+        }
+        finally
+        {
+            response?.Dispose();
+        }
+    }
 }

@@ -1,10 +1,10 @@
-# How to enable https for docker containters
+# How to enable https for docker containers
 
 For .net project that runs in docker that is set up on linux machine
 
 ### 1. Create a configuration file for OpenSSL
 
-Create a file (somwhere in the project directory) named `openssl.cnf` with the following content to include both DNS names:
+Create a file (somewhere in the project directory) named `openssl.cnf` with the following content to include both DNS names:
 
 ```
 [ req ]
@@ -170,4 +170,4 @@ For reference look up `OAuthServer` or `CitiesService.Api` projects
 
 ---
 
-Remember to forward appropiate ports (add to `iptables`)
+Remember to forward appropriate ports (add to `iptables`)

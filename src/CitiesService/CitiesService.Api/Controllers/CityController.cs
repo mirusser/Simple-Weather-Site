@@ -20,7 +20,7 @@ public class CityController(
 	//TODO: add custom authorize attribute and/or authorization handler:
 	// https://stackoverflow.com/questions/35609632/asp-net-5-authorize-against-two-or-more-policies-or-combined-policy
 	[HttpPost]
-	[Authorize(Policy = "ApiScope")]
+	//[Authorize(Policy = "ApiScope")]
 	public async Task<IActionResult> GetCitiesByName(GetCitiesRequest request)
 	{
 		var query = mapper.Map<GetCitiesQuery>(request);
