@@ -1,5 +1,5 @@
-﻿using EmailService.Contracts.Email;
-using EmailService.Features.Commands;
+﻿using EmailService.Application.Email.Commands;
+using EmailService.Contracts.Email;
 using EmailService.Features.Models.Dto;
 using Mapster;
 using MimeKit;

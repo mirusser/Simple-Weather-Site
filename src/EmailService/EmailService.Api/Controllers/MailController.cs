@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
 using Common.Presentation.Controllers;
+using EmailService.Application.Email.Commands;
 using EmailService.Contracts.Email;
-using EmailService.Features.Commands;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EmailService.Controllers;
+namespace EmailService.Api.Controllers;
 
 public class MailController(
 	ISender mediator,

@@ -8,26 +8,18 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace EmailService.Features.Commands;
+namespace EmailService.Application.Email.Commands;
 
 public class SendEmailCommand
     : MailRequest, IRequest<ErrorOr<SendEmailResult>>
 {
 }
 
-public class SendEmailHandler
-    : IRequestHandler<SendEmailCommand, ErrorOr<SendEmailResult>>
+public class SendEmailHandler(
+    IOptions<MailSettings> options
+) : IRequestHandler<SendEmailCommand, ErrorOr<SendEmailResult>>
 {
-    private readonly MailSettings _mailSettings;
-    private readonly IMapper _mapper;
-
-    public SendEmailHandler(
-        IOptions<MailSettings> options,
-        IMapper mapper)
-    {
-        _mailSettings = options.Value;
-        _mapper = mapper;
-    }
+    private readonly MailSettings mailSettings = options.Value;
 
     public async Task<ErrorOr<SendEmailResult>> Handle(
         SendEmailCommand request,
@@ -35,45 +27,66 @@ public class SendEmailHandler
     {
         request.To = !string.IsNullOrEmpty(request.To)
             ? request.To
-            : _mailSettings.DefaultEmailReciever;
+            : mailSettings.DefaultEmailReceiver;
         request.From = !string.IsNullOrEmpty(request.From)
             ? request.From
-            : _mailSettings.From;
-        var mailRequest = _mapper.Map<MailRequest>(request);
+            : mailSettings.From;
 
-        var sentEmailRequest = await SendEmailAsync(mailRequest);
+        MailRequest mailRequest = new()
+        {
+            To = request.To,
+            From = request.From,
+            Subject = request.Subject,
+            Body = request.Body,
+            Attachments = request.Attachments
+        };
 
-        return sentEmailRequest;
+        var sentEmailResult = await SendEmailAsync(mailRequest, cancellationToken);
+
+        return sentEmailResult;
     }
 
-    private async Task<SendEmailResult> SendEmailAsync(MailRequest request)
+    private async Task<SendEmailResult> SendEmailAsync(
+        MailRequest request,
+        CancellationToken cancellationToken = default)
     {
-        var mimeMessage = await CreateMimeMessage(request);
-        await SendEmailAsync(mimeMessage);
+        var mimeMessage = await CreateMimeMessage(request, cancellationToken);
+        await SendEmailAsync(mimeMessage, cancellationToken);
 
-        var sentEmailRequest = _mapper.Map<SendEmailResult>(mimeMessage);
+        SendEmailResult result = new()
+        {
+            To = mimeMessage.To.ToString(),
+            From = mimeMessage.From.ToString(),
+            Subject = mimeMessage.Subject,
+            Body = mimeMessage.Body.ToString(),
+            SendingDate = DateTime.Now
+        };
 
-        return sentEmailRequest;
+        return result;
     }
 
-    private async Task<MimeMessage> CreateMimeMessage(MailRequest mailRequest)
+    private async Task<MimeMessage> CreateMimeMessage(
+        MailRequest mailRequest,
+        CancellationToken cancellationToken = default)
     {
         var email = new MimeMessage()
         {
-            Sender = MailboxAddress.Parse(mailRequest.From ?? _mailSettings.From),
+            Sender = MailboxAddress.Parse(mailRequest.From ?? mailSettings.From),
             Subject = mailRequest.Subject
         };
 
         email.To.Add(MailboxAddress.Parse(mailRequest.To));
-        email.From.Add(new MailboxAddress(_mailSettings.DisplayName, mailRequest.From ?? _mailSettings.From));
+        email.From.Add(new MailboxAddress(mailSettings.DisplayName, mailRequest.From ?? mailSettings.From));
 
-        var builder = CreateBodyBuilder(mailRequest);
+        var builder = await CreateBodyBuilderAsync(mailRequest, cancellationToken);
         email.Body = builder.ToMessageBody();
 
         return email;
     }
 
-    private static BodyBuilder CreateBodyBuilder(MailRequest request)
+    private async Task<BodyBuilder> CreateBodyBuilderAsync(
+        MailRequest request,
+        CancellationToken cancellationToken = default)
     {
         var builder = new BodyBuilder
         {
@@ -83,29 +96,29 @@ public class SendEmailHandler
         if (request.Attachments?.Any() != true)
             return builder;
 
-        byte[] fileBytes;
-
-        foreach (var file in request.Attachments)
+        foreach (var file in request.Attachments.Where(file => file.Length > 0))
         {
-            if (file.Length > 0)
-            {
-                using var ms = new MemoryStream();
-                file.CopyTo(ms);
-                fileBytes = ms.ToArray();
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms, cancellationToken);
 
-                builder.Attachments.Add(file.Name, fileBytes, ContentType.Parse(file.ContentType));
-            }
+            await builder.Attachments.AddAsync(
+                file.Name,
+                ms,
+                ContentType.Parse(file.ContentType),
+                cancellationToken);
         }
 
         return builder;
     }
 
-    private async Task SendEmailAsync(MimeMessage email)
+    private async Task SendEmailAsync(
+        MimeMessage email,
+        CancellationToken cancellationToken = default)
     {
         using var smtp = new SmtpClient();
-        await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-        await smtp.AuthenticateAsync(_mailSettings.From, _mailSettings.Password);
-        await smtp.SendAsync(email);
-        await smtp.DisconnectAsync(true);
+        await smtp.ConnectAsync(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls, cancellationToken);
+        await smtp.AuthenticateAsync(mailSettings.From, mailSettings.Password, cancellationToken);
+        await smtp.SendAsync(email, cancellationToken);
+        await smtp.DisconnectAsync(true, cancellationToken);
     }
 }

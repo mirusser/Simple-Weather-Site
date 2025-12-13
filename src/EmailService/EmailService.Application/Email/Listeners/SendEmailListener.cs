@@ -1,5 +1,5 @@
-﻿using EmailService.Domain.Settings;
-using EmailService.Features.Commands;
+﻿using EmailService.Application.Email.Commands;
+using EmailService.Domain.Settings;
 using MapsterMapper;
 using MassTransit;
 using MediatR;
@@ -23,7 +23,7 @@ public class SendEmailListener(
 
 		if (!string.IsNullOrWhiteSpace(sendEmailCommand.To))
 		{
-			sendEmailCommand.To = options.Value.DefaultEmailReciever;
+			sendEmailCommand.To = options.Value.DefaultEmailReceiver;
 		}
 
 		if (!string.IsNullOrEmpty(sendEmailCommand.From))

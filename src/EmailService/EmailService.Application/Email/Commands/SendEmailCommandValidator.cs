@@ -1,5 +1,4 @@
-﻿using EmailService.Features.Commands;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace EmailService.Application.Email.Commands;
 
