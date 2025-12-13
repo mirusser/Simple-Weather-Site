@@ -8,6 +8,8 @@ using MediatR;
 
 namespace IconService.Application.Icon.Queries.GetAll;
 
+public record GetAllQuery() : IRequest<ErrorOr<IEnumerable<GetResult>>>;
+
 public class GetAllIconsHandler
     : IRequestHandler<GetAllQuery, ErrorOr<IEnumerable<GetResult>>>
 {

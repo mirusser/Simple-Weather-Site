@@ -5,44 +5,40 @@ using IconService;
 using IconService.Application;
 using IconService.Infrastructure;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-	builder.Host.UseSerilog();
+    builder.Host.UseSerilog();
 
-	builder.Services
-		.AddSharedLayer(builder.Configuration)
-		.AddCommonPresentationLayer(builder.Configuration)
-		.AddPresentation()
-		.AddApplication(builder.Configuration)
-		.AddInfrastructure(builder.Configuration);
+    builder.Services
+        .AddSharedLayer(builder.Configuration)
+        .AddCommonPresentationLayer(builder.Configuration)
+        .AddPresentation()
+        .AddApplication(builder.Configuration)
+        .AddInfrastructure(builder.Configuration);
 }
 
 var app = builder.Build();
 {
-	if (builder.Environment.IsDevelopment())
-	{
-		app.UseDeveloperExceptionPage();
-	}
-	
-	app.UseDefaultExceptionHandler();
-	app.UseDefaultScalar();
+    if (builder.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
 
-	//app.UseHttpsRedirection();
+    app.UseDefaultExceptionHandler();
+    app.UseDefaultScalar();
 
-	app
-	.UseRouting()
-	.UseCommonHealthChecks();
+    //app.UseHttpsRedirection();
 
-	app.UseAuthorization();
+    app
+        .UseRouting()
+        .UseCommonHealthChecks();
 
-	app.UseEndpoints(endpoints =>
-	{
-		endpoints.MapControllers();
-	});
+    app.UseAuthorization();
+
+    app.MapControllers();
 }
 
 await app.RunWithLoggerAsync();

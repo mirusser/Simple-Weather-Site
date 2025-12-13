@@ -1,6 +1,5 @@
 using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Ocelot.DependencyInjection;
@@ -37,10 +36,7 @@ var app = builder.Build();
 
     app.UseCors("AllowAll");
 
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-    });
+    app.MapControllers();
 
     await app.UseOcelot();
 
