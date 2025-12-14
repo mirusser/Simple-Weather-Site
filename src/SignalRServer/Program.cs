@@ -82,7 +82,7 @@ var app = builder.Build();
         .UseRouting()
         .UseCommonHealthChecks();
 
-    app.UseEndpoints(endpoints => { endpoints.MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}"); });
+    app.MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}");
 
     //app.UseSignalR(routes =>
     //{

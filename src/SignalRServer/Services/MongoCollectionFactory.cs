@@ -6,22 +6,19 @@ using SignalRServer.Settings;
 
 namespace SignalRServer.Services;
 
-public class MongoCollectionFactory<TMongoDocument> : IMongoCollectionFactory<TMongoDocument> where TMongoDocument : class
+public class MongoCollectionFactory<TMongoDocument>(IOptions<MongoSettings> settings)
+    : IMongoCollectionFactory<TMongoDocument>
+    where TMongoDocument : class
 {
-    private readonly MongoSettings _settings;
-
-    public MongoCollectionFactory(IOptions<MongoSettings> settings)
-    {
-        _settings = settings.Value;
-    }
+    private readonly MongoSettings settings = settings.Value;
 
     public IMongoCollection<TMongoDocument> Create(string? collectionName = null)
     {
         collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : typeof(TMongoDocument).Name;
-        var client = new MongoClient(_settings.ConnectionString);
-        var database = client.GetDatabase(_settings.Database);
+        var client = new MongoClient(settings.ConnectionString);
+        var database = client.GetDatabase(settings.Database);
 
-        if (!database.ListCollectionNames().ToList().Any(c => c == collectionName))
+        if (database.ListCollectionNames().ToList().All(c => c != collectionName))
         {
             database.CreateCollection(collectionName);
         }
