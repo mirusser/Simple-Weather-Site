@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -26,7 +27,6 @@ public class AddCitiesToDatabaseHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
     IOptions<FileUrlsAndPaths> fileUrlsAndPathsOptions,
     IOptions<ResiliencePipeline> resiliencePipelineOptions,
-    IMapper mapper,
     IHttpClientFactory clientFactory,
     ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<AddCitiesToDatabaseHandler> logger,
@@ -68,9 +68,18 @@ public class AddCitiesToDatabaseHandler(
             jsonSerializerOptions);
         citiesFromJson ??= [];
 
-        var cityInfo = mapper.Map<List<CityInfo>>(citiesFromJson);
-
-        await cityInfoRepo.CreateRangeAsync(cityInfo, cancellationToken);
+        var cityInfos = citiesFromJson
+            .Select(c => new CityInfo()
+            {
+                CityId = c.Id,
+                CountryCode = c.Country ?? string.Empty,
+                Lat = c.Coord?.Lat ?? 0,
+                Lon = c.Coord?.Lon ?? 0,
+                Name = c.Name ?? string.Empty,
+                State = c.State
+            });
+        
+        await cityInfoRepo.CreateRangeAsync(cityInfos, cancellationToken);
         return await cityInfoRepo.SaveAsync(cancellationToken);
     }
 
