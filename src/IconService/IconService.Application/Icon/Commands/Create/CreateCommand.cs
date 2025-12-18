@@ -1,6 +1,6 @@
-﻿using ErrorOr;
+﻿using Common.Mediator;
+using ErrorOr;
 using IconService.Application.Icon.Models.Dto;
-using MediatR;
 
 namespace IconService.Application.Icon.Commands.Create;
 

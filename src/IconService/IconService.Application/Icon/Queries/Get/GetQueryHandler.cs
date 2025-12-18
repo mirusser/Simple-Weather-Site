@@ -1,10 +1,10 @@
-﻿using ErrorOr;
+﻿using Common.Mediator;
+using ErrorOr;
 using IconService.Application.Common.Interfaces.Persistence;
 using IconService.Application.Icon.Models.Dto;
 using IconService.Domain.Common.Errors;
 using IconService.Domain.Entities.Documents;
 using MapsterMapper;
-using MediatR;
 
 namespace IconService.Application.Icon.Queries.Get;
 

@@ -1,15 +1,14 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Common.Mediator;
 using Common.Mediator.Wrappers;
-using ErrorOr;
 using Microsoft.Extensions.Logging;
 
-namespace Common.Application.Behaviors;
+namespace Common.TestConsole;
 
-public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
+public sealed class LoggingBehavior<TRequest, TResponse>(
+    ILogger<LoggingBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
-    where TResponse : IErrorOr
 {
     public async Task<TResponse> HandleAsync(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken ct)
@@ -29,7 +28,7 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TReque
         var response = await next();
 
         //Response
-        logger.LogInformation("Handled request with response type: {TypeName}", typeof(TResponse).Name);
+        logger.LogInformation("Handled request with response type: {TypeName}", typeof(TResponse).FullName);
 
         return response;
     }

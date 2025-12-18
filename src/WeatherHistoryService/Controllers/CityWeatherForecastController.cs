@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using MediatR;
+using Common.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using WeatherHistoryService.Features.Commands;
 using WeatherHistoryService.Features.Queries;
@@ -20,7 +20,7 @@ public class CityWeatherForecastController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> GetAll(GetCityWeatherForecastsQuery query)
     {
-        var cityWeatherForecastList = await _mediator.Send(query);
+        var cityWeatherForecastList = await _mediator.SendAsync(query);
 
         return cityWeatherForecastList != null ? Ok(cityWeatherForecastList) : NotFound();
     }
@@ -28,7 +28,7 @@ public class CityWeatherForecastController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Get(GetCityWeatherForecastByIdQuery query)
     {
-        var cityWeatherForecast = await _mediator.Send(query);
+        var cityWeatherForecast = await _mediator.SendAsync(query);
 
         return cityWeatherForecast != null ? Ok(cityWeatherForecast) : NotFound();
     }
@@ -36,12 +36,12 @@ public class CityWeatherForecastController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> GetCityWeatherForecastPagination(GetCityWeatherForecastPaginationQuery query)
     {
-        return Ok(await _mediator.Send(query));
+        return Ok(await _mediator.SendAsync(query));
     }
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateWeatherForecastDocumentCommand command)
     {
-        return Ok(await _mediator.Send(command));
+        return Ok(await _mediator.SendAsync(command));
     }
 }

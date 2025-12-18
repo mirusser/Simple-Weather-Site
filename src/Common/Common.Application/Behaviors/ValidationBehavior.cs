@@ -1,25 +1,19 @@
-﻿using ErrorOr;
+﻿using Common.Mediator;
+using Common.Mediator.Wrappers;
+using ErrorOr;
 using FluentValidation;
-using MediatR;
 
 namespace Common.Application.Behaviors;
 
-public class ValidationBehavior<TRequest, TResponse> :
+public class ValidationBehavior<TRequest, TResponse>(IValidator<TRequest>? validator = null) :
     IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
-        where TResponse : IErrorOr
+    where TRequest : IRequest<TResponse>
+    where TResponse : IErrorOr
 {
-    private readonly IValidator<TRequest>? validator;
-
-    public ValidationBehavior(IValidator<TRequest>? validator = null)
-    {
-        this.validator = validator;
-    }
-
-    public async Task<TResponse> Handle(
+    public async Task<TResponse> HandleAsync(
         TRequest request, 
         RequestHandlerDelegate<TResponse> next, 
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
         if (validator is null)
         {
@@ -28,7 +22,7 @@ public class ValidationBehavior<TRequest, TResponse> :
             //after the handler
         }
 
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        var validationResult = await validator.ValidateAsync(request, ct);
 
         if (validationResult.IsValid)
         {

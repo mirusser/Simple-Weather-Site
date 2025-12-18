@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Common.Mediator;
 using WeatherHistoryService.Models.Dto;
 using WeatherHistoryService.Services.Contracts;
 

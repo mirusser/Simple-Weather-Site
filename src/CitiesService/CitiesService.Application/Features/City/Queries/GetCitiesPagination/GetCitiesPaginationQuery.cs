@@ -7,8 +7,8 @@ using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
 using Common.Infrastructure.Managers.Contracts;
+using Common.Mediator;
 using ErrorOr;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Application.Features.City.Queries.GetCitiesPagination;

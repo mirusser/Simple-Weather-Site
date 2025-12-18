@@ -25,7 +25,8 @@ var builder = WebApplication.CreateBuilder(args);
 	//           .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
 	//}));
 
-	builder.Services.AddCommonPresentationLayer(builder.Configuration)
+	builder.Services
+		.AddCommonPresentationLayer(builder.Configuration)
 		.AddApplicationLayer(builder.Configuration)
 		.AddInfrastructure(builder.Configuration);
 

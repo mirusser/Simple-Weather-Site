@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
-using MediatR;
+using Common.Mediator;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +19,7 @@ public class CitiesAvailableHealthCheck(
 		try
 		{
 			GetCitiesPaginationQuery query = new() { NumberOfCities = 1, PageNumber = 1 };
-			var result = await mediator.Send(query, cancellationToken);
+			var result = await mediator.SendAsync(query, cancellationToken);
 
 			return result.Value.Cities?.Count > 0
 				? HealthCheckResult.Healthy("The 'CitiesService' is healthy")

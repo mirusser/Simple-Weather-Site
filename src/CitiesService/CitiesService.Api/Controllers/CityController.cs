@@ -3,9 +3,9 @@ using CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 using CitiesService.Application.Features.City.Queries.GetCities;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 using CitiesService.Contracts.City;
+using Common.Mediator;
 using Common.Presentation.Controllers;
 using MapsterMapper;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +14,7 @@ namespace CitiesService.Api.Controllers;
 
 [EnableCors("AllowAll")]
 public class CityController(
-	ISender mediator,
+	IMediator mediator,
 	IMapper mapper) : ApiController
 {
 	//TODO: add custom authorize attribute and/or authorization handler:
@@ -25,7 +25,7 @@ public class CityController(
 	{
 		var query = mapper.Map<GetCitiesQuery>(request);
 
-		var getCitiesResult = await mediator.Send(query);
+		var getCitiesResult = await mediator.SendAsync(query);
 
 		return getCitiesResult.Match(
 			getCitiesResult => Ok(mapper.Map<GetCitiesResponse>(getCitiesResult)),
@@ -37,7 +37,7 @@ public class CityController(
 	{
 		var query = mapper.Map<GetCitiesPaginationQuery>(request);
 
-		var getCitiesPaginationResult = await mediator.Send(query);
+		var getCitiesPaginationResult = await mediator.SendAsync(query);
 
 		return getCitiesPaginationResult.Match(
 			getCitiesPaginationResult => Ok(mapper.Map<GetCitiesPaginationResponse>(getCitiesPaginationResult)),
@@ -49,7 +49,7 @@ public class CityController(
 	{
 		var command = mapper.Map<AddCitiesToDatabaseCommand>(request);
 
-		var addCitiesToDatabaseResult = await mediator.Send(command);
+		var addCitiesToDatabaseResult = await mediator.SendAsync(command);
 
 		return addCitiesToDatabaseResult.Match(
 			addCitiesToDatabaseResult => Ok(mapper.Map<AddCitiesToDatabaseResponse>(addCitiesToDatabaseResult)),

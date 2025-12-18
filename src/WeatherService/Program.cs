@@ -3,6 +3,7 @@ using System.Reflection;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
+using Common.Mediator.DependencyInjection;
 using Common.Presentation;
 using Common.Shared;
 using MassTransit;
@@ -26,7 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.AddCommonPresentationLayer(builder.Configuration);
 	builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
 
-	builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
+	builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
 	builder.Services
 		.AddMassTransit(config =>

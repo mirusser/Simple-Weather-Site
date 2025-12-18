@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Mediator;
 using MapsterMapper;
 using MassTransit;
-using MediatR;
 using MQModels.WeatherHistory;
 using WeatherHistoryService.Models.Dto;
 using WeatherHistoryService.Mongo.Documents;

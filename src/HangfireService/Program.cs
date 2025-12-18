@@ -1,5 +1,6 @@
 using System.Reflection;
 using Common.Application.HealthChecks;
+using Common.Mediator.DependencyInjection;
 using Common.Presentation;
 using Common.Shared;
 using Hangfire;
@@ -19,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services
 		.AddSharedLayer(builder.Configuration)
 		.AddCommonPresentationLayer(builder.Configuration)
-		.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly))
+		.AddMediator(AppDomain.CurrentDomain.GetAssemblies())
 		.AddCustomMassTransit(builder.Configuration)
 		.AddHangfireServices(builder.Configuration)
 		.AddCommonHealthChecks(builder.Configuration);

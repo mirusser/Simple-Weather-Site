@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Common.Mediator;
 using MapsterMapper;
 using MassTransit;
-using MediatR;
 using MQModels.WeatherHistory;
 using WeatherService.Clients;
 using WeatherService.Models.Dto;

@@ -106,6 +106,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuthServer", "Authorizatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Infrastructure", "Common\Common.Infrastructure\Common.Infrastructure.csproj", "{DC5DAE25-8552-45CA-98C3-7D8B02466250}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Mediator", "Common\Common.Mediator\Common.Mediator.csproj", "{9C1AC3AA-6A5E-46E4-86E5-FB8BBD1541E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.TestConsole", "Common\Common.TestConsole\Common.TestConsole.csproj", "{9F50CAC3-6D37-43A6-9441-0513B4459133}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -244,6 +248,14 @@ Global
 		{DC5DAE25-8552-45CA-98C3-7D8B02466250}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC5DAE25-8552-45CA-98C3-7D8B02466250}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC5DAE25-8552-45CA-98C3-7D8B02466250}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C1AC3AA-6A5E-46E4-86E5-FB8BBD1541E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C1AC3AA-6A5E-46E4-86E5-FB8BBD1541E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C1AC3AA-6A5E-46E4-86E5-FB8BBD1541E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C1AC3AA-6A5E-46E4-86E5-FB8BBD1541E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F50CAC3-6D37-43A6-9441-0513B4459133}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F50CAC3-6D37-43A6-9441-0513B4459133}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F50CAC3-6D37-43A6-9441-0513B4459133}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F50CAC3-6D37-43A6-9441-0513B4459133}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -283,6 +295,8 @@ Global
 		{A1E82EF1-14C9-40D8-9CF5-816ECC89CB1B} = {B05DE9D2-FECA-4000-A4D6-E2FD674470B4}
 		{A4BB3041-D755-4C3E-9F0D-79C13F8C0B04} = {B05DE9D2-FECA-4000-A4D6-E2FD674470B4}
 		{DC5DAE25-8552-45CA-98C3-7D8B02466250} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
+		{9C1AC3AA-6A5E-46E4-86E5-FB8BBD1541E3} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
+		{9F50CAC3-6D37-43A6-9441-0513B4459133} = {9C1ACAA5-6F2E-447E-B6A1-E2B49A0F1E0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D94D9173-A01D-454A-B7AC-5B639D5F6A0E}

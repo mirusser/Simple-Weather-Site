@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Common.Application.Mapping;
 using Common.Presentation;
@@ -14,6 +15,7 @@ using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
 using WeatherHistoryService.Settings;
 using Common.Application.HealthChecks;
+using Common.Mediator.DependencyInjection;
 using Common.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddCommonPresentationLayer(builder.Configuration);
     builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
 
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
+    builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
     builder.Services.AddMappings(executingAssembly);
 
     builder.Services.AddMassTransit(config =>

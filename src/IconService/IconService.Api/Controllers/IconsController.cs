@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Common.Mediator;
 using Common.Presentation.Controllers;
 using IconService.Application.Icon.Commands.Create;
 using IconService.Application.Icon.Models.Dto;
@@ -7,13 +8,12 @@ using IconService.Application.Icon.Queries.Get;
 using IconService.Application.Icon.Queries.GetAll;
 using IconService.Contracts.Icon;
 using MapsterMapper;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IconService.Api.Controllers;
 
 public class IconsController(
-    ISender mediator,
+    IMediator mediator,
     IMapper mapper) : ApiController
 {
     [HttpPost]
@@ -21,7 +21,7 @@ public class IconsController(
     {
         var command = mapper.Map<CreateCommand>(request);
 
-        var createResult = await mediator.Send(command);
+        var createResult = await mediator.SendAsync(command);
 
         return createResult.Match(
             createResult => Ok(mapper.Map<CreateResponse>(createResult)),
@@ -33,7 +33,7 @@ public class IconsController(
     {
         var query = mapper.Map<GetQuery>(request);
 
-        var getResult = await mediator.Send(query);
+        var getResult = await mediator.SendAsync(query);
 
         return getResult.Match(
             getResult => Ok(mapper.Map<GetResponse>(getResult)),
@@ -43,8 +43,8 @@ public class IconsController(
     [HttpPost]
     public async Task<IActionResult> GetAll(GetAllQuery query)
     {
-        var getResult = await mediator.Send(query);
-        
+        var getResult = await mediator.SendAsync(query);
+
         return getResult.Match(
             getResult => Ok(mapper.Map<List<GetResult>>(getResult)),
             errors => base.Problem(errors));

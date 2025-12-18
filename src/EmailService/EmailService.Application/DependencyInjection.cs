@@ -2,11 +2,12 @@
 using Common.Application.Behaviors;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
+using Common.Mediator;
+using Common.Mediator.DependencyInjection;
 using EmailService.Domain.Settings;
 using EmailService.Listeners;
 using FluentValidation;
 using MassTransit;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,7 +20,7 @@ public static class DependencyInjection
 		IConfiguration configuration)
 	{
 		var executingAssembly = Assembly.GetExecutingAssembly();
-		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
+		services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
 		services.AddMappings(executingAssembly);
 

@@ -1,10 +1,9 @@
-﻿using EmailService.Domain.Settings;
+﻿using Common.Mediator;
+using EmailService.Domain.Settings;
 using EmailService.Features.Models.Dto;
 using ErrorOr;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using MapsterMapper;
-using MediatR;
 using Microsoft.Extensions.Options;
 using MimeKit;
 

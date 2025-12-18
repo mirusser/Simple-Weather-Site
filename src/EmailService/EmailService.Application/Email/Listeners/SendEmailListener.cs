@@ -1,8 +1,8 @@
-﻿using EmailService.Application.Email.Commands;
+﻿using Common.Mediator;
+using EmailService.Application.Email.Commands;
 using EmailService.Domain.Settings;
 using MapsterMapper;
 using MassTransit;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQModels.Email;
@@ -32,6 +32,6 @@ public class SendEmailListener(
 		}
 
 		//TODO: maybe do something with response here
-		var response = await mediator.Send(sendEmailCommand);
+		var response = await mediator.SendAsync(sendEmailCommand, context.CancellationToken);
 	}
 }

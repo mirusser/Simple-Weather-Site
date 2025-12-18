@@ -1,10 +1,10 @@
-﻿using Hangfire;
+﻿using Common.Mediator;
+using Hangfire;
 using HangfireService.Models;
-using MediatR;
 
 namespace HangfireService.Features.Commands;
 
-public class RegisterJobCommand : IRequest
+public class RegisterJobCommand : IRequest<bool>
 {
 	public string JobName { get; set; } = null!;
 	public string ServiceName { get; set; } = null!;
@@ -16,9 +16,9 @@ public class RegisterJobCommand : IRequest
 public class RegisterJobHandler(
 	IRecurringJobManager recurringJobManager,
 	IMediator mediator,
-	ILogger<RegisterJobHandler> logger) : IRequestHandler<RegisterJobCommand>
+	ILogger<RegisterJobHandler> logger) : IRequestHandler<RegisterJobCommand, bool>
 {
-	public Task Handle(RegisterJobCommand request, CancellationToken cancellationToken)
+	public Task<bool> Handle(RegisterJobCommand request, CancellationToken cancellationToken)
 	{
 		var jobCommand = GetJobCommand(
 			request.JobType,
@@ -28,7 +28,7 @@ public class RegisterJobHandler(
 
 		recurringJobManager.AddOrUpdate(
 			request.JobName,
-			() => mediator.Send(jobCommand, cancellationToken),
+			() => mediator.SendAsync(jobCommand, cancellationToken),
 			request.CronExpression);
 
 		logger.LogInformation(
@@ -36,15 +36,18 @@ public class RegisterJobHandler(
 			request.JobName,
 			request.ServiceName,
 			request.Url);
-		return Task.CompletedTask;
+		
+		return Task.FromResult(true);
 	}
 
-	private IRequest GetJobCommand(JobType jobType, string jobName, string serviceName, string? url)
+	private IRequest<bool> GetJobCommand(JobType jobType, string jobName, string serviceName, string? url) 
 		=> jobType switch
 		{
 			JobType.RunJob => new RunJobCommand() { JobName = jobName, ServiceName = serviceName },
-			JobType.CallEndpointJob => new CallEndpointJobCommand() { JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
-			JobType.CallHealthCheck => new CallHealthCheckJobCommand() { JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
+			JobType.CallEndpointJob => new CallEndpointJobCommand()
+				{ JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
+			JobType.CallHealthCheck => new CallHealthCheckJobCommand()
+				{ JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
 			_ => throw new ArgumentException($"Wrong argument: {nameof(JobType)}, value: {jobType}"),
 		};
 }

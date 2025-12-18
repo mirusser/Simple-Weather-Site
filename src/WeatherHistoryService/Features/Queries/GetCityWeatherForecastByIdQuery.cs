@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Common.Mediator;
 using WeatherHistoryService.Mongo.Documents;
 using WeatherHistoryService.Services.Contracts;
 
