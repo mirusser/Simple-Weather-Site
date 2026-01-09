@@ -1,8 +1,8 @@
-﻿using Common.Presentation.Exceptions;
+﻿using Common.Domain.Errors;
 
 namespace IconService.Domain.Common.Errors;
 
-public static partial class Errors
+public readonly record struct Errors
 {
     public static class Icon
     {

@@ -1,4 +1,5 @@
-﻿using Common.Mediator;
+﻿using Common.Domain.Errors;
+using Common.Mediator;
 using Common.Presentation.Exceptions;
 using IconService.Application.Common.Interfaces.Persistence;
 using IconService.Application.Icon.Models.Dto;

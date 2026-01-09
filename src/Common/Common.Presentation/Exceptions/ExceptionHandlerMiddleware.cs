@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
+using Common.Domain.Errors;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +52,7 @@ public class ExceptionHandlerMiddleware(
 
             ValidationException ve => (
                 HttpStatusCode.BadRequest,
-                ErrorCodes.ValidationException,
+                ErrorCodes.Validation,
                 ToValidationProblemDetails(ve)
             ),
 

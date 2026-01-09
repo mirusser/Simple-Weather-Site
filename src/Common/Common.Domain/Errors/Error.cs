@@ -1,4 +1,4 @@
-namespace Common.Presentation.Exceptions;
+namespace Common.Domain.Errors;
 
 public readonly record struct Error(
     string Code,

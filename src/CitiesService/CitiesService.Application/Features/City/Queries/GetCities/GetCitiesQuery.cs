@@ -6,6 +6,7 @@ using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
+using Common.Domain.Errors;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
 using Common.Presentation.Exceptions;
