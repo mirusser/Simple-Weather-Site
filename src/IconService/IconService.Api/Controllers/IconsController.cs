@@ -23,9 +23,7 @@ public class IconsController(
 
         var createResult = await mediator.SendAsync(command);
 
-        return createResult.Match(
-            createResult => Ok(mapper.Map<CreateResponse>(createResult)),
-            errors => base.Problem(errors));
+        return Ok(mapper.Map<CreateResponse>(createResult));
     }
 
     [HttpPost]
@@ -35,9 +33,7 @@ public class IconsController(
 
         var getResult = await mediator.SendAsync(query);
 
-        return getResult.Match(
-            getResult => Ok(mapper.Map<GetResponse>(getResult)),
-            errors => base.Problem(errors));
+        return Ok(mapper.Map<GetResponse>(getResult));
     }
 
     [HttpPost]
@@ -45,8 +41,6 @@ public class IconsController(
     {
         var getResult = await mediator.SendAsync(query);
 
-        return getResult.Match(
-            getResult => Ok(mapper.Map<List<GetResult>>(getResult)),
-            errors => base.Problem(errors));
+        return Ok(mapper.Map<List<GetResult>>(getResult));
     }
 }

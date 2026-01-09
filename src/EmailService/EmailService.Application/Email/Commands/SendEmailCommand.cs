@@ -1,7 +1,6 @@
 ﻿using Common.Mediator;
 using EmailService.Domain.Settings;
 using EmailService.Features.Models.Dto;
-using ErrorOr;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
@@ -10,17 +9,17 @@ using MimeKit;
 namespace EmailService.Application.Email.Commands;
 
 public class SendEmailCommand
-    : MailRequest, IRequest<ErrorOr<SendEmailResult>>
+    : MailRequest, IRequest<SendEmailResult>
 {
 }
 
 public class SendEmailHandler(
     IOptions<MailSettings> options
-) : IRequestHandler<SendEmailCommand, ErrorOr<SendEmailResult>>
+) : IRequestHandler<SendEmailCommand, SendEmailResult>
 {
     private readonly MailSettings mailSettings = options.Value;
 
-    public async Task<ErrorOr<SendEmailResult>> Handle(
+    public async Task<SendEmailResult> Handle(
         SendEmailCommand request,
         CancellationToken cancellationToken)
     {

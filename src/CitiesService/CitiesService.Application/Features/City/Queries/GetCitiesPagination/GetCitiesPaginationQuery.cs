@@ -8,12 +8,12 @@ using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
-using ErrorOr;
+using Common.Presentation.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 
-public class GetCitiesPaginationQuery : IRequest<ErrorOr<GetCitiesPaginationResult>>
+public class GetCitiesPaginationQuery : IRequest<GetCitiesPaginationResult>
 {
     public int NumberOfCities { get; set; }
     public int PageNumber { get; set; }
@@ -21,9 +21,9 @@ public class GetCitiesPaginationQuery : IRequest<ErrorOr<GetCitiesPaginationResu
 
 public class GetCitiesPaginationHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
-    ICacheManager cache) : IRequestHandler<GetCitiesPaginationQuery, ErrorOr<GetCitiesPaginationResult>>
+    ICacheManager cache) : IRequestHandler<GetCitiesPaginationQuery, GetCitiesPaginationResult>
 {
-    public async Task<ErrorOr<GetCitiesPaginationResult>> Handle(
+    public async Task<GetCitiesPaginationResult> Handle(
         GetCitiesPaginationQuery request,
         CancellationToken cancellationToken)
     {
@@ -36,7 +36,7 @@ public class GetCitiesPaginationHandler(
             || citiesPaginationDto.Cities is null
             || citiesPaginationDto.Cities.Count == 0)
         {
-            return Errors.City.CityNotFound;
+            throw new ServiceException.NotFoundException("City not found.");
         }
 
         return citiesPaginationDto;

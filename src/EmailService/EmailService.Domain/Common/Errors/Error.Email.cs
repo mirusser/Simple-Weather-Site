@@ -1,6 +1,4 @@
-﻿using ErrorOr;
-
-namespace EmailService.Domain.Common.Errors;
+﻿namespace EmailService.Domain.Common.Errors;
 
 public static partial class Errors
 {

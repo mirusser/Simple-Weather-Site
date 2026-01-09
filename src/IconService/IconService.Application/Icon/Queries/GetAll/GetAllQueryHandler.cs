@@ -1,5 +1,5 @@
 ﻿using Common.Mediator;
-using ErrorOr;
+using Common.Presentation.Exceptions;
 using IconService.Application.Common.Interfaces.Persistence;
 using IconService.Application.Icon.Models.Dto;
 using IconService.Domain.Common.Errors;
@@ -8,10 +8,10 @@ using MapsterMapper;
 
 namespace IconService.Application.Icon.Queries.GetAll;
 
-public record GetAllQuery() : IRequest<ErrorOr<IEnumerable<GetResult>>>;
+public record GetAllQuery() : IRequest<IEnumerable<GetResult>>;
 
 public class GetAllIconsHandler
-    : IRequestHandler<GetAllQuery, ErrorOr<IEnumerable<GetResult>>>
+    : IRequestHandler<GetAllQuery, IEnumerable<GetResult>>
 {
     private readonly IMapper _mapper;
     private readonly IMongoRepository<IconDocument> _iconRepository;
@@ -24,20 +24,23 @@ public class GetAllIconsHandler
         _iconRepository = iconRepository;
     }
 
-    public async Task<ErrorOr<IEnumerable<GetResult>>> Handle(
+    public async Task<IEnumerable<GetResult>> Handle(
         GetAllQuery request,
         CancellationToken cancellationToken)
     {
-        var iconDocuments = await _iconRepository.GetAllAsync(cancellation: cancellationToken);
+        var iconDocuments = await _iconRepository
+            .GetAllAsync(cancellation: cancellationToken);
 
-        if (iconDocuments != null)
+        if (iconDocuments is not null)
         {
             var getIconDtos = _mapper.Map<IEnumerable<GetResult>>(iconDocuments);
 
             // the library ErrorOr force to make it to list (?)
-            return getIconDtos.ToList();
+            return getIconDtos;
         }
 
-        return Errors.Icon.IconNotFound;
+        throw new ServiceException.NotFoundException(
+            code: Errors.Icon.IconNotFound.Code,
+            message:Errors.Icon.IconNotFound.Description);
     }
 }

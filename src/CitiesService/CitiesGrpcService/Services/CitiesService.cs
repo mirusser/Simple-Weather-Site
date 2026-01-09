@@ -47,9 +47,9 @@ public class CitiesService : Cities.CitiesBase
 
         var citiesPaginationReply = new CitiesPaginationReply()
         {
-            NumberOfAllCities = result.Value.NumberOfAllCities,
+            NumberOfAllCities = result.NumberOfAllCities,
         };
-        citiesPaginationReply.Cities.AddRange(mapper.Map<RepeatedField<CityReply>>(result.Value.Cities));
+        citiesPaginationReply.Cities.AddRange(mapper.Map<RepeatedField<CityReply>>(result.Cities));
 
         return citiesPaginationReply;
     }
@@ -62,7 +62,7 @@ public class CitiesService : Cities.CitiesBase
         var query = new GetCitiesPaginationQuery { NumberOfCities = request.NumberOfCities, PageNumber = request.PageNumber };
         var result = await mediator.SendAsync(query);
 
-        var cities = mapper.Map<List<CityReply>>(result.Value.Cities);
+        var cities = mapper.Map<List<CityReply>>(result.Cities);
 
         foreach (var city in cities)
         {

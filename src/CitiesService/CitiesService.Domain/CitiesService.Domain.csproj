@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErrorOr" Version="2.0.1" />
+    <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj" />
   </ItemGroup>
+
 </Project>

@@ -1,18 +1,16 @@
 ﻿using Common.Mediator;
 using Common.Mediator.Wrappers;
-using ErrorOr;
 using FluentValidation;
 
 namespace Common.Application.Behaviors;
 
-public class ValidationBehavior<TRequest, TResponse>(IValidator<TRequest>? validator = null) :
-    IPipelineBehavior<TRequest, TResponse>
+public class ValidationBehavior<TRequest, TResponse>(IValidator<TRequest>? validator = null)
+    : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
-    where TResponse : IErrorOr
 {
     public async Task<TResponse> HandleAsync(
-        TRequest request, 
-        RequestHandlerDelegate<TResponse> next, 
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
         CancellationToken ct)
     {
         if (validator is null)
@@ -22,18 +20,13 @@ public class ValidationBehavior<TRequest, TResponse>(IValidator<TRequest>? valid
             //after the handler
         }
 
-        var validationResult = await validator.ValidateAsync(request, ct);
+        var result = await validator.ValidateAsync(request, ct);
 
-        if (validationResult.IsValid)
+        if (!result.IsValid)
         {
-            return await next();
+            throw new ValidationException(result.Errors);
         }
 
-        var errors = validationResult.Errors
-            .ConvertAll(validationFailure => Error.Validation(
-                validationFailure.PropertyName,
-                validationFailure.ErrorMessage));
-
-        return (dynamic)errors;
+        return await next();
     }
 }

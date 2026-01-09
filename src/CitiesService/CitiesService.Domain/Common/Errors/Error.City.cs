@@ -1,4 +1,4 @@
-﻿using ErrorOr;
+﻿using Common.Presentation.Exceptions;
 
 namespace CitiesService.Domain.Common.Errors;
 
@@ -10,8 +10,9 @@ public static partial class Errors
         //    code: "Icon.NotCreated",
         //    description: "Icon wasn't created");
 
-        public static Error CityNotFound => Error.NotFound(
-            code: "City.NotFound",
-            description: "City not found");
+        public static Error CityNotFound => new(
+            "City.NotFound",
+            "City not found",
+            ErrorType.NotFound);
     }
 }

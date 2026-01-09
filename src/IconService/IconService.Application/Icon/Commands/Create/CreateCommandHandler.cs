@@ -1,5 +1,5 @@
 ﻿using Common.Mediator;
-using ErrorOr;
+using Common.Presentation.Exceptions;
 using IconService.Application.Common.Interfaces.Persistence;
 using IconService.Application.Icon.Models.Dto;
 using IconService.Domain.Common.Errors;
@@ -9,7 +9,7 @@ using MapsterMapper;
 namespace IconService.Application.Icon.Commands.Create;
 
 public class CreateCommandHandler
-    : IRequestHandler<CreateCommand, ErrorOr<CreateResult>>
+    : IRequestHandler<CreateCommand, CreateResult>
 {
     private readonly IMapper _mapper;
     private readonly IMongoRepository<IconDocument> _iconRepository;
@@ -22,7 +22,7 @@ public class CreateCommandHandler
         _iconRepository = iconRepository;
     }
 
-    public async Task<ErrorOr<CreateResult>> Handle(
+    public async Task<CreateResult> Handle(
         CreateCommand request,
         CancellationToken cancellationToken)
     {
@@ -32,9 +32,11 @@ public class CreateCommandHandler
             null,
             cancellationToken);
 
-        if (iconDocument is null || iconDocument.Id == default)
+        if (iconDocument?.Id == null)
         {
-            return Errors.Icon.IconNotCreated;
+            throw new ServiceException(
+                code: Errors.Icon.IconNotCreated.Code, 
+                message:Errors.Icon.IconNotCreated.Description);
         }
 
         var createIconDto = _mapper.Map<CreateResult>(iconDocument);

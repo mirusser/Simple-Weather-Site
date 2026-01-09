@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\Common\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\..\Common\Common.Infrastructure\Common.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Common\Common.Mediator\Common.Mediator.csproj" />
+    <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj" />
     <ProjectReference Include="..\..\Common\Common.Shared\Common.Shared.csproj" />
     <ProjectReference Include="..\..\MQModels\MQModels.csproj" />
     <ProjectReference Include="..\CitiesService.Contracts\CitiesService.Contracts.csproj" />

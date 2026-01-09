@@ -6,7 +6,6 @@ using CitiesService.Contracts.City;
 using Common.Mediator;
 using Common.Presentation.Controllers;
 using MapsterMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,9 +26,7 @@ public class CityController(
 
 		var getCitiesResult = await mediator.SendAsync(query);
 
-		return getCitiesResult.Match(
-			getCitiesResult => Ok(mapper.Map<GetCitiesResponse>(getCitiesResult)),
-			Problem);
+		return Ok(mapper.Map<GetCitiesResponse>(getCitiesResult));
 	}
 
 	[HttpPost]
@@ -39,9 +36,7 @@ public class CityController(
 
 		var getCitiesPaginationResult = await mediator.SendAsync(query);
 
-		return getCitiesPaginationResult.Match(
-			getCitiesPaginationResult => Ok(mapper.Map<GetCitiesPaginationResponse>(getCitiesPaginationResult)),
-			Problem);
+		return Ok(mapper.Map<GetCitiesPaginationResponse>(getCitiesPaginationResult));
 	}
 
 	[HttpPost]
@@ -51,8 +46,6 @@ public class CityController(
 
 		var addCitiesToDatabaseResult = await mediator.SendAsync(command);
 
-		return addCitiesToDatabaseResult.Match(
-			addCitiesToDatabaseResult => Ok(mapper.Map<AddCitiesToDatabaseResponse>(addCitiesToDatabaseResult)),
-			Problem);
+		return Ok(mapper.Map<AddCitiesToDatabaseResponse>(addCitiesToDatabaseResult));
 	}
 }

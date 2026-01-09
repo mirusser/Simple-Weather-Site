@@ -18,8 +18,6 @@ public class MailController(
 		var command = mapper.Map<SendEmailCommand>(request);
 		var sendEmailResult = await mediator.SendAsync(command);
 
-		return sendEmailResult.Match(
-			sendEmailResult => Ok(mapper.Map<SendEmailResponse>(sendEmailResult)),
-			Problem);
+		return Ok(mapper.Map<SendEmailResponse>(sendEmailResult));
 	}
 }

@@ -13,14 +13,13 @@ using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
 using Common.Infrastructure.Settings;
 using Common.Mediator;
-using ErrorOr;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly.Registry;
 
 namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 
-public class AddCitiesToDatabaseCommand : IRequest<ErrorOr<AddCitiesToDatabaseResult>>;
+public class AddCitiesToDatabaseCommand : IRequest<AddCitiesToDatabaseResult>;
 
 public class AddCitiesToDatabaseHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
@@ -30,11 +29,11 @@ public class AddCitiesToDatabaseHandler(
     ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<AddCitiesToDatabaseHandler> logger,
     JsonSerializerOptions jsonSerializerOptions)
-    : IRequestHandler<AddCitiesToDatabaseCommand, ErrorOr<AddCitiesToDatabaseResult>>
+    : IRequestHandler<AddCitiesToDatabaseCommand, AddCitiesToDatabaseResult>
 {
     private readonly FileUrlsAndPaths fileUrlsAndPaths = fileUrlsAndPathsOptions.Value;
 
-    public async Task<ErrorOr<AddCitiesToDatabaseResult>> Handle(
+    public async Task<AddCitiesToDatabaseResult> Handle(
         AddCitiesToDatabaseCommand request,
         CancellationToken cancellationToken)
     {

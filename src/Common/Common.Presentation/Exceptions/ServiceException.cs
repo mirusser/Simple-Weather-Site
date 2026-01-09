@@ -11,4 +11,15 @@ public class ServiceException : Exception
     {
         Code = code;
     }
+    
+
+    public sealed class NotFoundException(string message, string code = ErrorCodes.NotFound)
+        : ServiceException(message, code);
+
+    public sealed class ConflictException(string message, string code = ErrorCodes.Conflict)
+        : ServiceException(message, code);
+
+    public sealed class ForbiddenException(string message, string code = ErrorCodes.Forbidden)
+        : ServiceException(message, code);
+
 }

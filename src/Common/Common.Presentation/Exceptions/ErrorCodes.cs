@@ -6,7 +6,13 @@ public static partial class ErrorCodes
 
     public const string ValidationException = "validation_exception";
 
-    public const string Service_Unavailable = "service_unavailable";
+    public const string ServiceUnavailable = "service_unavailable";
 
     public const string Unauthorized = "unauthorized";
+
+    public const string NotFound = "not_found";
+
+    public const string Conflict = "conflict";
+
+    public const string Forbidden = "forbidden";
 }

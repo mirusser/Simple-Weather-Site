@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
 using Common.Mediator;
-using ErrorOr;
 using FluentAssertions;
 using IconService.Application.Common.Interfaces.Persistence;
 using IconService.Application.Icon.Models.Dto;
@@ -19,22 +18,24 @@ namespace IconService.Test
 {
     public class GetIconTest
     {
-        private GetQueryHandler? _sut { get; set; }
-        private readonly Mock<IMapper> _mapperMock = new();
-        private readonly Mock<IMongoRepository<IconDocument>> _iconMockMongoRepository = new();
+        private GetQueryHandler? sut { get; set; }
+        private readonly Mock<IMapper> mapperMock = new();
+        private readonly Mock<IMongoRepository<IconDocument>> iconMockMongoRepository = new();
 
         public GetIconTest()
         {
             Mock<IMongoCollection<IconDocument>> iconCollectionMock = new();
 
-            var _iconMockCollectionFactory = new Mock<IMongoCollectionFactory<IconDocument>>();
-            _iconMockCollectionFactory.Setup(x => x.Get(It.IsAny<string>())).Returns(iconCollectionMock.Object);
+            var iconMockCollectionFactory = new Mock<IMongoCollectionFactory<IconDocument>>();
+            iconMockCollectionFactory
+                .Setup(x => x.Get(It.IsAny<string>()))
+                .Returns(iconCollectionMock.Object);
         }
 
         [Fact]
         public void ShouldImplementIRequest()
         {
-            typeof(GetQueryHandler).Should().Implement<IRequestHandler<GetQuery, ErrorOr<GetResult>>>();
+            typeof(GetQueryHandler).Should().Implement<IRequestHandler<GetQuery, GetResult>>();
         }
 
         [Fact]
@@ -47,11 +48,11 @@ namespace IconService.Test
 
             //From what I've read Moq doesn't support setting up a specific expression, so that makes this test a little diluted.
             //https://stackoverflow.com/questions/2751935/moq-mockt-how-to-set-up-a-method-that-takes-an-expression
-            _iconMockMongoRepository
+            iconMockMongoRepository
                 .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<IconDocument, bool>>>(), It.IsAny<FindOptions?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(iconDocument);
 
-            _mapperMock
+            mapperMock
                 .Setup(x => x.Map<GetResult>(It.IsAny<IconDocument>()))
                 .Returns(new GetResult()
                 {
@@ -64,10 +65,10 @@ namespace IconService.Test
                 });
 
             var getIconQuery = new GetQuery(iconDocument.Icon);
-            _sut = new GetQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
+            sut = new GetQueryHandler(iconMockMongoRepository.Object, mapperMock.Object);
 
             //act
-            var iconDto = await _sut.Handle(getIconQuery, CancellationToken.None);
+            var iconDto = await sut.Handle(getIconQuery, CancellationToken.None);
 
             //assert
             iconDto
@@ -75,7 +76,7 @@ namespace IconService.Test
                 .NotBeNull()
                 .And
                 .Equals(getIconQuery.Icon);
-            iconDto.Value.Id.Should().NotBeEmpty();
+            iconDto.Id.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -84,15 +85,15 @@ namespace IconService.Test
             //arrange
             var fixture = new Fixture();
 
-            _iconMockMongoRepository
+            iconMockMongoRepository
                 .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<IconDocument, bool>>>(), It.IsAny<FindOptions?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => null);
 
             var getIconQuery = new GetQuery(It.IsAny<string>());
-            _sut = new GetQueryHandler(_iconMockMongoRepository.Object, _mapperMock.Object);
+            sut = new GetQueryHandler(iconMockMongoRepository.Object, mapperMock.Object);
 
             //act
-            var iconDto = await _sut.Handle(getIconQuery, CancellationToken.None);
+            var iconDto = await sut.Handle(getIconQuery, CancellationToken.None);
 
             //assert
             iconDto.Should().BeNull();

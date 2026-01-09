@@ -21,7 +21,7 @@ public class CitiesAvailableHealthCheck(
 			GetCitiesPaginationQuery query = new() { NumberOfCities = 1, PageNumber = 1 };
 			var result = await mediator.SendAsync(query, cancellationToken);
 
-			return result.Value.Cities?.Count > 0
+			return result.Cities?.Count > 0
 				? HealthCheckResult.Healthy("The 'CitiesService' is healthy")
 				: throw new Exception("There aren't any cities in the database");
 		}

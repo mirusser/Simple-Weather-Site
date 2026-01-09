@@ -8,13 +8,13 @@ using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
-using ErrorOr;
+using Common.Presentation.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace CitiesService.Application.Features.City.Queries.GetCities;
 
-public class GetCitiesQuery : IRequest<ErrorOr<GetCitiesResult>>
+public class GetCitiesQuery : IRequest<GetCitiesResult>
 {
     public string CityName { get; set; } = null!;
     public int Limit { get; set; }
@@ -24,9 +24,9 @@ public class GetCitiesHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
     ICacheManager cache,
     ILogger<GetCitiesHandler> logger)
-    : IRequestHandler<GetCitiesQuery, ErrorOr<GetCitiesResult>>
+    : IRequestHandler<GetCitiesQuery, GetCitiesResult>
 {
-    public async Task<ErrorOr<GetCitiesResult>> Handle(
+    public async Task<GetCitiesResult> Handle(
         GetCitiesQuery request,
         CancellationToken cancellationToken)
     {
@@ -38,8 +38,8 @@ public class GetCitiesHandler(
             cancellationToken);
 
         return cities is null || cities.Count == 0
-            ? (ErrorOr<GetCitiesResult>)Errors.City.CityNotFound
-            : (ErrorOr<GetCitiesResult>)new GetCitiesResult { Cities = cities };
+            ? throw new ServiceException.NotFoundException($"City '{request.CityName}' not found.")
+            : new GetCitiesResult { Cities = cities };
     }
 
     private async Task<List<GetCityResult>?> GetCitiesByNameAsync(
