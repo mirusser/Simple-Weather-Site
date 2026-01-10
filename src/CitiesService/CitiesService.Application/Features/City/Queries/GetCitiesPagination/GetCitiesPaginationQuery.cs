@@ -1,30 +1,27 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
-using CitiesService.Domain.Common.Errors;
 using CitiesService.Domain.Entities;
-using Common.Domain.Errors;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
-using Common.Presentation.Exceptions;
+using Common.Presentation.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 
-public class GetCitiesPaginationQuery : IRequest<GetCitiesPaginationResult>
+public class GetCitiesPaginationQuery : IRequest<Result<GetCitiesPaginationResult>>
 {
-    public int NumberOfCities { get; set; }
-    public int PageNumber { get; set; }
+    public int NumberOfCities { get; init; }
+    public int PageNumber { get; init; }
 }
 
 public class GetCitiesPaginationHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
-    ICacheManager cache) : IRequestHandler<GetCitiesPaginationQuery, GetCitiesPaginationResult>
+    ICacheManager cache) : IRequestHandler<GetCitiesPaginationQuery, Result<GetCitiesPaginationResult>>
 {
-    public async Task<GetCitiesPaginationResult> Handle(
+    public async Task<Result<GetCitiesPaginationResult>> Handle(
         GetCitiesPaginationQuery request,
         CancellationToken cancellationToken)
     {
@@ -33,14 +30,7 @@ public class GetCitiesPaginationHandler(
             request.PageNumber,
             cancellationToken);
 
-        if (citiesPaginationDto is null
-            || citiesPaginationDto.Cities is null
-            || citiesPaginationDto.Cities.Count == 0)
-        {
-            throw new ServiceException.NotFoundException("City not found.");
-        }
-
-        return citiesPaginationDto;
+        return Result<GetCitiesPaginationResult>.Ok(citiesPaginationDto);
     }
 
     private async Task<GetCitiesPaginationResult> GetCitiesPaginationDtoAsync(

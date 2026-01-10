@@ -13,13 +13,14 @@ using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
 using Common.Infrastructure.Settings;
 using Common.Mediator;
+using Common.Presentation.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly.Registry;
 
 namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 
-public class AddCitiesToDatabaseCommand : IRequest<AddCitiesToDatabaseResult>;
+public class AddCitiesToDatabaseCommand : IRequest<Result<AddCitiesToDatabaseResult>>;
 
 public class AddCitiesToDatabaseHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
@@ -29,11 +30,11 @@ public class AddCitiesToDatabaseHandler(
     ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<AddCitiesToDatabaseHandler> logger,
     JsonSerializerOptions jsonSerializerOptions)
-    : IRequestHandler<AddCitiesToDatabaseCommand, AddCitiesToDatabaseResult>
+    : IRequestHandler<AddCitiesToDatabaseCommand, Result<AddCitiesToDatabaseResult>>
 {
     private readonly FileUrlsAndPaths fileUrlsAndPaths = fileUrlsAndPathsOptions.Value;
 
-    public async Task<AddCitiesToDatabaseResult> Handle(
+    public async Task<Result<AddCitiesToDatabaseResult>> Handle(
         AddCitiesToDatabaseCommand request,
         CancellationToken cancellationToken)
     {
@@ -42,12 +43,13 @@ public class AddCitiesToDatabaseHandler(
 
         if (anyCityExists)
         {
-            return new AddCitiesToDatabaseResult { IsSuccess = false, IsAlreadyAdded = anyCityExists };
+            return Result<AddCitiesToDatabaseResult>.Fail(Problems.Conflict("Cities already added"));
         }
 
         var isSuccess = await SaveCitiesFromFileToDatabase(cancellationToken);
 
-        return new AddCitiesToDatabaseResult { IsSuccess = isSuccess, IsAlreadyAdded = anyCityExists };
+        return Result<AddCitiesToDatabaseResult>.Ok(new AddCitiesToDatabaseResult
+            { IsSuccess = isSuccess, IsAlreadyAdded = anyCityExists });
     }
 
     private async Task<bool> SaveCitiesFromFileToDatabase(CancellationToken cancellationToken)
@@ -76,7 +78,7 @@ public class AddCitiesToDatabaseHandler(
                 Name = c.Name ?? string.Empty,
                 State = c.State
             });
-        
+
         await cityInfoRepo.CreateRangeAsync(cityInfos, cancellationToken);
         return await cityInfoRepo.SaveAsync(cancellationToken);
     }
@@ -120,7 +122,7 @@ public class AddCitiesToDatabaseHandler(
         var client = clientFactory.CreateClient();
         var pipeline = pipelineProvider.GetPipeline(resiliencePipelineOptions.Value.Name);
         HttpResponseMessage? response = null;
-        
+
         try
         {
             response = await pipeline.ExecuteAsync(

@@ -37,7 +37,6 @@ public class ExceptionHandlerMiddleware(
                 new ProblemDetails { Title = "Unauthorized", Detail = exception.Message }
             ),
 
-            // Your “expected” app exception (see Step 4)
             ServiceException se => (
                 HttpStatusCode.BadRequest,
                 se.Code,
@@ -78,7 +77,7 @@ public class ExceptionHandlerMiddleware(
         context.Response.ContentType = MediaTypeNames.Application.Json;
         context.Response.StatusCode = (int)statusCode;
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOptions));
+        await context.Response.WriteAsJsonAsync(problem, problem.GetType(), JsonOptions);
     }
 
     private static ValidationProblemDetails ToValidationProblemDetails(ValidationException ex)
@@ -89,7 +88,7 @@ public class ExceptionHandlerMiddleware(
 
         return new ValidationProblemDetails(errors)
         {
-            Title = "Validation failed"
+            Title = "Validation failed",
         };
     }
 }

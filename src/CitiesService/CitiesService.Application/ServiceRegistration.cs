@@ -19,7 +19,7 @@ public static class ServiceRegistration
     public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
     {
         var executingAssembly = Assembly.GetExecutingAssembly();
-
+        
         services.AddValidatorsFromAssembly(executingAssembly);
         
         // TODO: do we really need all assemblies here?

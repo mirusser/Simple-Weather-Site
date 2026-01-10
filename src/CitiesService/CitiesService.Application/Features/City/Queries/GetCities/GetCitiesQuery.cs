@@ -10,12 +10,13 @@ using Common.Domain.Errors;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
 using Common.Presentation.Exceptions;
+using Common.Presentation.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace CitiesService.Application.Features.City.Queries.GetCities;
 
-public class GetCitiesQuery : IRequest<GetCitiesResult>
+public class GetCitiesQuery : IRequest<Result<GetCitiesResult>>
 {
     public string CityName { get; set; } = null!;
     public int Limit { get; set; }
@@ -25,9 +26,9 @@ public class GetCitiesHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
     ICacheManager cache,
     ILogger<GetCitiesHandler> logger)
-    : IRequestHandler<GetCitiesQuery, GetCitiesResult>
+    : IRequestHandler<GetCitiesQuery, Result<GetCitiesResult>>
 {
-    public async Task<GetCitiesResult> Handle(
+    public async Task<Result<GetCitiesResult>> Handle(
         GetCitiesQuery request,
         CancellationToken cancellationToken)
     {
@@ -38,9 +39,10 @@ public class GetCitiesHandler(
             request.Limit,
             cancellationToken);
 
-        return cities is null || cities.Count == 0
-            ? throw new ServiceException.NotFoundException($"City '{request.CityName}' not found.")
-            : new GetCitiesResult { Cities = cities };
+        return Result<GetCitiesResult>.Ok(new GetCitiesResult
+        {
+            Cities = cities ?? []
+        });
     }
 
     private async Task<List<GetCityResult>?> GetCitiesByNameAsync(
