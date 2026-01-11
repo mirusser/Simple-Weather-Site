@@ -1,47 +1,110 @@
 ﻿using Common.Mediator;
+using Common.Presentation.Http;
+using EmailService.Application.Email.Models.Dto;
+using EmailService.Domain.Common.Errors;
 using EmailService.Domain.Settings;
 using EmailService.Features.Models.Dto;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace EmailService.Application.Email.Commands;
 
 public class SendEmailCommand
-    : MailRequest, IRequest<SendEmailResult>
+    : MailRequest, IRequest<Result<SendEmailResult>>
 {
 }
 
 public class SendEmailHandler(
-    IOptions<MailSettings> options
-) : IRequestHandler<SendEmailCommand, SendEmailResult>
+    IOptionsSnapshot<MailSettings> options,
+    TimeProvider timeProvider,
+    ILogger<SendEmailHandler> logger)
+    : IRequestHandler<SendEmailCommand, Result<SendEmailResult>>
 {
     private readonly MailSettings mailSettings = options.Value;
 
-    public async Task<SendEmailResult> Handle(
+    public async Task<Result<SendEmailResult>> Handle(
         SendEmailCommand request,
         CancellationToken cancellationToken)
     {
-        request.To = !string.IsNullOrEmpty(request.To)
-            ? request.To
-            : mailSettings.DefaultEmailReceiver;
-        request.From = !string.IsNullOrEmpty(request.From)
-            ? request.From
-            : mailSettings.From;
+        var to = string.IsNullOrWhiteSpace(request.To) ? mailSettings.DefaultEmailReceiver : request.To;
+        var from = string.IsNullOrWhiteSpace(request.From) ? mailSettings.From : request.From;
 
         MailRequest mailRequest = new()
         {
-            To = request.To,
-            From = request.From,
+            To = to,
+            From = from,
             Subject = request.Subject,
             Body = request.Body,
             Attachments = request.Attachments
         };
 
-        var sentEmailResult = await SendEmailAsync(mailRequest, cancellationToken);
+        using var cts = CancellationTokenSource
+            .CreateLinkedTokenSource(cancellationToken);
 
-        return sentEmailResult;
+        cts.CancelAfter(TimeSpan.FromSeconds(60));
+
+        SendEmailResult sentEmailResult;
+
+        try
+        {
+            sentEmailResult = await SendEmailAsync(mailRequest, cancellationToken);
+        }
+        catch (MailKit.Security.AuthenticationException ex)
+        {
+            var message = "Mail server authentication failed."; 
+            logger.LogError(ex,message);
+            
+            return Result<SendEmailResult>.Fail(new Problem(
+                ErrorCodes.MailAuthenticationFailed,
+                message,
+                StatusCodes.Status503ServiceUnavailable));
+        }
+        catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable)
+        {
+            var message = "Recipient mailbox is unavailable."; 
+            logger.LogError(ex,message);
+            
+            return Result<SendEmailResult>.Fail(new Problem(
+                ErrorCodes.MailInvalidRecipient,
+                message,
+                StatusCodes.Status400BadRequest));
+        }
+        catch (SmtpCommandException ex)
+        {
+            var message = "Mail server rejected the request."; 
+            logger.LogError(ex,message);
+            
+            return Result<SendEmailResult>.Fail(new Problem(
+                ErrorCodes.MailProtocolError,
+                message,
+                StatusCodes.Status503ServiceUnavailable));
+        }
+        catch (SmtpProtocolException ex)
+        {
+            var message = "Mail protocol error."; 
+            logger.LogError(ex,message);
+            
+            return Result<SendEmailResult>.Fail(new Problem(
+                ErrorCodes.MailProtocolError,
+                message,
+                StatusCodes.Status503ServiceUnavailable));
+        }
+        catch (IOException ex)
+        {
+            var message = "Mail server is unreachable."; 
+            logger.LogError(ex,message);
+            
+            return Result<SendEmailResult>.Fail(new Problem(
+                ErrorCodes.MailServerUnavailable,
+                message,
+                StatusCodes.Status503ServiceUnavailable));
+        }
+
+        return Result<SendEmailResult>.Ok(sentEmailResult);
     }
 
     private async Task<SendEmailResult> SendEmailAsync(
@@ -56,8 +119,7 @@ public class SendEmailHandler(
             To = mimeMessage.To.ToString(),
             From = mimeMessage.From.ToString(),
             Subject = mimeMessage.Subject,
-            Body = mimeMessage.Body.ToString(),
-            SendingDate = DateTime.Now
+            SendingDate = timeProvider.GetUtcNow()
         };
 
         return result;
@@ -91,17 +153,17 @@ public class SendEmailHandler(
             HtmlBody = request.Body
         };
 
-        if (request.Attachments?.Any() != true)
-            return builder;
-
-        foreach (var file in request.Attachments.Where(file => file.Length > 0))
+        if (request.Attachments is null)
         {
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms, cancellationToken);
+            return builder;
+        }
 
+        foreach (var file in request.Attachments.Where(f => f.Length > 0))
+        {
+            await using var stream = file.OpenReadStream();
             await builder.Attachments.AddAsync(
-                file.Name,
-                ms,
+                file.FileName,
+                stream,
                 ContentType.Parse(file.ContentType),
                 cancellationToken);
         }
@@ -111,7 +173,7 @@ public class SendEmailHandler(
 
     private async Task SendEmailAsync(
         MimeMessage email,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         using var smtp = new SmtpClient();
         await smtp.ConnectAsync(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls, cancellationToken);

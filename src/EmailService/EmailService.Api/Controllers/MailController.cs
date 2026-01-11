@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Common.Mediator;
 using Common.Presentation.Controllers;
 using EmailService.Application.Email.Commands;
@@ -9,15 +10,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace EmailService.Api.Controllers;
 
 public class MailController(
-	IMediator mediator,
-	IMapper mapper) : ApiController
+    IMediator mediator,
+    IMapper mapper) : ApiController
 {
-	[HttpPost]
-	public async Task<IActionResult> SendEmail(SendEmailRequest request)
-	{
-		var command = mapper.Map<SendEmailCommand>(request);
-		var sendEmailResult = await mediator.SendAsync(command);
+    [HttpPost]
+    public async Task<IActionResult> SendEmail(
+        SendEmailRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = mapper.Map<SendEmailCommand>(request);
+        var result = await mediator.SendAsync(command, cancellationToken);
 
-		return Ok(mapper.Map<SendEmailResponse>(sendEmailResult));
-	}
+        return FromResult(result, mapper.Map<SendEmailResponse>);
+    }
 }

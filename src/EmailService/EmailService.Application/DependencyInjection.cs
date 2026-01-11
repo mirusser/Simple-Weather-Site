@@ -64,6 +64,8 @@ public static class DependencyInjection
 			typeof(IPipelineBehavior<,>),
 			typeof(LoggingBehavior<,>));
 
+		services.AddSingleton(TimeProvider.System);
+
 		services.AddCommonHealthChecks(configuration);
 
 		return services;

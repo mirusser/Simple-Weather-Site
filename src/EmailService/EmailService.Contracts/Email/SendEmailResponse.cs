@@ -4,7 +4,6 @@ public record SendEmailResponse
 (
     string To,
     string Subject,
-    string Body,
     string From,
-    DateTime SendingDate
+    DateTimeOffset SendingDate
 );

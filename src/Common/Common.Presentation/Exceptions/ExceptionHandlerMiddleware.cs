@@ -29,6 +29,13 @@ public class ExceptionHandlerMiddleware(
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        if (exception is OperationCanceledException &&
+            context.RequestAborted.IsCancellationRequested)
+        {
+            logger.LogDebug("Request was cancelled by the client.");
+            return;
+        }
+        
         var (statusCode, errorCode, problem) = exception switch
         {
             UnauthorizedAccessException => (

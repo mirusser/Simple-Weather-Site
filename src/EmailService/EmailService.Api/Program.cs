@@ -13,7 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
     builder.Services.AddSharedLayer(builder.Configuration);
     builder.Services.AddCommonPresentationLayer(builder.Configuration);
-    builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+    
+    builder.Services.AddOptions<MailSettings>()
+        .Bind(builder.Configuration.GetSection(nameof(MailSettings)))
+        .Validate(s => !string.IsNullOrWhiteSpace(s.From), "MailSettings.From is required.")
+        .Validate(s => !string.IsNullOrWhiteSpace(s.DefaultEmailReceiver), "MailSettings.DefaultEmailReceiver is required.")
+        .ValidateOnStart();
+    
     builder.Services.AddApplication(builder.Configuration);
     builder.Services.AddControllers();
 }
