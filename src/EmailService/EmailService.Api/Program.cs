@@ -11,7 +11,6 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Host.UseSerilog();
-    builder.Services.AddSharedLayer(builder.Configuration);
     builder.Services.AddCommonPresentationLayer(builder.Configuration);
     
     builder.Services.AddOptions<MailSettings>()

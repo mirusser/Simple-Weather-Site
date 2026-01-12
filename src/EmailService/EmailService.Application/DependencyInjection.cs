@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
-using Common.Application.Behaviors;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
-using Common.Mediator;
 using Common.Mediator.DependencyInjection;
 using EmailService.Domain.Settings;
 using EmailService.Listeners;
@@ -53,17 +51,9 @@ public static class DependencyInjection
 			// if specified, limits the wait time when stopping the bus
 			//options.StopTimeout = TimeSpan.FromSeconds(30);
 		});
-
-		services.AddScoped(
-			typeof(IPipelineBehavior<,>),
-			typeof(ValidationBehavior<,>));
-
+		
 		services.AddValidatorsFromAssembly(executingAssembly);
-
-		services.AddTransient(
-			typeof(IPipelineBehavior<,>),
-			typeof(LoggingBehavior<,>));
-
+		
 		services.AddSingleton(TimeProvider.System);
 
 		services.AddCommonHealthChecks(configuration);
