@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Serilog;
 using WeatherHistoryService.Listeners;
 using WeatherHistoryService.Mongo;
 using WeatherHistoryService.Services;
@@ -21,9 +20,9 @@ using Common.Shared;
 var builder = WebApplication.CreateBuilder(args);
 {
     var executingAssembly = Assembly.GetExecutingAssembly();
-    builder.Host.UseSerilog();
-
-    builder.Services.AddCommonPresentationLayer(builder.Configuration);
+    
+    builder.AddCommonPresentationLayer();
+    
     builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
 
     builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());

@@ -13,51 +13,61 @@ namespace EmailService.Application;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddApplication(
-		this IServiceCollection services,
-		IConfiguration configuration)
+	extension(IServiceCollection services)
 	{
-		var executingAssembly = Assembly.GetExecutingAssembly();
-		services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
-
-		services.AddMappings(executingAssembly);
-
-		services.AddMassTransit(config =>
+		public IServiceCollection AddApplicationLayer(IConfiguration configuration)
 		{
-			RabbitMQSettings rabbitMQSettings = new();
-			configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+			services.AddOptions<MailSettings>()
+				.Bind(configuration.GetSection(nameof(MailSettings)))
+				.Validate(s => !string.IsNullOrWhiteSpace(s.From), "MailSettings.From is required.")
+				.Validate(s => !string.IsNullOrWhiteSpace(s.DefaultEmailReceiver),
+					"MailSettings.DefaultEmailReceiver is required.")
+				.ValidateOnStart();
+		
+			var executingAssembly = Assembly.GetExecutingAssembly();
+			services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
-			config.AddConsumer<SendEmailListener>();
-			config.SetKebabCaseEndpointNameFormatter();
+			services.AddMappings(executingAssembly);
 
-			config.UsingRabbitMq((ctx, cfg) =>
+			services.AddMassTransit(config =>
 			{
-				cfg.Host(rabbitMQSettings.Host);
-				cfg.ConfigureEndpoints(ctx);
+				RabbitMQSettings rabbitMQSettings = new();
+				configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+
+				config.AddConsumer<SendEmailListener>();
+				config.SetKebabCaseEndpointNameFormatter();
+
+				config.UsingRabbitMq((ctx, cfg) =>
+				{
+					cfg.Host(rabbitMQSettings.Host);
+					cfg.ConfigureEndpoints(ctx);
+				});
 			});
-		});
 
-		services.AddOptions<MassTransitHostOptions>()
-		.Configure(options =>
-		{
-			// if specified, waits until the bus is started before
-			// returning from IHostedService.StartAsync
-			// default is false
-			options.WaitUntilStarted = true;
+			services.AddOptions<MassTransitHostOptions>()
+				.Configure(options =>
+				{
+					// if specified, waits until the bus is started before
+					// returning from IHostedService.StartAsync
+					// default is false
+					options.WaitUntilStarted = true;
 
-			// if specified, limits the wait time when starting the bus
-			//options.StartTimeout = TimeSpan.FromSeconds(10);
+					// if specified, limits the wait time when starting the bus
+					//options.StartTimeout = TimeSpan.FromSeconds(10);
 
-			// if specified, limits the wait time when stopping the bus
-			//options.StopTimeout = TimeSpan.FromSeconds(30);
-		});
+					// if specified, limits the wait time when stopping the bus
+					//options.StopTimeout = TimeSpan.FromSeconds(30);
+				});
 		
-		services.AddValidatorsFromAssembly(executingAssembly);
+			services.AddValidatorsFromAssembly(executingAssembly);
 		
-		services.AddSingleton(TimeProvider.System);
+			services.AddSingleton(TimeProvider.System);
 
-		services.AddCommonHealthChecks(configuration);
+			services.AddCommonHealthChecks(configuration);
 
-		return services;
+			services.AddControllers();
+
+			return services;
+		}
 	}
 }

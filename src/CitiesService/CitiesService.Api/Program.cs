@@ -18,13 +18,12 @@ var builder = WebApplication.CreateBuilder(args);
     builder.WebHost
         .CustomKestrelConfiguration(builder.Environment);
 
-    builder.Host
-        .UseSerilog();
+    builder
+        .AddCommonPresentationLayer();
 
     builder.Services
         .AddInfrastructure(builder.Configuration)
         .AddApplicationLayer(builder.Configuration)
-        .AddCommonPresentationLayer(builder.Configuration)
         .AddPresentation(builder.Configuration, builder.Environment);
 }
 

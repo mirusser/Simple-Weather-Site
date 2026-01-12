@@ -6,15 +6,12 @@ using IconService.Application;
 using IconService.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    builder.Host.UseSerilog();
+    builder.AddCommonPresentationLayer();
 
     builder.Services
-        .AddSharedLayer(builder.Configuration)
-        .AddCommonPresentationLayer(builder.Configuration)
         .AddPresentation()
         .AddApplication(builder.Configuration)
         .AddInfrastructure(builder.Configuration);

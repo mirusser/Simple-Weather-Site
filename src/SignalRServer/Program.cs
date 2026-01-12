@@ -3,7 +3,6 @@ using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using SignalRServer.Hubs.Site;
 using SignalRServer.Listeners;
 using SignalRServer.Services;
@@ -14,10 +13,8 @@ using Common.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    builder.Host.UseSerilog();
+    builder.AddCommonPresentationLayer();
 
-    builder.Services.AddSharedLayer(builder.Configuration);
-    builder.Services.AddCommonPresentationLayer(builder.Configuration);
     builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
     builder.Services.Configure<HubMethods>(builder.Configuration.GetSection(nameof(HubMethods)));
 

@@ -8,23 +8,18 @@ using Common.Presentation;
 using Common.Shared;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Polly;
-using Serilog;
 using WeatherService.Clients;
 using WeatherService.HealthCheck;
 using WeatherService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-	var executingAssembly = Assembly.GetExecutingAssembly();
-	builder.Host.UseSerilog();
-
-	builder.Services.AddCommonPresentationLayer(builder.Configuration);
+	builder.AddCommonPresentationLayer();
 	builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
 
 	builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
@@ -60,6 +55,7 @@ var builder = WebApplication.CreateBuilder(args);
 			options.StopTimeout = TimeSpan.FromSeconds(30);
 		});
 
+	var executingAssembly = Assembly.GetExecutingAssembly();
 	builder.Services.AddMappings(executingAssembly);
 
 	builder.Services.AddSharedLayer(builder.Configuration);
