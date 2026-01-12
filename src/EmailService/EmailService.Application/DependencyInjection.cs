@@ -2,8 +2,8 @@
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Mediator.DependencyInjection;
+using EmailService.Application.Email.Listeners;
 using EmailService.Domain.Settings;
-using EmailService.Listeners;
 using FluentValidation;
 using MassTransit;
 using Microsoft.Extensions.Configuration;

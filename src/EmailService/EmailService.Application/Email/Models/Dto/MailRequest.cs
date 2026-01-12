@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
-namespace EmailService.Features.Models.Dto;
+namespace EmailService.Application.Email.Models.Dto;
 
 public class MailRequest
 {
     public string To { get; set; } = null!;
-    public string Subject { get; set; } = null!;
-    public string Body { get; set; } = null!;
+    public required string Subject { get; init; } = null!;
+    public required string Body { get; init; } = null!;
     public string? From { get; set; }
-    public List<IFormFile>? Attachments { get; set; } = new List<IFormFile>();
+    public List<IFormFile>? Attachments { get; init; } = [];
 }

@@ -1,7 +1,6 @@
 ﻿using EmailService.Application.Email.Commands;
 using EmailService.Application.Email.Models.Dto;
 using EmailService.Contracts.Email;
-using EmailService.Features.Models.Dto;
 using Mapster;
 using MimeKit;
 using MQModels.Email;

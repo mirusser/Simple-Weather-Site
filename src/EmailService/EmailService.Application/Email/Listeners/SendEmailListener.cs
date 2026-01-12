@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQModels.Email;
 
-namespace EmailService.Listeners;
+namespace EmailService.Application.Email.Listeners;
 
 public class SendEmailListener(
 	IMediator mediator,

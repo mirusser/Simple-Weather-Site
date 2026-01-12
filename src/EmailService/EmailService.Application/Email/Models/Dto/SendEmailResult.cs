@@ -2,8 +2,8 @@
 
 public class SendEmailResult
 {
-    public string To { get; set; } = null!;
-    public string Subject { get; set; } = null!;
-    public string From { get; set; }
-    public DateTimeOffset SendingDate { get; set; }
+    public string To { get; init; } = null!;
+    public required string Subject { get; init; }
+    public required string From { get; init; }
+    public DateTimeOffset SendingDate { get; init; }
 }

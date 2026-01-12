@@ -3,7 +3,6 @@ using Common.Presentation.Http;
 using EmailService.Application.Email.Models.Dto;
 using EmailService.Domain.Common.Errors;
 using EmailService.Domain.Settings;
-using EmailService.Features.Models.Dto;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
