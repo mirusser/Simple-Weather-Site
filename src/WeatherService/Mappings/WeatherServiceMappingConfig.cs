@@ -2,6 +2,7 @@
 using Mapster;
 using MQModels.WeatherHistory;
 using WeatherService.Clients;
+using WeatherService.Clients.Responses;
 using WeatherService.Models;
 using WeatherService.Models.Dto;
 
@@ -11,7 +12,7 @@ public class WeatherServiceMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<WeatherClient.Forecast, WeatherForecastDto>()
+        config.NewConfig<Forecast, WeatherForecastDto>()
             .Map(dest => dest.City, src => src.name)
             .Map(dest => dest.CountryCode, src => src.sys != null ? src.sys.country : "")
             .Map(dest => dest.Summary, src => src.weather != null && src.weather.Length > 0 ? src.weather[0].description : "")

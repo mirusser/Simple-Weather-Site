@@ -1,49 +1,53 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Common.Mediator;
+using Common.Presentation.Http;
 using MapsterMapper;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 using MQModels.WeatherHistory;
 using WeatherService.Clients;
 using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries;
 
-public class GetByCityIdQuery : IRequest<WeatherForecastDto>
+public class GetByCityIdQuery : IRequest<Result<WeatherForecastDto>>
 {
-    public decimal CityId { get; set; }
+    public int CityId { get; set; }
 }
 
-public class GetByCityIdHandler : IRequestHandler<GetByCityIdQuery, WeatherForecastDto>
+// TODO: check publish, add try blocks in other handlers, log errors
+public class GetByCityIdHandler(
+    WeatherClient weatherClient,
+    IPublishEndpoint publishEndpoint,
+    IMapper mapper,
+    ILogger<GetByCityIdHandler> logger)
+    : IRequestHandler<GetByCityIdQuery, Result<WeatherForecastDto>>
 {
-    private readonly WeatherClient _weatherClient;
-    private readonly IPublishEndpoint _publishEndpoint;
-    private readonly IMapper _mapper;
-
-    public GetByCityIdHandler(
-        WeatherClient weatherClient,
-        IPublishEndpoint publishEndpoint,
-        IMapper mapper)
+    public async Task<Result<WeatherForecastDto>> Handle(
+        GetByCityIdQuery request,
+        CancellationToken cancellationToken)
     {
-        _weatherClient = weatherClient;
-        _publishEndpoint = publishEndpoint;
-        _mapper = mapper;
-    }
+        var forecastResult = await weatherClient.GetCurrentWeatherByCityIdAsync(request.CityId, cancellationToken);
 
-    public async Task<WeatherForecastDto> Handle(GetByCityIdQuery request, CancellationToken cancellationToken)
-    {
-        var forecast = await _weatherClient.GetCurrentWeatherByCityIdAsync(request.CityId);
-        if (forecast == null)
+        if (!forecastResult.IsSuccess)
         {
-            //TODO: logging
-            return new();
+            return Result<WeatherForecastDto>.Fail(forecastResult.Problem!);
         }
 
-        var weatherForecastDto = _mapper.Map<WeatherForecastDto>(forecast);
-        var gotWeatherForecast = _mapper.Map<IGotWeatherForecast>(weatherForecastDto);
+        var weatherForecastDto = mapper.Map<WeatherForecastDto>(forecastResult.Value!);
+        var gotWeatherForecastDto = mapper.Map<IGotWeatherForecast>(weatherForecastDto);
 
-        await _publishEndpoint.Publish(gotWeatherForecast);
+        try
+        {
+            await publishEndpoint.Publish(gotWeatherForecastDto, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occured while publishing the weather");
+        }
 
-        return weatherForecastDto;
+        return Result<WeatherForecastDto>.Ok(weatherForecastDto);
     }
 }

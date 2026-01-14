@@ -19,6 +19,8 @@ public readonly record struct Result(Problem? Problem)
     public bool IsSuccess => Problem is null;
     public static Result Ok() => new(null);
     public static Result Fail(Problem problem) => new(problem);
+    public TResult Match<TResult>(Func<TResult> onOk, Func<Problem, TResult> onFail)
+        => IsSuccess ? onOk() : onFail(Problem!);
 }
 
 public sealed record Problem(string Code, string Message, int Status);
@@ -39,5 +41,11 @@ public static class Problems
 
     public static Problem ServiceUnavailable(string message = "Service unavailable")
         => new(ErrorCodes.ServiceUnavailable, message, StatusCodes.Status503ServiceUnavailable);
+    
+    public static Problem BadGateway(string message = "Bad gateway")
+        => new(ErrorCodes.BadGateway, message, StatusCodes.Status502BadGateway);
+
+    public static Problem GatewayTimeout(string message = "Gateway timeout")
+        => new(ErrorCodes.GatewayTimeout, message, StatusCodes.Status504GatewayTimeout);
 }
 

@@ -23,4 +23,8 @@ public static partial class ErrorCodes
     public const string Unexpected = "unexpected";
 
     public const string Forbidden = "forbidden";
+    
+    public const string BadGateway = "bad_gateway";
+    
+    public const string GatewayTimeout = "gateway_timeout";
 }

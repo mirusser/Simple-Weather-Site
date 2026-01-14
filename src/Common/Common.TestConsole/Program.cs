@@ -36,7 +36,7 @@ public class PrintToConsoleHandler : IRequestHandler<PrintToConsoleRequest, bool
         return Task.FromResult(true);
     }
 
-    public Task<bool> Handle(PrintToConsoleRequest request, CancellationToken ct)
+    public Task<bool> Handle(PrintToConsoleRequest request, CancellationToken cancellationToken)
     {
         Console.WriteLine(request.Text);
         

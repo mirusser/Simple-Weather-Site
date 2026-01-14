@@ -3,6 +3,7 @@ using System.Reflection;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
+using Common.Infrastructure;
 using Common.Mediator.DependencyInjection;
 using Common.Presentation;
 using Common.Shared;
@@ -12,85 +13,88 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Polly;
+using Microsoft.Extensions.Options;
 using WeatherService.Clients;
 using WeatherService.HealthCheck;
 using WeatherService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-	builder.AddCommonPresentationLayer();
-	builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
+    builder.Services.AddCommonInfrastructure(builder.Configuration);
+    builder.AddCommonPresentationLayer();
+    builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
 
-	builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
+    builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
-	builder.Services
-		.AddMassTransit(config =>
-		{
-			RabbitMQSettings rabbitMQSettings = new();
-			builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+    builder.Services
+        .AddMassTransit(config =>
+        {
+            RabbitMQSettings rabbitMQSettings = new();
+            builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
 
-			config.SetKebabCaseEndpointNameFormatter();
+            config.SetKebabCaseEndpointNameFormatter();
 
-			config.UsingRabbitMq((ctx, cfg) =>
-			{
-				cfg.Host(rabbitMQSettings.Host);
-				cfg.ConfigureEndpoints(ctx);
-			});
-		});
+            config.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host(rabbitMQSettings.Host);
+                cfg.ConfigureEndpoints(ctx);
+            });
+        });
 
-	builder.Services
-		.AddOptions<MassTransitHostOptions>()
-		.Configure(options =>
-		{
-			// if specified, waits until the bus is started before
-			// returning from IHostedService.StartAsync
-			// default is false
-			options.WaitUntilStarted = true;
+    builder.Services
+        .AddOptions<MassTransitHostOptions>()
+        .Configure(options =>
+        {
+            // if specified, waits until the bus is started before
+            // returning from IHostedService.StartAsync
+            // default is false
+            options.WaitUntilStarted = true;
 
-			// if specified, limits the wait time when starting the bus
-			options.StartTimeout = TimeSpan.FromSeconds(10);
+            // if specified, limits the wait time when starting the bus
+            options.StartTimeout = TimeSpan.FromSeconds(10);
 
-			// if specified, limits the wait time when stopping the bus
-			options.StopTimeout = TimeSpan.FromSeconds(30);
-		});
+            // if specified, limits the wait time when stopping the bus
+            options.StopTimeout = TimeSpan.FromSeconds(30);
+        });
 
-	var executingAssembly = Assembly.GetExecutingAssembly();
-	builder.Services.AddMappings(executingAssembly);
+    var executingAssembly = Assembly.GetExecutingAssembly();
+    builder.Services.AddMappings(executingAssembly);
 
-	builder.Services.AddSharedLayer(builder.Configuration);
-	builder.Services.AddControllers();
+    builder.Services.AddHttpClient("OpenWeather", (sp, client) =>
+    {
+        var settings = sp.GetRequiredService<IOptions<ServiceSettings>>().Value;
+        client.BaseAddress = new Uri($"https://{settings.OpenWeatherHost}/");
+    });
 
-	// TODO: use resilience pipeline from commons
-	builder.Services.AddHttpClient<WeatherClient>()
-		 .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(10, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
-		 .AddTransientHttpErrorPolicy(builder => builder.CircuitBreakerAsync(3, TimeSpan.FromSeconds(10)));
+    builder.Services.AddTransient<WeatherClient>();
 
-	builder.Services.AddCommonHealthChecks(builder.Configuration)
-		.AddCheck<OpenWeatherExternalEndpointHealthCheck>(
-			name: "OpenWeather",
-			failureStatus: HealthStatus.Degraded,
-			tags: [nameof(HealthChecksTags.Database)]);
+    builder.Services.AddControllers();
+
+    builder.Services.AddCommonHealthChecks(builder.Configuration)
+        .AddCheck<OpenWeatherExternalEndpointHealthCheck>(
+            name: "OpenWeather",
+            failureStatus: HealthStatus.Degraded,
+            tags: [nameof(HealthChecksTags.Database)]);
 }
 
 var app = builder.Build();
 {
-	if (builder.Environment.IsDevelopment())
-	{
-		app.UseDeveloperExceptionPage();
-	}
+    if (builder.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
 
-	app.UseDefaultExceptionHandler();
+    app.UseDefaultExceptionHandler();
 
-	app.UseDefaultScalar();
+    app.UseDefaultScalar();
 
-	//app.UseHttpsRedirection();
-	app
-	.UseRouting()
-	.UseCommonHealthChecks();
-	app.UseAuthorization();
+    //app.UseHttpsRedirection();
+    app
+        .UseRouting()
+        .UseCommonHealthChecks();
+    app.UseAuthorization();
 
-	app.MapControllers();
+    app.MapControllers();
 }
 
 await app.RunWithLoggerAsync();

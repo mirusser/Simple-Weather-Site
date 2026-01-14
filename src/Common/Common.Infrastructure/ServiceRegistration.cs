@@ -51,6 +51,9 @@ public static class ServiceRegistration
 			// Add a simple timeout around the whole HTTP call
 			pipelineBuilder.AddTimeout(TimeSpan.FromSeconds(resiliencePipelineSettings.DefaultTimeoutSeconds));
 		});
+		
+		services.AddSingleton<IHttpExecutor, HttpExecutor>();
+		
 		return services;
 	}
 }

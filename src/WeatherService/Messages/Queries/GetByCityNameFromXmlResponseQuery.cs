@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Common.Mediator;
+using Common.Presentation.Http;
 using MapsterMapper;
 using MassTransit;
 using MQModels.WeatherHistory;
@@ -9,42 +10,33 @@ using WeatherService.Models.Dto;
 
 namespace WeatherService.Messages.Queries;
 
-public class GetByCityNameFromXmlResponseQuery : IRequest<WeatherForecastDto>
+public class GetByCityNameFromXmlResponseQuery : IRequest<Result<WeatherForecastDto>>
 {
-    public string City { get; set; }
+    public required string City { get; init; }
 }
 
-public class GetByCityNameFromXmlResponseHandler : IRequestHandler<GetByCityNameFromXmlResponseQuery, WeatherForecastDto>
+public class GetByCityNameFromXmlResponseHandler(
+    WeatherClient weatherClient,
+    IPublishEndpoint publishEndpoint,
+    IMapper mapper)
+    : IRequestHandler<GetByCityNameFromXmlResponseQuery, Result<WeatherForecastDto>>
 {
-    private readonly WeatherClient _weatherClient;
-    private readonly IPublishEndpoint _publishEndpoint;
-    private readonly IMapper _mapper;
-
-    public GetByCityNameFromXmlResponseHandler(
-        WeatherClient weatherClient,
-        IPublishEndpoint publishEndpoint,
-        IMapper mapper)
+    public async Task<Result<WeatherForecastDto>> Handle(
+        GetByCityNameFromXmlResponseQuery request,
+        CancellationToken cancellationToken)
     {
-        _weatherClient = weatherClient;
-        _publishEndpoint = publishEndpoint;
-        _mapper = mapper;
-    }
+        var currentResult = await weatherClient.GetCurrentXmlByCityAsync(request.City, cancellationToken);
 
-    public async Task<WeatherForecastDto> Handle(GetByCityNameFromXmlResponseQuery request, CancellationToken cancellationToken)
-    {
-        var current = await _weatherClient.GetCurrentWeatherInXmlByCityNameAsync(request.City);
-
-        if (current == null)
+        if (!currentResult.IsSuccess)
         {
-            //TODO: logging
-            return new();
+            return Result<WeatherForecastDto>.Fail(currentResult.Problem!);
         }
 
-        var weatherForecastDto = _mapper.Map<WeatherForecastDto>(current);
-        var gotWeatherForecast = _mapper.Map<IGotWeatherForecast>(weatherForecastDto);
+        var weatherForecastDto = mapper.Map<WeatherForecastDto>(currentResult.Value!);
+        var gotWeatherForecastDto = mapper.Map<IGotWeatherForecast>(weatherForecastDto);
 
-        await _publishEndpoint.Publish(gotWeatherForecast);
+        await publishEndpoint.Publish(gotWeatherForecastDto, cancellationToken);
 
-        return weatherForecastDto;
+        return Result<WeatherForecastDto>.Ok(weatherForecastDto);
     }
 }
