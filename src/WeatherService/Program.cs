@@ -7,6 +7,7 @@ using Common.Infrastructure;
 using Common.Mediator.DependencyInjection;
 using Common.Presentation;
 using Common.Shared;
+using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddCommonInfrastructure(builder.Configuration);
     builder.AddCommonPresentationLayer();
+    
     builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection(nameof(ServiceSettings)));
 
     builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
@@ -59,6 +61,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     var executingAssembly = Assembly.GetExecutingAssembly();
     builder.Services.AddMappings(executingAssembly);
+    builder.Services.AddValidatorsFromAssembly(executingAssembly);
 
     builder.Services.AddHttpClient("OpenWeather", (sp, client) =>
     {

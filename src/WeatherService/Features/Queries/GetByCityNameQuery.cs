@@ -1,14 +1,16 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Common.Mediator;
 using Common.Presentation.Http;
 using MapsterMapper;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 using MQModels.WeatherHistory;
 using WeatherService.Clients;
 using WeatherService.Models.Dto;
 
-namespace WeatherService.Messages.Queries;
+namespace WeatherService.Features.Queries;
 
 public class GetByCityNameQuery : IRequest<Result<WeatherForecastDto>>
 {
@@ -18,11 +20,12 @@ public class GetByCityNameQuery : IRequest<Result<WeatherForecastDto>>
 public class GetByCityNameHandler(
     WeatherClient weatherClient,
     IPublishEndpoint publishEndpoint,
-    IMapper mapper)
+    IMapper mapper,
+    ILogger<GetByCityNameHandler> logger)
     : IRequestHandler<GetByCityNameQuery, Result<WeatherForecastDto>>
 {
     public async Task<Result<WeatherForecastDto>> Handle(
-        GetByCityNameQuery request, 
+        GetByCityNameQuery request,
         CancellationToken cancellationToken)
     {
         var forecastResult = await weatherClient.GetCurrentWeatherByCityNameAsync(request.City, cancellationToken);
@@ -35,7 +38,14 @@ public class GetByCityNameHandler(
         var weatherForecastDto = mapper.Map<WeatherForecastDto>(forecastResult.Value!);
         var gotWeatherForecastDto = mapper.Map<IGotWeatherForecast>(weatherForecastDto);
 
-        await publishEndpoint.Publish(gotWeatherForecastDto, cancellationToken);
+        try
+        {
+            await publishEndpoint.Publish(gotWeatherForecastDto, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occured while publishing the weather");
+        }
 
         return Result<WeatherForecastDto>.Ok(weatherForecastDto);
     }

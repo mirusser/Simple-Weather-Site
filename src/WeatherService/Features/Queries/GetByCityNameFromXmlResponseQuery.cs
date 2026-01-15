@@ -10,35 +10,34 @@ using MQModels.WeatherHistory;
 using WeatherService.Clients;
 using WeatherService.Models.Dto;
 
-namespace WeatherService.Messages.Queries;
+namespace WeatherService.Features.Queries;
 
-public class GetByCityIdQuery : IRequest<Result<WeatherForecastDto>>
+public class GetByCityNameFromXmlResponseQuery : IRequest<Result<WeatherForecastDto>>
 {
-    public int CityId { get; set; }
+    public required string City { get; init; }
 }
 
-// TODO: check publish, add try blocks in other handlers, log errors
-public class GetByCityIdHandler(
+public class GetByCityNameFromXmlResponseHandler(
     WeatherClient weatherClient,
     IPublishEndpoint publishEndpoint,
     IMapper mapper,
-    ILogger<GetByCityIdHandler> logger)
-    : IRequestHandler<GetByCityIdQuery, Result<WeatherForecastDto>>
+    ILogger<GetByCityNameFromXmlResponseHandler> logger)
+    : IRequestHandler<GetByCityNameFromXmlResponseQuery, Result<WeatherForecastDto>>
 {
     public async Task<Result<WeatherForecastDto>> Handle(
-        GetByCityIdQuery request,
+        GetByCityNameFromXmlResponseQuery request,
         CancellationToken cancellationToken)
     {
-        var forecastResult = await weatherClient.GetCurrentWeatherByCityIdAsync(request.CityId, cancellationToken);
+        var currentResult = await weatherClient.GetCurrentXmlByCityAsync(request.City, cancellationToken);
 
-        if (!forecastResult.IsSuccess)
+        if (!currentResult.IsSuccess)
         {
-            return Result<WeatherForecastDto>.Fail(forecastResult.Problem!);
+            return Result<WeatherForecastDto>.Fail(currentResult.Problem!);
         }
 
-        var weatherForecastDto = mapper.Map<WeatherForecastDto>(forecastResult.Value!);
+        var weatherForecastDto = mapper.Map<WeatherForecastDto>(currentResult.Value!);
         var gotWeatherForecastDto = mapper.Map<IGotWeatherForecast>(weatherForecastDto);
-
+        
         try
         {
             await publishEndpoint.Publish(gotWeatherForecastDto, cancellationToken);

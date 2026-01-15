@@ -2,9 +2,7 @@
 using System.Threading.Tasks;
 using Common.Presentation.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using WeatherService.Messages.Queries;
-using WeatherService.Models.Contracts;
-using WeatherService.Models.Dto;
+using WeatherService.Features.Queries;
 
 namespace WeatherService.Controllers;
 
@@ -12,10 +10,9 @@ public class WeatherForecastController : ApiController
 {
     [HttpPost]
     public async Task<IActionResult> GetByCityName(
-        GetByCityNameRequest request,
+        GetByCityNameQuery query,
         CancellationToken cancellationToken)
     {
-        GetByCityNameQuery query = new () { City = request.Name };
         var result = await Mediator.SendAsync(query, cancellationToken);
 
         return FromResult(result);
@@ -23,10 +20,9 @@ public class WeatherForecastController : ApiController
 
     [HttpPost]
     public async Task<IActionResult> GetCityByNameFromXmlResponse(
-        GetCityByNameFromXmlResponseRequest request,
+        GetByCityNameFromXmlResponseQuery query,
         CancellationToken cancellationToken)
     {
-        GetByCityNameFromXmlResponseQuery query = new() {City =  request.City};
         var result = await Mediator.SendAsync(query, cancellationToken);
 
         return FromResult(result);
@@ -34,10 +30,9 @@ public class WeatherForecastController : ApiController
 
     [HttpPost]
     public async Task<IActionResult> GetByCityId(
-        GetByCityIdRequest request,
+        GetByCityIdQuery query,
         CancellationToken cancellationToken)
     {
-        GetByCityIdQuery query = new() { CityId =  request.CityId };
         var result = await Mediator.SendAsync(query, cancellationToken);
 
         return FromResult(result);
