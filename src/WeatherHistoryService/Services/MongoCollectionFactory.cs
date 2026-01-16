@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using WeatherHistoryService.Mongo;
+using WeatherHistoryService.Services.Contracts;
+using WeatherHistoryService.Settings;
 
 namespace WeatherHistoryService.Services;
 

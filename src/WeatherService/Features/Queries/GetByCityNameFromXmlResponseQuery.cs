@@ -36,7 +36,7 @@ public class GetByCityNameFromXmlResponseHandler(
         }
 
         var weatherForecastDto = mapper.Map<WeatherForecastDto>(currentResult.Value!);
-        var gotWeatherForecastDto = mapper.Map<IGotWeatherForecast>(weatherForecastDto);
+        var gotWeatherForecastDto = mapper.Map<GotWeatherForecast>(weatherForecastDto);
         
         try
         {

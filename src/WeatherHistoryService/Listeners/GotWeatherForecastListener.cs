@@ -9,27 +9,23 @@ using WeatherHistoryService.Services.Contracts;
 namespace WeatherHistoryService.Listeners;
 
 public class GotWeatherForecastListener(
-	ICityWeatherForecastService cityWeatherForecastService,
-	IMapper mapper,
-	ILogger<GotWeatherForecastListener> logger,
-	IPublishEndpoint publishEndpoint)
-	: IConsumer<IGotWeatherForecast>
+    ICityWeatherForecastService cityWeatherForecastService,
+    IMapper mapper,
+    ILogger<GotWeatherForecastListener> logger,
+    IPublishEndpoint publishEndpoint)
+    : IConsumer<GotWeatherForecast>
 {
-	public async Task Consume(ConsumeContext<IGotWeatherForecast> context)
-	{
-		if (context?.Message is null)
-		{
-			logger.LogWarning("Received event {EventName} is null.", nameof(IGotWeatherForecast));
-			await Task.CompletedTask;
+    public async Task Consume(ConsumeContext<GotWeatherForecast> context)
+    {
+        // TODO: validate message fields?
+        var cityWeatherForecastDocument = mapper.Map<CityWeatherForecastDocument>(context.Message);
+        await cityWeatherForecastService.UpsertIdempotentAsync(cityWeatherForecastDocument, context.CancellationToken);
 
-			return;
-		}
+        await publishEndpoint.Publish(new CreatedCityWeatherForecastSearch
+        {
+            // ideally include something meaningful (e.g., doc id / event id)
+        }, context.CancellationToken);
 
-		var cityWeatherForecastDocument = mapper.Map<CityWeatherForecastDocument>(context.Message);
-		await cityWeatherForecastService.CreateAsync(cityWeatherForecastDocument);
-
-		await publishEndpoint.Publish<CreatedCityWeatherForecastSearch>(new());
-
-		return;
-	}
+        return;
+    }
 }

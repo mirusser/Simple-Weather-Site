@@ -12,6 +12,9 @@ public class CityWeatherForecastDocument
 	[BsonRepresentation(BsonType.ObjectId)]
 	public string Id { get; set; } = null!;
 
+	[BsonElement("eventId")]
+	public Guid EventId { get; set; }
+	
 	[Required(ErrorMessage = "City is required")]
 	public string City { get; set; } = null!;
 

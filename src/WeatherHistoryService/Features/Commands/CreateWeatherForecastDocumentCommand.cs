@@ -36,7 +36,7 @@ public class CreateWeatherForecastDocumentHandler(
 		CancellationToken cancellationToken)
 	{
 		var cityWeatherForecastDocument = mapper.Map<CityWeatherForecastDocument>(request);
-		var cityWeatherForecast = await cityWeatherForecastService.CreateAsync(cityWeatherForecastDocument);
+		var cityWeatherForecast = await cityWeatherForecastService.UpsertIdempotentAsync(cityWeatherForecastDocument);
 
 		await publishEndpoint.Publish<CreatedCityWeatherForecastSearch>(new(), cancellationToken);
 

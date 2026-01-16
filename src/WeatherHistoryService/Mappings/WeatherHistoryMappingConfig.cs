@@ -22,10 +22,10 @@ public class WeatherHistoryMappingConfig : IRegister
 
         config.NewConfig<CreateWeatherForecastDocumentCommand, CityWeatherForecastDocument>();
 
-        config.NewConfig<IGotWeatherForecast, CityWeatherForecastDocument>()
+        config.NewConfig<GotWeatherForecast, CityWeatherForecastDocument>()
             .Map(dest => dest.City, src => src.City)
             .Map(dest => dest.CountryCode, src => src.CountryCode)
-            .Map(dest => dest.SearchDate, src => src.Date)
+            .Map(dest => dest.SearchDate, src => src.ObservedAtUtc)
             .Map(dest => dest.Temperature.TemperatureC, src => src.TemperatureC)
             .Map(dest => dest.Temperature.TemperatureF, src => src.TemperatureF)
             .Map(dest => dest.Summary, src => src.Summary)

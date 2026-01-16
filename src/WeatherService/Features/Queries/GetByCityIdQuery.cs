@@ -36,7 +36,7 @@ public class GetByCityIdHandler(
         }
 
         var weatherForecastDto = mapper.Map<WeatherForecastDto>(forecastResult.Value!);
-        var gotWeatherForecastDto = mapper.Map<IGotWeatherForecast>(weatherForecastDto);
+        var gotWeatherForecastDto = mapper.Map<GotWeatherForecast>(weatherForecastDto);
 
         try
         {
