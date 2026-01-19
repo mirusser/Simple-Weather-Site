@@ -493,3 +493,4 @@ src/CitiesService/CitiesService.Api/cert/openssl.cnf
 src/CitiesService/CitiesService.Api/cert/localhost.key
 src/CitiesService/CitiesService.Api/cert/localhost.crt
 /src/SignalRServer/appsettings.Development.json
+/src/WeatherSite/Site/appsettings.Development.json

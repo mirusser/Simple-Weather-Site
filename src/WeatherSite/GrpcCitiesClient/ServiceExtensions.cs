@@ -27,8 +27,9 @@ public static class ServiceExtensions
 
         services.AddGrpcClient<Cities.CitiesClient>("Cities", o =>
         {
-            o.Address = new Uri("http://citiesgrpcservice:80"); //TODO add to settings
+            //o.Address = new Uri("http://citiesgrpcservice:80"); //TODO add to settings
             //o.Address = new Uri("http://localhost:8681"); //TODO add to settings
+            o.Address = new Uri("http://localhost:5031"); //TODO add to settings
         })
         .ConfigureChannel(o =>
         {
