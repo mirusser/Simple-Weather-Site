@@ -41,7 +41,7 @@ public class CreateWeatherForecastDocumentHandler(
             .UpsertIdempotentAsync(cityWeatherForecastDocument, cancellationToken);
 
         await publishEndpoint.Publish(
-            new CreatedCityWeatherForecastSearch(Guid.NewGuid(), Guid.Empty),
+            new CreatedCityWeatherForecastSearch() { EventId = Guid.NewGuid(), GotWeatherForecastEventId = Guid.Empty},
             cancellationToken);
 
         return cityWeatherForecast;

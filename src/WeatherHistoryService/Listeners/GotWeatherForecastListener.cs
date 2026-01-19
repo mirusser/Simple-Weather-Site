@@ -14,16 +14,17 @@ public class GotWeatherForecastListener(
     IMapper mapper,
     ILogger<GotWeatherForecastListener> logger,
     IPublishEndpoint publishEndpoint)
-    : IConsumer<GotWeatherForecast>
+    : IConsumer<IGotWeatherForecast>
 {
-    public async Task Consume(ConsumeContext<GotWeatherForecast> context)
+    public async Task Consume(ConsumeContext<IGotWeatherForecast> context)
     {
-        logger.LogDebug("Received {TypeOfMessage} message", nameof(GotWeatherForecast));
+        logger.LogInformation("Received {TypeOfMessage} message", nameof(IGotWeatherForecast));
 
         // TODO: validate message fields?
         var cityWeatherForecastDocument = mapper.Map<CityWeatherForecastDocument>(context.Message);
         await publishEndpoint.Publish(
-            new CreatedCityWeatherForecastSearch(Guid.NewGuid(), context.Message.EventId),
+            new CreatedCityWeatherForecastSearch()
+                { EventId = Guid.NewGuid(), GotWeatherForecastEventId = context.Message.EventId },
             context.CancellationToken);
 
         await cityWeatherForecastService.UpsertIdempotentAsync(cityWeatherForecastDocument, context.CancellationToken);

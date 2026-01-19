@@ -28,7 +28,7 @@ public class WeatherServiceMappingConfig : IRegister
             .Map(dest => dest.Icon, _ => "")
             .Map(dest => dest.Date, src => src.Lastupdate.Value);
 
-        config.NewConfig<WeatherForecastDto, GotWeatherForecast>()
+        config.NewConfig<WeatherForecastDto, IGotWeatherForecast>()
             .Map(dest => dest.EventId, src => Guid.NewGuid())
             .TwoWays();
     }

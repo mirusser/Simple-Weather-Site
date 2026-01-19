@@ -36,7 +36,7 @@ public class GetByCityNameHandler(
         }
 
         var weatherForecastDto = mapper.Map<WeatherForecastDto>(forecastResult.Value!);
-        var gotWeatherForecastDto = mapper.Map<GotWeatherForecast>(weatherForecastDto);
+        var gotWeatherForecastDto = mapper.Map<IGotWeatherForecast>(weatherForecastDto);
 
         try
         {
@@ -46,7 +46,7 @@ public class GetByCityNameHandler(
         {
             logger.LogError(ex,
                 "Failed to publish {Event} for City={City}",
-                nameof(GotWeatherForecast),
+                nameof(IGotWeatherForecast),
                 request.City);
         }
 

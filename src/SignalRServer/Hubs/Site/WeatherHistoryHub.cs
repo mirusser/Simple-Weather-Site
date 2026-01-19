@@ -10,13 +10,16 @@ namespace SignalRServer.Hubs.Site;
 public class WeatherHistoryHub(IMongoCollectionFactory<WeatherHistoryConnection> mongoCollectionFactory)
     : Hub
 {
-    private readonly IMongoCollection<WeatherHistoryConnection> weatherHistoryConnectionCollection = mongoCollectionFactory.Create();
+    private readonly IMongoCollection<WeatherHistoryConnection> weatherHistoryConnectionCollection =
+        mongoCollectionFactory.Create();
 
     public override async Task OnConnectedAsync()
     {
-        Console.WriteLine($"Connection Established, connection Id: {Context.ConnectionId}"); //TODO: log it maybe? (add logger)
+        Console.WriteLine(
+            $"Connection Established, connection Id: {Context.ConnectionId}"); //TODO: log it maybe? (add logger)
 
-        await weatherHistoryConnectionCollection.InsertOneAsync(new WeatherHistoryConnection() { ConnectionId = Context.ConnectionId });
+        await weatherHistoryConnectionCollection.InsertOneAsync(new WeatherHistoryConnection()
+            { ConnectionId = Context.ConnectionId });
 
         await base.OnConnectedAsync();
     }

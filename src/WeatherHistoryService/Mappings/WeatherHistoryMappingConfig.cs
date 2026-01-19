@@ -22,7 +22,7 @@ public class WeatherHistoryMappingConfig : IRegister
 
         config.NewConfig<CreateWeatherForecastDocumentCommand, CityWeatherForecastDocument>();
 
-        config.NewConfig<GotWeatherForecast, CityWeatherForecastDocument>()
+        config.NewConfig<IGotWeatherForecast, CityWeatherForecastDocument>()
             .Map(dest => dest.EventId, src => src.EventId)
             .Map(dest => dest.City, src => src.City)
             .Map(dest => dest.CountryCode, src => src.CountryCode)

@@ -35,15 +35,15 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddMassTransit(config =>
     {
-        RabbitMQSettings rabbitMQSettings = new();
-        builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+        RabbitMQSettings rabbitMqSettings = new();
+        builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMqSettings);
 
         config.AddConsumer<CreatedCityWeatherForecastSearchListener>();
         config.SetKebabCaseEndpointNameFormatter();
 
         config.UsingRabbitMq((ctx, cfg) =>
         {
-            cfg.Host(rabbitMQSettings.Host);
+            cfg.Host(rabbitMqSettings.Host);
             cfg.ConfigureEndpoints(ctx);
         });
     });

@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MQModels.WeatherHistory;
@@ -15,7 +15,8 @@ namespace SignalRServer.Listeners;
 public class CreatedCityWeatherForecastSearchListener(
     IOptions<HubMethods> options,
     IHubContext<WeatherHistoryHub> hubContext,
-    IMongoCollectionFactory<WeatherHistoryConnection> mongoCollectionFactory)
+    IMongoCollectionFactory<WeatherHistoryConnection> mongoCollectionFactory,
+    ILogger<CreatedCityWeatherForecastSearchListener> logger)
     : IConsumer<CreatedCityWeatherForecastSearch>
 {
     private readonly HubMethods hubMethods = options.Value;
@@ -25,6 +26,8 @@ public class CreatedCityWeatherForecastSearchListener(
 
     public async Task Consume(ConsumeContext<CreatedCityWeatherForecastSearch> context)
     {
+        logger.LogInformation("Received {TypeOfMessage} message", nameof(CreatedCityWeatherForecastSearch));
+        
         var weatherHistoryConnections
             = await weatherHistoryConnectionCollection.FindAsync(_ => true);
 
