@@ -15,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using WeatherService.Clients;
 using WeatherService.HealthCheck;
 using WeatherService.Settings;
@@ -29,46 +28,20 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
-    MongoSettings mongoSettings = new();
-    builder.Configuration.GetSection(nameof(MongoSettings)).Bind(mongoSettings);
-
-    builder.Services.AddSingleton<IMongoClient>(_ =>
-        new MongoClient(mongoSettings.ConnectionString));
-
-    builder.Services.AddSingleton(sp =>
+    builder.Services.AddMassTransit(x =>
     {
-        var client = sp.GetRequiredService<IMongoClient>();
-        return client.GetDatabase(mongoSettings.Database);
-    });
+        x.SetKebabCaseEndpointNameFormatter();
 
-    builder.Services
-        .AddMassTransit(config =>
+        RabbitMqSettings rabbitMqSettings = new();
+        builder.Configuration.GetSection(nameof(RabbitMqSettings)).Bind(rabbitMqSettings);
+
+        x.UsingRabbitMq((ctx, cfg) =>
         {
-            config.SetKebabCaseEndpointNameFormatter();
+            cfg.Host(rabbitMqSettings.Host);
 
-            // Mongo outbox (bus outbox enabled)
-            config.AddMongoDbOutbox(o =>
-            {
-                o.QueryDelay = TimeSpan.FromSeconds(mongoSettings.OutboxSettings.QueryDelaySeconds);
-                o.ClientFactory(sp => sp.GetRequiredService<IMongoClient>());
-                o.DatabaseFactory(sp => sp.GetRequiredService<IMongoDatabase>());
-
-                // inbox dedupe window applies to consumer outbox/inbox;
-                o.DuplicateDetectionWindow =
-                    TimeSpan.FromSeconds(mongoSettings.OutboxSettings.DuplicateDetectionWindowSeconds);
-
-                o.UseBusOutbox();
-            });
-
-            RabbitMqSettings rabbitMqSettings = new();
-            builder.Configuration.GetSection(nameof(RabbitMqSettings)).Bind(rabbitMqSettings);
-
-            config.UsingRabbitMq((ctx, cfg) =>
-            {
-                cfg.Host(rabbitMqSettings.Host);
-                cfg.ConfigureEndpoints(ctx);
-            });
+            cfg.ConfigureEndpoints(ctx);
         });
+    });
 
     builder.Services
         .AddOptions<MassTransitHostOptions>()
@@ -93,7 +66,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddHttpClient("OpenWeather", (sp, client) =>
     {
         var settings = sp.GetRequiredService<IOptions<ServiceSettings>>().Value;
-        client.BaseAddress = new Uri($"https://{settings.OpenWeatherHost}/");
+        client.BaseAddress = new Uri(settings.OpenWeatherHost);
     });
 
     builder.Services.AddTransient<WeatherClient>();

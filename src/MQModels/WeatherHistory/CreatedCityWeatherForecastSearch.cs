@@ -1,5 +1,7 @@
-﻿namespace MQModels.WeatherHistory;
+﻿using System;
 
-public class CreatedCityWeatherForecastSearch
-{
-}
+namespace MQModels.WeatherHistory;
+
+public record CreatedCityWeatherForecastSearch(
+    Guid EventId,
+    Guid GotWeatherForecastEventIt);

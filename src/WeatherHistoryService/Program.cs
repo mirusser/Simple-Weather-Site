@@ -15,6 +15,9 @@ using WeatherHistoryService.Settings;
 using Common.Application.HealthChecks;
 using Common.Mediator.DependencyInjection;
 using Common.Shared;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +31,10 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
     builder.Services.AddMappings(executingAssembly);
 
+    // Register a global Guid serializer
+    BsonSerializer.RegisterSerializer(
+        new GuidSerializer(GuidRepresentation.Standard));
+
     MongoSettings mongoSettings = new();
     builder.Configuration.GetSection(nameof(MongoSettings)).Bind(mongoSettings);
 
@@ -39,7 +46,7 @@ var builder = WebApplication.CreateBuilder(args);
         var client = sp.GetRequiredService<IMongoClient>();
         return client.GetDatabase(mongoSettings.Database);
     });
-    
+
     builder.Services.AddHostedService<MongoIndexesHostedService>();
 
     builder.Services.AddMassTransit(config =>
@@ -57,6 +64,8 @@ var builder = WebApplication.CreateBuilder(args);
             // how long to remember MessageId to prevent duplicates
             o.DuplicateDetectionWindow =
                 TimeSpan.FromSeconds(mongoSettings.OutboxSettings.DuplicateDetectionWindowSeconds);
+
+            o.UseBusOutbox();
         });
 
         // Apply to all receive endpoints:

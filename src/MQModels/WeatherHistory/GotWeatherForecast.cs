@@ -6,7 +6,7 @@ public record GotWeatherForecast(
     Guid EventId,
     string City,
     string CountryCode,
-    DateTime ObservedAtUtc,
+    DateTimeOffset Date,
     int TemperatureC,
     int TemperatureF,
     string Summary,

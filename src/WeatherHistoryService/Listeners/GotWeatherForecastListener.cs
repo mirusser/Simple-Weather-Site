@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MapsterMapper;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -17,15 +18,14 @@ public class GotWeatherForecastListener(
 {
     public async Task Consume(ConsumeContext<GotWeatherForecast> context)
     {
+        logger.LogDebug("Received {TypeOfMessage} message", nameof(GotWeatherForecast));
+
         // TODO: validate message fields?
         var cityWeatherForecastDocument = mapper.Map<CityWeatherForecastDocument>(context.Message);
+        await publishEndpoint.Publish(
+            new CreatedCityWeatherForecastSearch(Guid.NewGuid(), context.Message.EventId),
+            context.CancellationToken);
+
         await cityWeatherForecastService.UpsertIdempotentAsync(cityWeatherForecastDocument, context.CancellationToken);
-
-        await publishEndpoint.Publish(new CreatedCityWeatherForecastSearch
-        {
-            // ideally include something meaningful (e.g., doc id / event id)
-        }, context.CancellationToken);
-
-        return;
     }
 }
