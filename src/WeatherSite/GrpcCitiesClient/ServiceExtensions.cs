@@ -29,7 +29,8 @@ public static class ServiceExtensions
         {
             //o.Address = new Uri("http://citiesgrpcservice:80"); //TODO add to settings
             //o.Address = new Uri("http://localhost:8681"); //TODO add to settings
-            o.Address = new Uri("http://localhost:5031"); //TODO add to settings
+            //o.Address = new Uri("https://localhost:5031"); //TODO add to settings
+            o.Address = new Uri("http://localhost:5030"); //TODO add to settings
         })
         .ConfigureChannel(o =>
         {

@@ -26,28 +26,26 @@ public class CityWeatherForecastService(IMongoCollectionFactory<CityWeatherForec
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        CityWeatherForecastPaginationDto cityWeatherForecastPaginationDto = new();
+        var dto = new CityWeatherForecastPaginationDto();
 
-        cityWeatherForecastPaginationDto.NumberOfAllEntities = (int)await cityWeatherForecastCollection
-            .CountDocumentsAsync(c => c.Id != default, cancellationToken: cancellationToken);
+        var filter = Builders<CityWeatherForecastDocument>.Filter.Ne(x => x.Id, default);
 
-        if (pageNumber >= 1 && numberOfEntities >= 1)
-        {
-            var howManyToSkip = pageNumber > 1
-                ? numberOfEntities * (pageNumber - 1)
-                : 0;
+        dto.NumberOfAllEntities = (int)await cityWeatherForecastCollection
+            .CountDocumentsAsync(filter, cancellationToken: cancellationToken);
 
-            var cityWeatherForecastDocuments = cityWeatherForecastCollection.AsQueryable()
-                .Where(c => c.Id != default)
-                .OrderByDescending(c => c.SearchDate)
-                .Skip(howManyToSkip)
-                .Take(numberOfEntities);
+        if (pageNumber < 1 || numberOfEntities < 1)
+            return dto;
 
-            cityWeatherForecastPaginationDto.WeatherForecastDocuments = await cityWeatherForecastDocuments
-                .ToListAsync(cancellationToken);
-        }
+        var skip = (pageNumber - 1) * numberOfEntities;
 
-        return cityWeatherForecastPaginationDto;
+        dto.WeatherForecastDocuments = await cityWeatherForecastCollection
+            .Find(filter)
+            .SortByDescending(x => x.SearchDate)
+            .Skip(skip)
+            .Limit(numberOfEntities)
+            .ToListAsync(cancellationToken);
+
+        return dto;
     }
 
     public async Task<CityWeatherForecastDocument?> GetAsync(

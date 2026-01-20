@@ -494,3 +494,5 @@ src/CitiesService/CitiesService.Api/cert/localhost.key
 src/CitiesService/CitiesService.Api/cert/localhost.crt
 /src/SignalRServer/appsettings.Development.json
 /src/WeatherSite/Site/appsettings.Development.json
+/src/CitiesService/CitiesGrpcService/appsettings.Development.json
+/src/Authorization/OAuthServer/keys/is-signing-key-923AC7BA10DCA78EDFC1116700E1EF0E.json
