@@ -1,55 +1,101 @@
 ﻿using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
-using ErrorOr;
+using Common.Domain.Errors;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Common.Presentation.Exceptions;
 
 public class ExceptionHandlerMiddleware(
-	RequestDelegate next,
-	ILogger<ExceptionHandlerMiddleware> logger)
+    RequestDelegate next,
+    ILogger<ExceptionHandlerMiddleware> logger)
 {
-	private readonly JsonSerializerOptions jsonSerializerOptions
-		= new() { PropertyNameCaseInsensitive = true };
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-	public async Task Invoke(HttpContext context)
-	{
-		try
-		{
-			await next(context);
-		}
-		catch (Exception ex)
-		{
-			await HandleExceptionAsync(context, ex);
-		}
-	}
+    public async Task Invoke(HttpContext context)
+    {
+        try
+        {
+            await next(context);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(context, ex);
+        }
+    }
 
-	private async Task HandleExceptionAsync(HttpContext context, Exception exception)
-	{
-		var (statusCode, errorCode) = exception switch
-		{
-			UnauthorizedAccessException => (HttpStatusCode.Unauthorized, ErrorCodes.Unauthorized),
-			ServiceException e => (HttpStatusCode.BadRequest, e.Code),
-			HttpRequestException => (HttpStatusCode.ServiceUnavailable, ErrorCodes.Service_Unavailable),
-			ValidationException => (HttpStatusCode.BadRequest, ErrorCodes.ValidationException),
-			_ => (HttpStatusCode.InternalServerError, ErrorCodes.DefaultError),
-		};
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    {
+        if (exception is OperationCanceledException &&
+            context.RequestAborted.IsCancellationRequested)
+        {
+            logger.LogDebug("Request was cancelled by the client.");
+            return;
+        }
+        
+        var (statusCode, errorCode, problem) = exception switch
+        {
+            UnauthorizedAccessException => (
+                HttpStatusCode.Unauthorized,
+                ErrorCodes.Unauthorized,
+                new ProblemDetails { Title = "Unauthorized", Detail = exception.Message }
+            ),
 
-		logger.LogError(
-			exception,
-			"Exception code: {ErrorCode}, Exception message: {Message}",
-			errorCode,
-			exception.Message);
+            ServiceException se => (
+                HttpStatusCode.BadRequest,
+                se.Code,
+                new ProblemDetails { Title = se.Message, Detail = se.Message }
+            ),
 
-		var response = Error.Failure(code: errorCode, description: exception.Message);
-		var payload = JsonSerializer.Serialize(response, jsonSerializerOptions);
+            HttpRequestException => (
+                HttpStatusCode.ServiceUnavailable,
+                ErrorCodes.ServiceUnavailable,
+                new ProblemDetails { Title = "Service Unavailable", Detail = exception.Message }
+            ),
 
-		context.Response.ContentType = MediaTypeNames.Application.Json;
-		context.Response.StatusCode = (int)statusCode;
+            ValidationException ve => (
+                HttpStatusCode.BadRequest,
+                ErrorCodes.Validation,
+                ToValidationProblemDetails(ve)
+            ),
 
-		await context.Response.WriteAsync(payload);
-	}
+            _ => (
+                HttpStatusCode.InternalServerError,
+                ErrorCodes.DefaultError,
+                new ProblemDetails { Title = "Internal Server Error", Detail = "An unexpected error occurred." }
+            )
+        };
+
+        logger.LogError(
+            exception,
+            "Exception code: {ErrorCode}, Exception message: {Message}",
+            errorCode,
+            exception.Message);
+
+        // Enrich problem details (standard goodies)
+        problem.Status = (int)statusCode;
+        problem.Instance = context.Request.Path;
+        problem.Extensions["errorCode"] = errorCode;
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+
+        context.Response.ContentType = MediaTypeNames.Application.Json;
+        context.Response.StatusCode = (int)statusCode;
+
+        await context.Response.WriteAsJsonAsync(problem, problem.GetType(), JsonOptions);
+    }
+
+    private static ValidationProblemDetails ToValidationProblemDetails(ValidationException ex)
+    {
+        var errors = ex.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+        return new ValidationProblemDetails(errors)
+        {
+            Title = "Validation failed",
+        };
+    }
 }

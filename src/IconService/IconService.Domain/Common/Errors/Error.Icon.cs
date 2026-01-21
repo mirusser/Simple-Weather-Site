@@ -1,17 +1,19 @@
-﻿using ErrorOr;
+﻿using Common.Domain.Errors;
 
 namespace IconService.Domain.Common.Errors;
 
-public static partial class Errors
+public readonly record struct Errors
 {
     public static class Icon
     {
-        public static Error IconNotCreated => Error.Failure(
-            code: "Icon.NotCreated",
-            description: "Icon wasn't created");
+        public static Error IconNotCreated => new(
+            "Icon.NotCreated",
+            "Icon wasn't created",
+            ErrorType.Failure);
 
-        public static Error IconNotFound => Error.NotFound(
-            code: "Icon.NotFound",
-            description: "Icon not found");
+        public static Error IconNotFound => new(
+            "Icon.NotFound",
+            "Icon not found",
+            ErrorType.NotFound);
     }
 }

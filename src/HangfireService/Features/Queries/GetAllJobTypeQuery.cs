@@ -1,5 +1,5 @@
-﻿using HangfireService.Models;
-using MediatR;
+﻿using Common.Mediator;
+using HangfireService.Models;
 
 namespace HangfireService.Features.Queries;
 

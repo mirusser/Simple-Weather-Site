@@ -1,5 +1,5 @@
 # Use the appropriate ASP.NET Core runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 # Set Current Director to '/app'
 WORKDIR /app

@@ -1,100 +1,124 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
-using System.Net.Http.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
+using Common.ExtensionMethods;
+using Common.Infrastructure.Managers.Contracts;
+using Common.Presentation.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
+using WeatherService.Clients.Responses;
 using WeatherService.Models;
 using WeatherService.Settings;
+using Clouds = WeatherService.Clients.Responses.Clouds;
+using Coord = WeatherService.Clients.Responses.Coord;
+using Weather = WeatherService.Clients.Responses.Weather;
+using Wind = WeatherService.Clients.Responses.Wind;
 
 namespace WeatherService.Clients;
 
-public class WeatherClient
+public sealed class WeatherClient(
+    IHttpExecutor httpExecutor,
+    IOptions<ServiceSettings> options)
 {
-    #region Properties
+    private const string ClientName = "OpenWeather";
+    private const string CurrentWeatherPath = "data/2.5/weather";
+    private readonly ServiceSettings settings = options.Value;
 
-    private readonly HttpClient _httpClient;
-    private readonly ServiceSettings _serviceSettings;
-
-    #endregion Properties
-
-    //TODO move records from here bro
-
-    #region Records
-
-    public record Coord(decimal lon, decimal lat); //coordinates - longitude, latitude
-    public record Weather(int id, string main, string description, string icon);
-    public record Main(decimal temp, decimal feels_like, decimal temp_min, decimal temp_max, int pressure, int humidity);
-    public record Wind(decimal speed, int deg);
-    public record Clouds(int all);
-    public record Sys(int type, int id, string country, long sunrise, long sunset);
-    public record Forecast(
-        Coord coord,
-        Weather[] weather,
-        Main main,
-        int visibility,
-        Wind wind,
-        Clouds clouds,
-        long dt,
-        Sys sys,
-        int timezone,
-        int id,
-        string name,
-        int cod);
-
-    #endregion Records
-
-    public WeatherClient(
-        HttpClient httpClient,
-        IOptions<ServiceSettings> options)
+    public async Task<Result<Forecast>> GetCurrentWeatherByCityNameAsync(string city, CancellationToken ct)
     {
-        _httpClient = httpClient;
-        _serviceSettings = options.Value;
+        var uri = BuildWeatherUri(city: city, cityId: null, mode: null);
+
+        using var req = new HttpRequestMessage(HttpMethod.Get, uri);
+        using var res = await httpExecutor.SendAsync(ClientName, req, ct);
+
+        return await HttpResult.ReadJsonAsResultAsync<Forecast>(res, ct);
     }
 
-    public async Task<Current> GetCurrentWeatherInXmlByCityNameAsync(string city = "Tokio")
+    public async Task<Result<Forecast>> GetCurrentWeatherByCityIdAsync(
+        int cityId,
+        CancellationToken ct)
     {
-        Current currentWeather = null;
-        var url = $"https://{_serviceSettings.OpenWeatherHost}/data/2.5/weather?q={city}&appid={_serviceSettings.ApiKey}&mode=xml&units=metric";
+        var uri = BuildWeatherUri(city: null, cityId: cityId, mode: null);
+
+        using var req = new HttpRequestMessage(HttpMethod.Get, uri);
+        using var res = await httpExecutor.SendAsync(ClientName, req, ct);
+
+        return await HttpResult.ReadJsonAsResultAsync<Forecast>(res, ct);
+    }
+
+    public async Task<Result<Current>> GetCurrentXmlByCityAsync(string city, CancellationToken ct)
+    {
+        var uri = BuildWeatherUri(city: city, cityId: null, mode: "xml");
+
+        using var req = new HttpRequestMessage(HttpMethod.Get, uri);
+        using var res = await httpExecutor.SendAsync(ClientName, req, ct);
+
+        var xmlResult = await HttpResult.ReadStringAsResultAsync(res, ct);
+        if (!xmlResult.IsSuccess)
+        {
+            return Result<Current>.Fail(xmlResult.Problem!);
+        }
 
         try
         {
-            using HttpResponseMessage responseMessage = await _httpClient.GetAsync(url);
-            using HttpContent content = responseMessage.Content;
-            string data = await content.ReadAsStringAsync();
-
-            if (data != null)
-            {
-                XmlSerializer serializer = new(typeof(Current));
-                using StringReader reader = new(data);
-
-                currentWeather = (Current)serializer.Deserialize(reader);
-            }
+            var current = xmlResult.Value!.DeserializeXml<Current>();
+            return Result<Current>.Ok(current);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex) // XmlSerializer throws this on invalid XML
         {
-            //TODO: handle the exception somehow
-            var foo = ex;
+            // "upstream returned junk"
+            return Result<Current>.Fail(Problems.BadGateway($"Invalid XML received from upstream: {ex.Message}"));
+        }
+    }
+
+    private Uri BuildWeatherUri(string? city, int? cityId, string? mode)
+    {
+        if (!string.IsNullOrWhiteSpace(city) == (cityId is not null))
+        {
+            throw new ArgumentException("Provide either city or cityId, but not both.");
         }
 
-        return currentWeather;
+        // Base required query parameters
+        var query = new Dictionary<string, string?>
+        {
+            ["appid"] = settings.ApiKey,
+            ["units"] = "metric",
+        };
+
+        // Choose exactly one identifier
+        if (!string.IsNullOrWhiteSpace(city))
+        {
+            query["q"] = city;
+        }
+
+        if (cityId is not null)
+        {
+            query["id"] = cityId.Value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        if (!string.IsNullOrWhiteSpace(mode))
+        {
+            query["mode"] = mode;
+        }
+
+        var relative = QueryHelpers.AddQueryString(CurrentWeatherPath, query);
+        return new Uri(relative, UriKind.Relative);
     }
 
-    public async Task<Forecast> GetCurrentWeatherByCityNameAsync(string city)
-    {
-        var forecast = await _httpClient.GetFromJsonAsync<Forecast>(
-            $"https://{_serviceSettings.OpenWeatherHost}/data/2.5/weather?q={city}&appid={_serviceSettings.ApiKey}&units=metric"
-        );
-
-        return forecast;
-    }
-
-    public async Task<Forecast> GetCurrentWeatherByCityNameMockAsync(string city)
+    // TODO: use it in tests
+    public Task<Forecast> GetCurrentWeatherByCityNameMockAsync(string city)
     {
         Coord coord = new(Convert.ToDecimal(16.9299), Convert.ToDecimal(52.4069));
         Weather weather = new(801, "Clouds", "broken clouds", "02d");
-        Main main = new(Convert.ToDecimal(2.01), Convert.ToDecimal(-3.32), Convert.ToDecimal(1.11), Convert.ToDecimal(2.78), 1024, 51);
+        Main main = new(
+            Convert.ToDecimal(2.01),
+            Convert.ToDecimal(-3.32),
+            Convert.ToDecimal(1.11),
+            Convert.ToDecimal(2.78),
+            1024, 51);
         int visibility = 10000;
         Wind wind = new(Convert.ToDecimal(3.6), 250);
         Clouds clouds = new(20);
@@ -105,17 +129,20 @@ public class WeatherClient
         string name = "Poznań";
         int cod = 200;
 
-        var forecast = new Forecast(coord, new Weather[] { weather }, main, visibility, wind, clouds, dt, sys, timezone, id, name, cod);
+        var forecast = new Forecast(
+            coord,
+            [weather],
+            main,
+            visibility,
+            wind,
+            clouds,
+            dt,
+            sys,
+            timezone,
+            id,
+            name,
+            cod);
 
-        return forecast;
-    }
-
-    public async Task<Forecast> GetCurrentWeatherByCityIdAsync(decimal cityId)
-    {
-        var forecast = await _httpClient.GetFromJsonAsync<Forecast>(
-            $"https://{_serviceSettings.OpenWeatherHost}/data/2.5/weather?id={cityId}&appid={_serviceSettings.ApiKey}&units=metric"
-        );
-
-        return forecast;
+        return Task.FromResult(forecast);
     }
 }

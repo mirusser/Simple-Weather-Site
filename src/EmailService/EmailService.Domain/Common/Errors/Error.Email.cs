@@ -1,17 +1,10 @@
-﻿using ErrorOr;
+﻿namespace EmailService.Domain.Common.Errors;
 
-namespace EmailService.Domain.Common.Errors;
-
-public static partial class Errors
+public static partial class ErrorCodes
 {
-    public static class Email
-    {
-        //public static Error IconNotCreated => Error.Failure(
-        //    code: "Icon.NotCreated",
-        //    description: "Icon wasn't created");
-
-        //public static Error IconNotFound => Error.NotFound(
-        //    code: "Icon.NotFound",
-        //    description: "Icon not found");
-    }
+    // Mail-specific
+    public const string MailInvalidRecipient = "mail_invalid_recipient";
+    public const string MailAuthenticationFailed = "mail_auth_failed";
+    public const string MailServerUnavailable = "mail_server_unavailable";
+    public const string MailProtocolError = "mail_protocol_error";
 }

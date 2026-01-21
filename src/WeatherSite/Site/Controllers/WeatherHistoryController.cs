@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WeatherSite.Clients;
 using WeatherSite.Helpers;
+using WeatherSite.Logic.Clients;
 using WeatherSite.Models.WeatherHistory;
 using WeatherSite.Settings;
 

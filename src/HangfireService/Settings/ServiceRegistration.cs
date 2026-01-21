@@ -30,7 +30,12 @@ public static class ServiceRegistration
 			config.UseMongoStorage(
 				mongoSettings.ConnectionString,
 				mongoSettings.Database,
-				new MongoStorageOptions { MigrationOptions = migrationOptions });
+				new MongoStorageOptions
+				{
+					MigrationOptions = migrationOptions,
+					CheckQueuedJobsStrategy = CheckQueuedJobsStrategy.TailNotificationsCollection,
+					QueuePollInterval = TimeSpan.FromSeconds(1)
+				});
 		});
 		services.AddHangfireServer();
 

@@ -1,37 +1,40 @@
-﻿using System.Threading.Tasks;
-using MediatR;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Common.Presentation.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using WeatherService.Messages.Queries;
-using WeatherService.Models.Dto;
+using WeatherService.Features.Queries;
 
 namespace WeatherService.Controllers;
 
-[ApiController]
-[Route("api/[controller]/[action]")]
-public class WeatherForecastController : ControllerBase
+public class WeatherForecastController : ApiController
 {
-    private readonly IMediator _mediator;
-
-    public WeatherForecastController(IMediator mediator)
+    [HttpPost]
+    public async Task<IActionResult> GetByCityName(
+        GetByCityNameQuery query,
+        CancellationToken cancellationToken)
     {
-        _mediator = mediator;
+        var result = await Mediator.SendAsync(query, cancellationToken);
+
+        return FromResult(result);
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetByCityName(GetByCityNameQuery query)
+    public async Task<IActionResult> GetCityByNameFromXmlResponse(
+        GetByCityNameFromXmlResponseQuery query,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _mediator.Send(query));
+        var result = await Mediator.SendAsync(query, cancellationToken);
+
+        return FromResult(result);
     }
 
     [HttpPost]
-    public async Task<ActionResult<WeatherForecastDto>> GetCityByNameFromXmlResponse(GetByCityNameFromXmlResponseQuery query)
+    public async Task<IActionResult> GetByCityId(
+        GetByCityIdQuery query,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _mediator.Send(query));
-    }
+        var result = await Mediator.SendAsync(query, cancellationToken);
 
-    [HttpPost]
-    public async Task<ActionResult<WeatherForecastDto>> GetByCityId(GetByCityIdQuery query)
-    {
-        return Ok(await _mediator.Send(query));
+        return FromResult(result);
     }
 }

@@ -14,5 +14,5 @@ public interface ICityWeatherForecastService
 
     Task<CityWeatherForecastDocument?> GetAsync(string id, CancellationToken cancellationToken = default);
 
-    Task<CityWeatherForecastDocument> CreateAsync(CityWeatherForecastDocument? cityWeatherForecast, CancellationToken cancellationToken = default);
+    Task<CityWeatherForecastDocument> UpsertIdempotentAsync(CityWeatherForecastDocument? cityWeatherForecast, CancellationToken cancellationToken = default);
 }

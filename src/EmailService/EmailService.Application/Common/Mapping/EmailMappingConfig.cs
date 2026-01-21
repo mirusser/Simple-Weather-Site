@@ -1,11 +1,11 @@
-﻿using EmailService.Contracts.Email;
-using EmailService.Features.Commands;
-using EmailService.Features.Models.Dto;
+﻿using EmailService.Application.Email.Commands;
+using EmailService.Application.Email.Models.Dto;
+using EmailService.Contracts.Email;
 using Mapster;
 using MimeKit;
 using MQModels.Email;
 
-namespace EmailService.Mappings;
+namespace EmailService.Application.Common.Mapping;
 
 public class EmailMappingConfig : IRegister
 {
@@ -14,9 +14,8 @@ public class EmailMappingConfig : IRegister
         config.NewConfig<MimeMessage, SendEmailResult>()
             .Map(dest => dest.To, src => src.To.ToString())
             .Map(dest => dest.From, src => src.From.ToString())
-            .Map(dest => dest.Body, src => src.Body.ToString())
             .Map(dest => dest.Subject, src => src.Subject)
-            .Map(dest => dest.SendingDate, _ => DateTime.Now);
+            .Map(dest => dest.SendingDate, _ => DateTimeOffset.Now);
 
         config.NewConfig<SendEmail, SendEmailCommand>();
         config.NewConfig<SendEmailCommand, SendEmail>();

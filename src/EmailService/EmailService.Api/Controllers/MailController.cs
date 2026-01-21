@@ -1,25 +1,23 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Common.Presentation.Controllers;
+using EmailService.Application.Email.Commands;
+using EmailService.Application.Email.Models.Dto;
 using EmailService.Contracts.Email;
-using EmailService.Features.Commands;
-using MapsterMapper;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EmailService.Controllers;
+namespace EmailService.Api.Controllers;
 
-public class MailController(
-	ISender mediator,
-	IMapper mapper) : ApiController
+public class MailController : ApiController
 {
-	[HttpPost]
-	public async Task<IActionResult> SendEmail(SendEmailRequest request)
-	{
-		var command = mapper.Map<SendEmailCommand>(request);
-		var sendEmailResult = await mediator.Send(command);
+    [HttpPost]
+    public async Task<IActionResult> SendEmail(
+        SendEmailRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = Mapper.Map<SendEmailCommand>(request);
+        var result = await Mediator.SendAsync(command, cancellationToken);
 
-		return sendEmailResult.Match(
-			sendEmailResult => Ok(mapper.Map<SendEmailResponse>(sendEmailResult)),
-			Problem);
-	}
+        return FromResult<SendEmailResult, SendEmailResponse>(result);
+    }
 }

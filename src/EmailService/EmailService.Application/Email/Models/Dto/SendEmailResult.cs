@@ -1,12 +1,9 @@
-﻿using System;
-
-namespace EmailService.Features.Models.Dto;
+﻿namespace EmailService.Application.Email.Models.Dto;
 
 public class SendEmailResult
 {
-    public string To { get; set; } = null!;
-    public string Subject { get; set; } = null!;
-    public string Body { get; set; } = null!;
-    public string From { get; set; }
-    public DateTime SendingDate { get; set; }
+    public string To { get; init; } = null!;
+    public required string Subject { get; init; }
+    public required string From { get; init; }
+    public DateTimeOffset SendingDate { get; init; }
 }

@@ -1,11 +1,13 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using CitiesService.Domain.Settings;
 using Common.Application.Behaviors;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
+using Common.Mediator;
+using Common.Mediator.DependencyInjection;
 using FluentValidation;
 using MassTransit;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,58 +16,57 @@ namespace CitiesService.Application;
 
 public static class ServiceRegistration
 {
-	public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
-	{
-		var executingAssembly = Assembly.GetExecutingAssembly();
+    public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
+    {
+        var executingAssembly = Assembly.GetExecutingAssembly();
+        
+        services.AddValidatorsFromAssembly(executingAssembly);
+        
+        // TODO: do we really need all assemblies here?
+        services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
-		services.AddValidatorsFromAssembly(executingAssembly);
-		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddMassTransit(config =>
+        {
+            RabbitMQSettings rabbitMQSettings = new();
+            configuration
+                .GetSection(nameof(RabbitMQSettings))
+                .Bind(rabbitMQSettings);
 
-		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
+            // TODO: after adding a job uncomment the lines
+            //config.AddConsumer<JobListener>();
 
-		services.AddMassTransit(config =>
-		{
-			RabbitMQSettings rabbitMQSettings = new();
-			configuration
-				.GetSection(nameof(RabbitMQSettings))
-				.Bind(rabbitMQSettings);
+            config.SetKebabCaseEndpointNameFormatter();
+            config.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host(rabbitMQSettings.Host);
+                cfg.ConfigureEndpoints(ctx);
+            });
+        });
 
-			// TODO: after adding a job uncomment the lines
-			//config.AddConsumer<JobListener>();
+        services.AddOptions<MassTransitHostOptions>()
+            .Configure(options =>
+            {
+                // if specified, waits until the bus is started before
+                // returning from IHostedService.StartAsync
+                // default is false
+                options.WaitUntilStarted = false;
 
-			config.SetKebabCaseEndpointNameFormatter();
-			config.UsingRabbitMq((ctx, cfg) =>
-			{
-				cfg.Host(rabbitMQSettings.Host);
-				cfg.ConfigureEndpoints(ctx);
-			});
-		});
+                // if specified, limits the wait time when starting the bus
+                //options.StartTimeout = TimeSpan.FromSeconds(10);
 
-		services.AddOptions<MassTransitHostOptions>()
-			.Configure(options =>
-			{
-				// if specified, waits until the bus is started before
-				// returning from IHostedService.StartAsync
-				// default is false
-				options.WaitUntilStarted = false;
+                // if specified, limits the wait time when stopping the bus
+                //options.StopTimeout = TimeSpan.FromSeconds(30);
+            });
 
-				// if specified, limits the wait time when starting the bus
-				//options.StartTimeout = TimeSpan.FromSeconds(10);
+        services.AddMappings(executingAssembly);
 
-				// if specified, limits the wait time when stopping the bus
-				//options.StopTimeout = TimeSpan.FromSeconds(30);
-			});
+        return services;
+    }
 
-		services.AddMappings(executingAssembly);
+    public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app, IConfiguration configuration)
+    {
+        app.UseCommonHealthChecks();
 
-		return services;
-	}
-
-	public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app, IConfiguration configuration)
-	{
-		app.UseCommonHealthChecks();
-
-		return app;
-	}
+        return app;
+    }
 }

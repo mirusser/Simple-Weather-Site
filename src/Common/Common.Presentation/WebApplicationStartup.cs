@@ -5,37 +5,45 @@ namespace Common.Presentation;
 
 public static class WebApplicationStartup
 {
-	public static async Task RunWithLoggerAsync(this WebApplication app)
-	{
-		InitializeLogger(app);
+    extension(WebApplication app)
+    {
+        public async Task RunWithLoggerAsync()
+        {
+            var appName = ExtensionMethods.AssemblyExtensions.GetProjectName();
+            var lifetime = app.Lifetime;
 
-		var executingAssemblyName = ExtensionMethods.AssemblyExtensions.GetProjectName();
+            lifetime.ApplicationStarted.Register(() =>
+            {
+                Log.Information(
+                    "{Name} has started and is ready to accept requests (Environment: {Environment})",
+                    appName,
+                    app.Environment.EnvironmentName);
+            });
 
-		try
-		{
-			Log.Information(
-				"{Name} is starting (Environment: {Environment})",
-				executingAssemblyName,
-				app.Environment.EnvironmentName);
+            lifetime.ApplicationStopping.Register(()
+                => Log.Information("{Name} is stopping", appName));
 
-			await app.RunAsync();
-		}
-		catch (Exception ex)
-		{
-			Log.Fatal(ex, "{Name} fatal exception during execution", executingAssemblyName);
-			throw;
-		}
-		finally
-		{
-			await Log.CloseAndFlushAsync();
-		}
-	}
+            lifetime.ApplicationStopped.Register(()
+                => Log.Information("{Name} has stopped", appName));
 
-	private static void InitializeLogger(WebApplication app)
-	{
-		Log.Logger = new LoggerConfiguration()
-			.ReadFrom.Configuration(app.Configuration)
-			.Enrich.WithProperty("Environment", app.Environment.EnvironmentName)
-			.CreateLogger();
-	}
+            try
+            {
+                Log.Information(
+                    "{Name} is starting (Environment: {Environment})",
+                    appName,
+                    app.Environment.EnvironmentName);
+
+                await app.RunAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "{Name} fatal exception during execution", appName);
+                throw;
+            }
+            finally
+            {
+                await Log.CloseAndFlushAsync();
+            }
+        }
+    }
 }

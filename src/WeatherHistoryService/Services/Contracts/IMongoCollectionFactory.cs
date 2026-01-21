@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
 
-namespace WeatherHistoryService.Services;
+namespace WeatherHistoryService.Services.Contracts;
 
 public interface IMongoCollectionFactory<TMongoDocument> where TMongoDocument : class
 {

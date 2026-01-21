@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <UserSecretsId>d1b3f66d-a292-41d2-ac26-bd205f451b84</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DownloadedCities\" />
     <Folder Include="cert\" />
     <None Update="cert\localhost.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

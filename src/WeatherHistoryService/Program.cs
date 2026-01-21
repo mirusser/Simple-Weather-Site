@@ -1,103 +1,138 @@
+using System;
 using System.Reflection;
 using Common.Application.Mapping;
 using Common.Presentation;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Serilog;
 using WeatherHistoryService.Listeners;
-using WeatherHistoryService.Mongo;
 using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
 using WeatherHistoryService.Settings;
 using Common.Application.HealthChecks;
+using Common.Mediator.DependencyInjection;
+using Common.Shared;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-	var executingAssembly = Assembly.GetExecutingAssembly();
-	builder.Host.UseSerilog();
+    var executingAssembly = Assembly.GetExecutingAssembly();
 
-	builder.Services.AddCommonPresentationLayer(builder.Configuration);
-	builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
+    builder.AddCommonPresentationLayer();
 
-	builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
-	builder.Services.AddMappings(executingAssembly);
+    builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection(nameof(MongoSettings)));
 
-	builder.Services.AddMassTransit(config =>
-	{
-		RabbitMQSettings rabbitMQSettings = new();
-		builder.Configuration.GetSection(nameof(RabbitMQSettings)).Bind(rabbitMQSettings);
+    builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
+    builder.Services.AddMappings(executingAssembly);
 
-		config.AddConsumer<GotWeatherForecastListener>();
-		config.SetKebabCaseEndpointNameFormatter();
+    // Register a global Guid serializer
+    BsonSerializer.RegisterSerializer(
+        new GuidSerializer(GuidRepresentation.Standard));
 
-		config.UsingRabbitMq((ctx, cfg) =>
-		{
-			cfg.Host(rabbitMQSettings.Host);
-			cfg.ConfigureEndpoints(ctx);
-		});
-	});
-	builder.Services.AddOptions<MassTransitHostOptions>()
-	.Configure(options =>
-	{
-		// if specified, waits until the bus is started before
-		// returning from IHostedService.StartAsync
-		// default is false
-		options.WaitUntilStarted = true;
+    MongoSettings mongoSettings = new();
+    builder.Configuration.GetSection(nameof(MongoSettings)).Bind(mongoSettings);
 
-		// if specified, limits the wait time when starting the bus
-		//options.StartTimeout = TimeSpan.FromSeconds(10);
+    builder.Services.AddSingleton<IMongoClient>(_ =>
+        new MongoClient(mongoSettings.ConnectionString));
 
-		// if specified, limits the wait time when stopping the bus
-		//options.StopTimeout = TimeSpan.FromSeconds(30);
-	});
+    builder.Services.AddSingleton(sp =>
+    {
+        var client = sp.GetRequiredService<IMongoClient>();
+        return client.GetDatabase(mongoSettings.Database);
+    });
 
-	builder.Services.AddControllers();
-	builder.Services.AddSwaggerGen(c =>
-	{
-		c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeatherHistoryService", Version = "v1" });
-	});
+    builder.Services.AddHostedService<MongoIndexesHostedService>();
 
-	builder.Services.AddCommonHealthChecks(builder.Configuration);
+    builder.Services.AddMassTransit(config =>
+    {
+        config.AddConsumer<GotWeatherForecastListener>();
+        config.SetKebabCaseEndpointNameFormatter();
 
-	//register services
-	builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
-	builder.Services.AddScoped<ICityWeatherForecastService, CityWeatherForecastService>();
+        // Mongo outbox config (used by consumer outbox/inbox too)
+        config.AddMongoDbOutbox(o =>
+        {
+            o.QueryDelay = TimeSpan.FromSeconds(mongoSettings.OutboxSettings.QueryDelaySeconds);
+            o.ClientFactory(sp => sp.GetRequiredService<IMongoClient>());
+            o.DatabaseFactory(sp => sp.GetRequiredService<IMongoDatabase>());
+
+            // how long to remember MessageId to prevent duplicates
+            o.DuplicateDetectionWindow =
+                TimeSpan.FromSeconds(mongoSettings.OutboxSettings.DuplicateDetectionWindowSeconds);
+
+            o.UseBusOutbox();
+        });
+
+        // Apply to all receive endpoints:
+        config.AddConfigureEndpointsCallback((context, name, cfg) =>
+        {
+            // delayed redelivery (for transient issues)
+            cfg.UseDelayedRedelivery(r =>
+                r.Intervals(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(2)));
+
+            // immediate retry (fast transient failures)
+            cfg.UseMessageRetry(r => r.Intervals(100, 500, 1000, 2000));
+
+            // consumer outbox/inbox using MongoDB
+            cfg.UseMongoDbOutbox(context);
+        });
+
+        RabbitMqSettings rabbitMqSettings = new();
+        builder.Configuration.GetSection(nameof(RabbitMqSettings)).Bind(rabbitMqSettings);
+
+        config.UsingRabbitMq((ctx, cfg) =>
+        {
+            cfg.Host(rabbitMqSettings.Host);
+            cfg.ConfigureEndpoints(ctx);
+        });
+    });
+    builder.Services.AddOptions<MassTransitHostOptions>()
+        .Configure(options =>
+        {
+            // if specified, waits until the bus is started before
+            // returning from IHostedService.StartAsync
+            // default is false
+            options.WaitUntilStarted = true;
+
+            // if specified, limits the wait time when starting the bus
+            //options.StartTimeout = TimeSpan.FromSeconds(10);
+
+            // if specified, limits the wait time when stopping the bus
+            //options.StopTimeout = TimeSpan.FromSeconds(30);
+        });
+
+    builder.Services.AddControllers();
+    builder.Services.AddCommonHealthChecks(builder.Configuration);
+
+    //register services
+    builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
+    builder.Services.AddScoped<ICityWeatherForecastService, CityWeatherForecastService>();
 }
 
 var app = builder.Build();
 {
-	if (builder.Environment.IsDevelopment())
-	{
-		app.UseDeveloperExceptionPage();
-	}
+    if (builder.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
 
-	#region Swagger
+    app.UseDefaultScalar();
+    app.UseDefaultExceptionHandler();
+    app.UseHttpsRedirection();
+    app
+        .UseRouting()
+        .UseCommonHealthChecks();
 
-	app.UseSwagger();
-	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeatherHistoryService v1"));
+    app.UseAuthorization();
 
-	#endregion Swagger
-
-	app.UseDefaultExceptionHandler();
-	app.UseHttpsRedirection();
-	app
-	.UseRouting()
-	.UseCommonHealthChecks();
-
-	app.UseAuthorization();
-
-	app.UseEndpoints(endpoints =>
-	{
-		endpoints.MapControllers();
-		endpoints.MapHealthChecks("/health");
-		endpoints.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
-	});
+    app.MapControllers();
+    app.MapHealthChecks("/health");
+    app.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
 }
 
 await app.RunWithLoggerAsync();

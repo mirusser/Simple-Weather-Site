@@ -1,7 +1,7 @@
 ﻿using System;
 using Mapster;
 using MQModels.WeatherHistory;
-using WeatherService.Clients;
+using WeatherService.Clients.Responses;
 using WeatherService.Models;
 using WeatherService.Models.Dto;
 
@@ -11,10 +11,11 @@ public class WeatherServiceMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<WeatherClient.Forecast, WeatherForecastDto>()
+        config.NewConfig<Forecast, WeatherForecastDto>()
             .Map(dest => dest.City, src => src.name)
             .Map(dest => dest.CountryCode, src => src.sys != null ? src.sys.country : "")
-            .Map(dest => dest.Summary, src => src.weather != null && src.weather.Length > 0 ? src.weather[0].description : "")
+            .Map(dest => dest.Summary,
+                src => src.weather != null && src.weather.Length > 0 ? src.weather[0].description : "")
             .Map(dest => dest.TemperatureC, src => src.main != null ? (int)src.main.temp : 0)
             .Map(dest => dest.Icon, src => src.weather != null && src.weather.Length > 0 ? src.weather[0].icon : "")
             .Map(dest => dest.Date, src => DateTimeOffset.FromUnixTimeSeconds(src.dt).DateTime);
@@ -28,6 +29,7 @@ public class WeatherServiceMappingConfig : IRegister
             .Map(dest => dest.Date, src => src.Lastupdate.Value);
 
         config.NewConfig<WeatherForecastDto, IGotWeatherForecast>()
+            .Map(dest => dest.EventId, src => Guid.NewGuid())
             .TwoWays();
     }
 }

@@ -1,13 +1,13 @@
-﻿using EmailService.Domain.Settings;
-using EmailService.Features.Commands;
+﻿using Common.Mediator;
+using EmailService.Application.Email.Commands;
+using EmailService.Domain.Settings;
 using MapsterMapper;
 using MassTransit;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQModels.Email;
 
-namespace EmailService.Listeners;
+namespace EmailService.Application.Email.Listeners;
 
 public class SendEmailListener(
 	IMediator mediator,
@@ -23,7 +23,7 @@ public class SendEmailListener(
 
 		if (!string.IsNullOrWhiteSpace(sendEmailCommand.To))
 		{
-			sendEmailCommand.To = options.Value.DefaultEmailReciever;
+			sendEmailCommand.To = options.Value.DefaultEmailReceiver;
 		}
 
 		if (!string.IsNullOrEmpty(sendEmailCommand.From))
@@ -32,6 +32,6 @@ public class SendEmailListener(
 		}
 
 		//TODO: maybe do something with response here
-		var response = await mediator.Send(sendEmailCommand);
+		var response = await mediator.SendAsync(sendEmailCommand, context.CancellationToken);
 	}
 }

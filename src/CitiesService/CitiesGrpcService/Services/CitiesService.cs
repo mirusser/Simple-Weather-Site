@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 using CitiesService.Domain.Entities;
+using Common.Mediator;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 using MapsterMapper;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CitiesGrpcService.Services;
@@ -43,7 +43,7 @@ public class CitiesService : Cities.CitiesBase
         ServerCallContext context)
     {
         var query = new GetCitiesPaginationQuery { NumberOfCities = request.NumberOfCities, PageNumber = request.PageNumber };
-        var result = await mediator.Send(query);
+        var result = await mediator.SendAsync(query);
 
         var citiesPaginationReply = new CitiesPaginationReply()
         {
@@ -60,7 +60,7 @@ public class CitiesService : Cities.CitiesBase
         ServerCallContext context)
     {
         var query = new GetCitiesPaginationQuery { NumberOfCities = request.NumberOfCities, PageNumber = request.PageNumber };
-        var result = await mediator.Send(query);
+        var result = await mediator.SendAsync(query);
 
         var cities = mapper.Map<List<CityReply>>(result.Value.Cities);
 

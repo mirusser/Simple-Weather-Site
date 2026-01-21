@@ -5,19 +5,16 @@ using Common.Presentation.Http;
 using Common.Presentation.Settings;
 using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Serilog;
 using WeatherSite.Clients;
 using WeatherSite.Logic.Clients;
 using WeatherSite.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-	builder.Host.UseSerilog();
 	builder.Services.AddCommonInfrastructure(builder.Configuration);
-	builder.Services.AddCommonPresentationLayer(builder.Configuration);
+	builder.AddCommonPresentationLayer();
 
 	builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));
 	builder.Services.Configure<ApiConsumerAuthSettings>(builder.Configuration.GetSection(nameof(ApiConsumerAuthSettings)));

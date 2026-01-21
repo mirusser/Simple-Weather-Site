@@ -1,38 +1,29 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Common.Mediator;
 using Common.Presentation.Controllers;
 using IconService.Application.Icon.Commands.Create;
+using IconService.Application.Icon.Models.Dto;
 using IconService.Application.Icon.Queries.Get;
 using IconService.Application.Icon.Queries.GetAll;
 using IconService.Contracts.Icon;
 using MapsterMapper;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace IconService.Controllers;
+namespace IconService.Api.Controllers;
 
-public class IconsController : ApiController
+public class IconsController(
+    IMediator mediator,
+    IMapper mapper) : ApiController
 {
-    private readonly ISender mediator;
-    private readonly IMapper mapper;
-
-    public IconsController(
-        ISender mediator,
-        IMapper mapper)
-    {
-        this.mediator = mediator;
-        this.mapper = mapper;
-    }
-
     [HttpPost]
     public async Task<IActionResult> Create(CreateRequest request)
     {
         var command = mapper.Map<CreateCommand>(request);
 
-        var createResult = await mediator.Send(command);
+        var createResult = await mediator.SendAsync(command);
 
-        return createResult.Match(
-            createResult => Ok(mapper.Map<CreateResponse>(createResult)),
-            errors => base.Problem(errors));
+        return Ok(mapper.Map<CreateResponse>(createResult));
     }
 
     [HttpPost]
@@ -40,16 +31,16 @@ public class IconsController : ApiController
     {
         var query = mapper.Map<GetQuery>(request);
 
-        var getResult = await mediator.Send(query);
+        var getResult = await mediator.SendAsync(query);
 
-        return getResult.Match(
-            getResult => Ok(mapper.Map<GetResponse>(getResult)),
-            errors => base.Problem(errors));
+        return Ok(mapper.Map<GetResponse>(getResult));
     }
 
     [HttpPost]
     public async Task<IActionResult> GetAll(GetAllQuery query)
     {
-        return Ok(await mediator.Send(query));
+        var getResult = await mediator.SendAsync(query);
+
+        return Ok(mapper.Map<List<GetResult>>(getResult));
     }
 }

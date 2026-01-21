@@ -8,6 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Common.Infrastructure.Settings;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Managers;
+using Polly;
+using Polly.Retry;
+using ResiliencePipeline = Common.Infrastructure.Settings.ResiliencePipeline;
 
 namespace Common.Infrastructure;
 
@@ -26,6 +29,31 @@ public static class ServiceRegistration
 
 		services.AddSingleton<ICacheManager, CacheManager>();
 
+		services.AddHttpClient();
+		
+		ResiliencePipeline resiliencePipelineSettings = new();
+		configuration
+			.GetSection(nameof(ResiliencePipeline))
+			.Bind(resiliencePipelineSettings);
+		
+		services.AddResiliencePipeline(resiliencePipelineSettings.Name, pipelineBuilder =>
+		{
+			// Retry with exponential backoff + jitter
+			pipelineBuilder.AddRetry(new RetryStrategyOptions
+			{
+				MaxRetryAttempts = resiliencePipelineSettings.MaxRetryAttempts,
+				Delay = TimeSpan.FromSeconds(resiliencePipelineSettings.DelaySeconds),
+				BackoffType = DelayBackoffType.Exponential,
+				UseJitter = resiliencePipelineSettings.UseJitter,
+				// more potential configuration here
+			});
+
+			// Add a simple timeout around the whole HTTP call
+			pipelineBuilder.AddTimeout(TimeSpan.FromSeconds(resiliencePipelineSettings.DefaultTimeoutSeconds));
+		});
+		
+		services.AddSingleton<IHttpExecutor, HttpExecutor>();
+		
 		return services;
 	}
 }

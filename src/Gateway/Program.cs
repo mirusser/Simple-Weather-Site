@@ -1,16 +1,14 @@
 using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    builder.Host.UseSerilog();
-
+    builder.AddCommonPresentationLayer();
+    
     builder.Services.AddOcelot();
 
     builder.Services.AddCors(options =>
@@ -37,10 +35,7 @@ var app = builder.Build();
 
     app.UseCors("AllowAll");
 
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-    });
+    app.MapControllers();
 
     await app.UseOcelot();
 
