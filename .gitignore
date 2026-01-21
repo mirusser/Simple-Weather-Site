@@ -479,7 +479,6 @@ src/WeatherService/appsettings.Development.json
 /src/IconService/IconService.Api/deploy
 /src/HangfireService/deploy
 .mono/
-src/WeatherSite/Site/libman.json
 src/WeatherSite/Site/favicon.ico
 /src/HangfireService/appsettings.Development.json
 /src/Authorization/OAuthServer/appsettings.Development.json
