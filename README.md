@@ -2,7 +2,7 @@
 
 ### Current state of the project
 
-- Migrated from .NET 5 to .NET 8
+- Migrated from .NET 5 to .NET 10
 - Changed folder structure to be more usable and 'friendly'
 - Fixed general errors that prevented project from being fully operational when running on Docker
 - Some minor refactor
