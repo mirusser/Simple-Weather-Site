@@ -4,8 +4,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WeatherSite.Clients.Models.Records;
-using WeatherSite.Settings;
+using WeatherSite.Logic.Clients.Models.Records;
+using WeatherSite.Logic.Settings;
 
 namespace WeatherSite.Logic.Clients;
 

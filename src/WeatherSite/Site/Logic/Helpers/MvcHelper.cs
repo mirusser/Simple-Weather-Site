@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace WeatherSite.Helpers;
+namespace WeatherSite.Logic.Helpers;
 
-public class MvcHelper
+public static class MvcHelper
 {
     public static string NameOfController<T>() where T : Controller
         => typeof(T).Name.Replace("Controller", string.Empty);

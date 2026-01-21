@@ -2,25 +2,19 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WeatherSite.Helpers;
 using WeatherSite.Logic.Clients;
+using WeatherSite.Logic.Helpers;
+using WeatherSite.Logic.Settings;
 using WeatherSite.Models.WeatherHistory;
-using WeatherSite.Settings;
 
 namespace WeatherSite.Controllers;
 
-public class WeatherHistoryController : Controller
+public class WeatherHistoryController(
+    WeatherHistoryClient weatherHistoryClient,
+    IOptions<ApiEndpoints> options)
+    : Controller
 {
-    private readonly WeatherHistoryClient weatherHistoryClient;
-    private readonly ApiEndpoints apiEndpoints;
-
-    public WeatherHistoryController(
-        WeatherHistoryClient weatherHistoryClient,
-        IOptions<ApiEndpoints> options)
-    {
-        this.weatherHistoryClient = weatherHistoryClient;
-        apiEndpoints = options.Value;
-    }
+    private readonly ApiEndpoints apiEndpoints = options.Value;
 
     [HttpGet]
     public async Task<IActionResult> GetWeatherHistoryPagination()

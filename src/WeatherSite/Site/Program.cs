@@ -7,9 +7,8 @@ using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using WeatherSite.Clients;
 using WeatherSite.Logic.Clients;
-using WeatherSite.Settings;
+using WeatherSite.Logic.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -58,12 +57,9 @@ var app = builder.Build();
 
 	//app.UseAuthorization();
 
-	app.UseEndpoints(endpoints =>
-	{
-		endpoints.MapControllerRoute(
-			name: "default",
-			pattern: "{controller=WeatherPrediction}/{action=Index}/{id?}");
-	});
+	app.MapControllerRoute(
+		name: "default",
+		pattern: "{controller=WeatherPrediction}/{action=Index}/{id?}");
 }
 
 await app.RunWithLoggerAsync();

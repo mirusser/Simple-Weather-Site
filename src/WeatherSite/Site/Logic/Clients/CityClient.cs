@@ -1,38 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.Options;
-using WeatherSite.Clients.Models.Records;
-using WeatherSite.Settings;
+using Newtonsoft.Json;
+using WeatherSite.Logic.Clients.Models.Records;
+using WeatherSite.Logic.Settings;
 
-namespace WeatherSite.Clients;
+namespace WeatherSite.Logic.Clients;
 
 //TODO: interface, HttpFactory, Polly, hardcoded strings, exception handling
-public class CityClient
+public class CityClient(
+    HttpClient httpClient,
+    IOptions<ApiEndpoints> options)
 {
-    #region Properties
-
-    private readonly HttpClient _httpClient;
-    private readonly ApiEndpoints _apiEndpoints; 
-
-    #endregion Properties
-
-    public CityClient(
-        HttpClient httpClient,
-        IOptions<ApiEndpoints> options)
-    {
-        _httpClient = httpClient;
-        _apiEndpoints = options.Value;
-    }
+    private readonly ApiEndpoints apiEndpoints = options.Value; 
 
     public async Task<List<City>> GetCitiesByName(string cityName, int limit = 10)
     {
         //string url = $"{_apiEndpoints.CitiesServiceApiUrl}/GetCitiesByName{HttpUtility.UrlEncode(cityName)}/{HttpUtility.UrlEncode(limit.ToString())}";
 
-        string url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesByName";
+        string url = $"{apiEndpoints.CitiesServiceApiUrl}GetCitiesByName";
 
         var getCitiesQuery = new
         {
@@ -42,7 +31,7 @@ public class CityClient
 
         var jsonContent = JsonContent.Create(getCitiesQuery);
 
-        HttpResponseMessage response = await _httpClient.PostAsync(url, jsonContent);
+        HttpResponseMessage response = await httpClient.PostAsync(url, jsonContent);
 
         var content = await response.Content.ReadAsStringAsync();
         var cities = JsonConvert.DeserializeObject<CitiesResponse>(content);
@@ -52,9 +41,9 @@ public class CityClient
 
     public async Task<CitiesPagination?> GetCitiesPagination(int pageNumber = 1, int numberOfCities = 25)
     {
-        string url = $"{_apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
+        string url = $"{apiEndpoints.CitiesServiceApiUrl}GetCitiesPagination/{HttpUtility.UrlEncode(numberOfCities.ToString())}/{HttpUtility.UrlEncode(pageNumber.ToString())}";
 
-        CitiesPagination? citiesPagination = await _httpClient.GetFromJsonAsync<CitiesPagination>(url);
+        CitiesPagination? citiesPagination = await httpClient.GetFromJsonAsync<CitiesPagination>(url);
 
         return citiesPagination;
     }

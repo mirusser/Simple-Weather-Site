@@ -4,24 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using GrpcCitiesClient;
 using Microsoft.AspNetCore.Mvc;
-using WeatherSite.Clients;
-using WeatherSite.Clients.Models.Records;
-using WeatherSite.Helpers;
+using WeatherSite.Logic.Clients;
+using WeatherSite.Logic.Clients.Models.Records;
+using WeatherSite.Logic.Helpers;
 using WeatherSite.Models.City;
 
 namespace WeatherSite.Controllers;
 
-public class CityController : Controller
+public class CityController(
+    CityClient cityClient, // rest client 
+    ICitiesClient citiesClient // grpc client
+    ) : Controller
 {
-    private readonly CityClient _cityClient; //Rest client
-    private readonly ICitiesClient _citiesClient; //Grpc client
-
-    public CityController(CityClient cityClient, ICitiesClient citiesClient)
-    {
-        _cityClient = cityClient;
-        _citiesClient = citiesClient;
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetCitiesPagination()
     {
@@ -38,7 +32,7 @@ public class CityController : Controller
         //var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
 
         //using gRPC (unary)
-        var citiesPaginationReply = await _citiesClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
+        var citiesPaginationReply = await citiesClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
 
         //using gRPC (stream from server)
         //var citiesPagination = await _cityClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
@@ -67,7 +61,7 @@ public class CityController : Controller
     [HttpPost]
     public async Task<List<City>> GetCitiesByName([FromBody] Request request)
     {
-        var response = await _cityClient.GetCitiesByName(request.CityName);
+        var response = await cityClient.GetCitiesByName(request.CityName);
 
         return response;
     }

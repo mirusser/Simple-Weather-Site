@@ -1,4 +1,4 @@
-﻿namespace WeatherSite.Settings;
+﻿namespace WeatherSite.Logic.Settings;
 
 public class ApiEndpoints
 {

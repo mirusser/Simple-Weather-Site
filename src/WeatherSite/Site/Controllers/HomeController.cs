@@ -1,5 +1,4 @@
-﻿//using System.Text.Json;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WeatherSite.Models;

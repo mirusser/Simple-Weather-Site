@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace WeatherSite.Clients.Models.Records;
+namespace WeatherSite.Logic.Clients.Models.Records;
 
 public record CitiesResponse(
     [property: JsonProperty("cities")] List<City> Cities);

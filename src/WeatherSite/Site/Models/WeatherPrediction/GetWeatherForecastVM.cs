@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using WeatherSite.Clients.Models.Records;
+using WeatherSite.Logic.Clients.Models.Records;
 
 namespace WeatherSite.Models.WeatherPrediction;
 

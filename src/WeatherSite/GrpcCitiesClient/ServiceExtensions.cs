@@ -3,6 +3,7 @@ using System.Net.Http;
 using CitiesGrpcService;
 using Grpc.Core;
 using Grpc.Net.Client.Configuration;
+using GrpcCitiesClient.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,13 +25,13 @@ public static class ServiceExtensions
                 RetryableStatusCodes = { StatusCode.Unavailable }
             }
         };
+        
+        GrpcCitiesClientConnections citiesClientConnections = new();
+        configuration.GetSection(nameof(GrpcCitiesClientConnections)).Bind(citiesClientConnections);
 
         services.AddGrpcClient<Cities.CitiesClient>("Cities", o =>
         {
-            //o.Address = new Uri("http://citiesgrpcservice:80"); //TODO add to settings
-            //o.Address = new Uri("http://localhost:8681"); //TODO add to settings
-            //o.Address = new Uri("https://localhost:5031"); //TODO add to settings
-            o.Address = new Uri("http://localhost:5030"); //TODO add to settings
+            o.Address = new Uri(citiesClientConnections.Uri);
         })
         .ConfigureChannel(o =>
         {

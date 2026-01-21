@@ -2,4 +2,5 @@
 
 public class GrpcCitiesClientConnections
 {
+    public string Uri { get; set; }
 }

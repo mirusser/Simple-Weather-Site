@@ -3,21 +3,17 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using WeatherSite.Clients.Models.Records;
-using WeatherSite.Settings;
+using WeatherSite.Logic.Clients.Models.Records;
+using WeatherSite.Logic.Settings;
 
-namespace WeatherSite.Clients;
+namespace WeatherSite.Logic.Clients;
 
 public class WeatherForecastClient(
     HttpClient httpClient,
     IOptions<ApiEndpoints> options,
     JsonSerializerOptions jsonSerializerOptions)
 {
-
-    #region Properties
     private readonly ApiEndpoints _apiEndpoints = options.Value;
-
-    #endregion Properties
 
     //public async Task<WeatherForecast> GetCurrentWeatherForCityByCityName(string city)
     //{

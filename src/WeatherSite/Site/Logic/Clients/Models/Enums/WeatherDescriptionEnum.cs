@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace WeatherSite.Clients.Models.Enums;
+namespace WeatherSite.Logic.Clients.Models.Enums;
 
 public enum WeatherDescriptionEnum
 {

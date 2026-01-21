@@ -17,7 +17,7 @@ public static class UriHelper
         var uriBuilder = new UriBuilder(url);
         var uriParameters = HttpUtility.ParseQueryString(string.Empty);
 
-        if (parameters is not null && parameters.Any())
+        if (parameters is not null && parameters.Count != 0)
         {
             foreach (var parameter in parameters)
             {

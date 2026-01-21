@@ -10,7 +10,7 @@ namespace GrpcCitiesClient;
 
 public class CitiesClient : ICitiesClient
 {
-    private readonly Cities.CitiesClient _client;
+    private readonly Cities.CitiesClient client;
 
     public CitiesClient(GrpcClientFactory grpcClientFactory)
     {
@@ -27,7 +27,7 @@ public class CitiesClient : ICitiesClient
             }
         };
 
-        _client = grpcClientFactory.CreateClient<Cities.CitiesClient>(nameof(Cities));
+        client = grpcClientFactory.CreateClient<Cities.CitiesClient>(nameof(Cities));
     }
 
     public async IAsyncEnumerable<CityReply> GetCitiesStream(int pageNumber = 1, int numberOfCities = 25)
@@ -38,7 +38,7 @@ public class CitiesClient : ICitiesClient
             NumberOfCities = numberOfCities
         };
 
-        using var call = _client.GetCitiesStream(request);
+        using var call = client.GetCitiesStream(request);
 
         await foreach (var cityReply in call.ResponseStream.ReadAllAsync())
         {
@@ -54,7 +54,7 @@ public class CitiesClient : ICitiesClient
             NumberOfCities = numberOfCities
         };
 
-        var response = await _client.GetCitiesPaginationAsync(request);
+        var response = await client.GetCitiesPaginationAsync(request);
 
         return response;
     }

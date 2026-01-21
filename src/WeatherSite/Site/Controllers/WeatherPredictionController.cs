@@ -2,30 +2,18 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WeatherSite.Clients;
 using WeatherSite.Logic.Clients;
+using WeatherSite.Logic.Settings;
 using WeatherSite.Models.WeatherPrediction;
-using WeatherSite.Settings;
 
 namespace WeatherSite.Controllers;
 
-public class WeatherPredictionController : Controller
+public class WeatherPredictionController(
+    WeatherForecastClient weatherForecastClient,
+    IOptions<ApiEndpoints> options)
+    : Controller
 {
-    private readonly ApiEndpoints _apiEndpoints;
-
-    private readonly WeatherForecastClient _weatherForecastClient;
-    private readonly CityClient _cityClient;
-
-    public WeatherPredictionController(
-        WeatherForecastClient weatherForecastClient,
-        CityClient cityClient,
-        IconClient iconClient,
-        IOptions<ApiEndpoints> options)
-    {
-        _weatherForecastClient = weatherForecastClient;
-        _cityClient = cityClient;
-        _apiEndpoints = options.Value;
-    }
+    private readonly ApiEndpoints apiEndpoints = options.Value;
 
     [HttpGet]
     public async Task<IActionResult> Index()
@@ -39,7 +27,7 @@ public class WeatherPredictionController : Controller
     {
         var vm = new GetWeatherForecastVM()
         {
-            CitiesServiceEndpoint = _apiEndpoints.CitiesServiceApiUrl
+            CitiesServiceEndpoint = apiEndpoints.CitiesServiceApiUrl
         };
 
         return PartialView(vm);
@@ -52,7 +40,7 @@ public class WeatherPredictionController : Controller
         if (weatherForecastVM != null && weatherForecastVM.CityId != default)
         {
             weatherForecastVM.CityName = Regex.Replace(weatherForecastVM.CityName, @"\t|\n|\r", "").TrimStart();
-            weatherForecastVM.WeatherForecast = await _weatherForecastClient.GetCurrentWeatherForCityByCityId(weatherForecastVM.CityId);
+            weatherForecastVM.WeatherForecast = await weatherForecastClient.GetCurrentWeatherForCityByCityId(weatherForecastVM.CityId);
         }
 
         return PartialView(weatherForecastVM);
