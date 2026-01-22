@@ -107,7 +107,7 @@ var builder = WebApplication.CreateBuilder(args);
         });
 
     builder.Services.AddControllers();
-    builder.Services.AddCommonHealthChecks(builder.Configuration);
+    builder.Services.AddCommonHealthChecks();
 
     //register services
     builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));

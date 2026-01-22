@@ -61,7 +61,8 @@ public static class ServiceRegistration
 			.AddHttpClient()
 			.AddCustomAuth(configuration, environment);
 
-		services.AddCommonHealthChecks(configuration)
+		services
+			.AddCommonHealthChecks()
 			.AddDbContextCheck<ApplicationDbContext>(
 				name: "SQL health check",
 				failureStatus: HealthStatus.Unhealthy,

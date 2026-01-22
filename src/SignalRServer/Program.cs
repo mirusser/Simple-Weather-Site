@@ -64,7 +64,7 @@ var builder = WebApplication.CreateBuilder(args);
         });
 
     builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
-    builder.Services.AddCommonHealthChecks(builder.Configuration);
+    builder.Services.AddCommonHealthChecks();
 }
 
 var app = builder.Build();

@@ -1,6 +1,6 @@
 ﻿using Common.Mediator;
 using Common.Presentation.Http;
-using EmailService.Application.Email.Models.Dto;
+using EmailService.Application.Features.Models.Dto;
 using EmailService.Domain.Common.Errors;
 using EmailService.Domain.Settings;
 using MailKit.Net.Smtp;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace EmailService.Application.Email.Commands;
+namespace EmailService.Application.Features.Commands;
 
 public class SendEmailCommand
     : MailRequest, IRequest<Result<SendEmailResult>>

@@ -1,36 +1,51 @@
 ﻿using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Common.Domain.Settings;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Common.Application.HealthChecks;
 
-//TODO: move magic strings to appsettings
 public static class ServiceRegistration
 {
-	public static IHealthChecksBuilder AddCommonHealthChecks(this IServiceCollection services, IConfiguration configuration)
-	{
-		var baseUrl = configuration
-			.GetSection(nameof(ServiceEndpoints))
-			.GetValue<string>(nameof(ServiceEndpoints.BaseUrl));
+    extension(IServiceCollection services)
+    {
+        public IHealthChecksBuilder AddCommonHealthChecks()
+        {
+            var builder = services.AddHealthChecks();
 
-		var executingAssemblyName = ExtensionMethods.AssemblyExtensions.GetProjectName();
+            // Liveness
+            builder.AddCheck(
+                "self",
+                () => HealthCheckResult.Healthy(),
+                tags: ["live"]);
 
-		var builder = services.AddHealthChecks();
+            return builder;
+        }
+    }
 
-		return builder;
-	}
+    extension(IApplicationBuilder app)
+    {
+        public IApplicationBuilder UseCommonHealthChecks()
+        {
+            app.UseHealthChecks("/health", new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
 
-	public static IApplicationBuilder UseCommonHealthChecks(this IApplicationBuilder app)
-	{
-		app.UseHealthChecks("/health", new HealthCheckOptions
-		{
-			Predicate = _ => true,
-			ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-		});
+            app.UseHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = r => r.Tags.Contains("live")
+            });
 
-		return app;
-	}
+            app.UseHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = r => r.Tags.Contains("ready"),
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
+            return app;
+        }
+    }
 }

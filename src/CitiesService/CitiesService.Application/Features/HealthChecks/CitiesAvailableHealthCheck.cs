@@ -27,7 +27,7 @@ public class CitiesAvailableHealthCheck(
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "In {HealthCheck}", [nameof(CitiesAvailableHealthCheck)]);
+			logger.LogError(ex, "In {HealthCheck}", nameof(CitiesAvailableHealthCheck));
 
 			return HealthCheckResult.Unhealthy(nameof(CitiesAvailableHealthCheck), ex);
 		}

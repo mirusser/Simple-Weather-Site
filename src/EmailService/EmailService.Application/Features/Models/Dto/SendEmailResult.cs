@@ -1,4 +1,4 @@
-﻿namespace EmailService.Application.Email.Models.Dto;
+﻿namespace EmailService.Application.Features.Models.Dto;
 
 public class SendEmailResult
 {

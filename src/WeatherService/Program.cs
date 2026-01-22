@@ -73,7 +73,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddControllers();
 
-    builder.Services.AddCommonHealthChecks(builder.Configuration)
+    builder.Services.AddCommonHealthChecks()
         .AddCheck<OpenWeatherExternalEndpointHealthCheck>(
             name: "OpenWeather",
             failureStatus: HealthStatus.Degraded,

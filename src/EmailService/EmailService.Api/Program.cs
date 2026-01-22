@@ -20,7 +20,11 @@ var app = builder.Build();
 
     app.UseDefaultExceptionHandler();
     app.UseDefaultScalar();
-    app.UseHttpsRedirection();
+
+    if (!builder.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
 
     app
         .UseRouting()
@@ -29,8 +33,7 @@ var app = builder.Build();
     app.UseAuthorization();
 
     app.MapControllers();
-    app.MapGet("/ping", () => "pong");
-    app.MapGet("/", () => $"EmailService in {builder.Environment.EnvironmentName} mode");
+    app.UseServiceStartupPage(builder.Environment);
 }
 
 await app.RunWithLoggerAsync();

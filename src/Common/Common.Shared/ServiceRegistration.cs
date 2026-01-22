@@ -12,8 +12,7 @@ public static class ServiceRegistration
 {
     public static IServiceCollection AddSharedLayer(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton(JsonSerializerOptions.Default);
-
+        services.AddSingleton(JsonSerializerOptions.Web);
         services.AddOpenApi();
 
         return services;
@@ -35,10 +34,12 @@ public static class ServiceRegistration
     /// Page with basic environment information about the service
     /// To ease getting environment config data
     /// </summary>
-    public static IEndpointRouteBuilder UseServiceStartupPage(this IEndpointRouteBuilder app,
+    public static IEndpointRouteBuilder UseServiceStartupPage(
+        this IEndpointRouteBuilder app,
         IHostEnvironment environment)
     {
-        app.MapGet("/", () => environment);
+        app.MapGet("/", () => $"{environment.ApplicationName} in {environment.EnvironmentName}");
+        app.MapGet("/ping", () => "pong");
 
         return app;
     }

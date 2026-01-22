@@ -1,5 +1,5 @@
 ﻿using Common.Mediator;
-using EmailService.Application.Email.Commands;
+using EmailService.Application.Features.Commands;
 using EmailService.Domain.Settings;
 using MapsterMapper;
 using MassTransit;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQModels.Email;
 
-namespace EmailService.Application.Email.Listeners;
+namespace EmailService.Application.Features.Listeners;
 
 public class SendEmailListener(
 	IMediator mediator,

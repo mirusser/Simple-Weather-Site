@@ -2,7 +2,7 @@
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Mediator.DependencyInjection;
-using EmailService.Application.Email.Listeners;
+using EmailService.Application.Features.Listeners;
 using EmailService.Domain.Settings;
 using FluentValidation;
 using MassTransit;
@@ -63,7 +63,7 @@ public static class DependencyInjection
 		
 			services.AddSingleton(TimeProvider.System);
 
-			services.AddCommonHealthChecks(configuration);
+			services.AddCommonHealthChecks();
 
 			services.AddControllers();
 
