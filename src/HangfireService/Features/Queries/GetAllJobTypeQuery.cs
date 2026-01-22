@@ -9,7 +9,7 @@ public class GetAllJobTypeHandler : IRequestHandler<GetAllJobTypeQuery, IEnumera
 {
 	public async Task<IEnumerable<JobTypeDto>> Handle(GetAllJobTypeQuery request, CancellationToken cancellationToken)
 	{
-		var jobTypes = (JobType[])Enum.GetValues(typeof(JobType));
+		var jobTypes = Enum.GetValues<JobType>();
 
 		var result = jobTypes
 			.Select(jobType => new JobTypeDto { Value = (int)jobType, Name = jobType.ToString() });

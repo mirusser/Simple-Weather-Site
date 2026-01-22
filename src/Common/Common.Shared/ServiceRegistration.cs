@@ -12,12 +12,9 @@ public static class ServiceRegistration
 {
     public static IServiceCollection AddSharedLayer(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: in .NET 9 and later you could use: JsonSerializerOptions.Default
-        //https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/configure-options?pivots=dotnet-8-0
-        services.AddSingleton<JsonSerializerOptions>(_ => new(JsonSerializerDefaults.Web));
+        services.AddSingleton(JsonSerializerOptions.Default);
 
         services.AddOpenApi();
-        //services.AddEndpointsApiExplorer();
 
         return services;
     }
