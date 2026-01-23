@@ -59,7 +59,10 @@ Replace `zaq1@WSX` with your actual password for the `.pfx` file.
 
 ### 4. Setup listening for port
 
-In `Program.cs` file, use this code:
+Copy `localhost.pfx` file to `OAuthServer` (same directory for `.csproj`)
+also copy it to CitiesService/CitiesService.Api/cert/localhost.pfx
+
+In `Program.cs` file of `OAuthServer`, use this code:
 
 ```
 // Configure Kestrel to use HTTPS

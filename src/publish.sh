@@ -6,7 +6,11 @@
 
 # This script is meant to run locally for dev purposes
 # Run with sudo (in folder with file), use this command:
-# sudo ./publish.sh
+# > sudo ./publish.sh
+
+# To setup for https in docker reference file:
+# AdditionalInfo/HttpsInDocker.md
+# (Make sure to setup it up before running this script)
 
 # Colors for better readability
 GREEN='\033[0;32m' # for success messages
@@ -16,14 +20,30 @@ BLUE='\033[0;34m' # for custom informative messages
 NC='\033[0m' # No Color - for default/informative messages
 
 # Defines where solution and its docker-compose.yml files are located
-BASE_DIR="${1:-/home/arnie/Repos/Projects/Simple-Weather-Site/src}"
+BASE_DIR="${1:-/home/mirusser/Repos/Simple-Weather-Site/src}"
 
 check_dependencies() {
 
     # Make sure that iptables,iptables-persistent, netstat packages are installed, if not run:
-    # sudo apt-get update
-    # sudo apt-get install iptables
-    # sudo apt-get install net-tools
+    # > sudo apt-get update
+    # > sudo apt-get update # optional, but maybe it's worth to upgrade
+    # > sudo apt-get install iptables
+    # > sudo apt-get install net-tools
+
+    # install .net sdk (version may change in the future)
+    # on debain based linux distros:
+    # > sudo apt update
+    # > sudo apt install -y wget apt-transport-https ca-certificates gnupg
+    # > wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb
+    # > sudo dpkg -i packages-microsoft-prod.deb
+    # > rm packages-microsoft-prod.deb
+    # > sudo apt update
+    # > sudo apt install dotnet-sdk-10.0
+    # If it doesn’t find dotnet-sdk-10.0, list available versions:
+    # > apt search dotnet-sdk
+    # Verify:
+    # > dotnet --info
+    # > dotnet --list-sdks
 
     # Make sure that iptables is added to path
     # echo $PATH
@@ -78,7 +98,7 @@ build_and_dockerize() {
 
 build_and_run_docker_compose(){
 
-   docker compose build && docker compose -p "sws-containers" up -d && \
+   docker compose build --no-cache && docker compose -p "sws-containers" up -d && \
     echo -e "${GREEN}=> The containers started in the background.${NC}" || \
     { echo -e "${RED}=> Docker compose failed.${NC}"; exit 1; }
 }
