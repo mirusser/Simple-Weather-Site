@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Folder Include="cert\" />
+    <Folder Include="DownloadedCities\" />
     <None Update="cert\localhost.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
