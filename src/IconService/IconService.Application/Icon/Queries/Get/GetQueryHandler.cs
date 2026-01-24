@@ -1,6 +1,5 @@
 ﻿using Common.Domain.Errors;
 using Common.Mediator;
-using Common.Presentation.Exceptions;
 using IconService.Application.Common.Interfaces.Persistence;
 using IconService.Application.Icon.Models.Dto;
 using IconService.Domain.Common.Errors;
@@ -8,6 +7,11 @@ using IconService.Domain.Entities.Documents;
 using MapsterMapper;
 
 namespace IconService.Application.Icon.Queries.Get;
+
+public record GetQuery
+(
+    string? Icon
+) : IRequest<GetResult?>;
 
 public class GetQueryHandler(
     IMongoRepository<IconDocument> iconRepository,

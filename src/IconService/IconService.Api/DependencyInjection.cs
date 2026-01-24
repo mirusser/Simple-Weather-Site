@@ -1,13 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace IconService;
+namespace IconService.Api;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPresentation(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddControllers();
+        public IServiceCollection AddPresentation()
+        {
+            services.AddControllers();
         
-        return services;
+            return services;
+        }
     }
 }

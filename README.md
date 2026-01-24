@@ -1,6 +1,6 @@
 # Simple Weather Site
 
-### Current state of the project
+## Current state of the project
 
 - Migrated from .NET 5 to .NET 10
 - Changed folder structure to be more usable and 'friendly'
@@ -10,7 +10,7 @@
 - Added health checks for each app and configured Watchdog
 - Added (a little janky but still) OAuth identity server (using duende package for test purposes)
 
-### TODOs:
+## TODOs:
 
 - general refactor
   - _in progress_
@@ -51,6 +51,11 @@
 3. You can look up all your stored secrets with this command: `dotnet user-secrets list`
 4. Set up your api key secret in WeatherService project: `dotnet user-secrets set "ServiceSettings:ApiKey" "your_api_key_here"`
 
+### Services
+- Create Database for CitiesService and populate it by running: `AddCityInfoToDatabase` endpoint
+- IconService: run Seed endpoint
+
+## Miscellaneous
 Setup Redis on Windows 10:
 [Running Redis on Windows 10](https://redislabs.com/blog/redis-on-windows-10/)
 

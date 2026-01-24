@@ -10,16 +10,19 @@ namespace IconService.Application;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+	extension(IServiceCollection services)
 	{
-		var executingAssembly = Assembly.GetExecutingAssembly();
-		services.AddMappings(executingAssembly);
+		public IServiceCollection AddApplication(IConfiguration configuration)
+		{
+			var executingAssembly = Assembly.GetExecutingAssembly();
+			services.AddMappings(executingAssembly);
 
-		services.AddValidatorsFromAssembly(executingAssembly);
-		services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
+			services.AddValidatorsFromAssembly(executingAssembly);
+			services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
-		services.AddCommonHealthChecks();
+			services.AddCommonHealthChecks();
 
-		return services;
+			return services;
+		}
 	}
 }

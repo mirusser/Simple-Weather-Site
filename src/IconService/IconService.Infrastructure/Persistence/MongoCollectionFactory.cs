@@ -5,27 +5,23 @@ using MongoDB.Driver;
 
 namespace IconService.Infrastructure.Persistence;
 
-//TODO: maybe think about merging with MongoRepository
-public class MongoCollectionFactory<TMongoDocument>
-    : IMongoCollectionFactory<TMongoDocument> where TMongoDocument : class
+public class MongoCollectionFactory<TMongoDocument>(
+    IMongoClient client,
+    IOptions<MongoSettings> settings)
+    : IMongoCollectionFactory<TMongoDocument>
+    where TMongoDocument : class
 {
-    private readonly MongoSettings _settings;
-
-    public MongoCollectionFactory(IOptions<MongoSettings> settings)
-    {
-        _settings = settings.Value;
-    }
+    private readonly MongoSettings settings = settings.Value;
 
     public IMongoCollection<TMongoDocument> Get(string? collectionName = null)
     {
-        collectionName = !string.IsNullOrEmpty(collectionName)
-            ? collectionName
-            : typeof(TMongoDocument).Name;
+        collectionName ??= typeof(TMongoDocument).Name;
 
-        var client = new MongoClient(_settings.ConnectionString);
-        var database = client.GetDatabase(_settings.Database);
+        var database = client.GetDatabase(settings.Database);
 
-        if (!database.ListCollectionNames().ToList().Any(c => c == collectionName))
+        // optional: explicit creation
+        var exists = database.ListCollectionNames().ToList().Any(c => c == collectionName);
+        if (!exists)
         {
             database.CreateCollection(collectionName);
         }

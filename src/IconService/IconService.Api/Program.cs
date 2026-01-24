@@ -1,7 +1,7 @@
 ﻿using Common.Application.HealthChecks;
 using Common.Presentation;
 using Common.Shared;
-using IconService;
+using IconService.Api;
 using IconService.Application;
 using IconService.Infrastructure;
 using Microsoft.AspNetCore.Builder;
@@ -12,9 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
     builder.AddCommonPresentationLayer();
 
     builder.Services
-        .AddPresentation()
         .AddApplication(builder.Configuration)
-        .AddInfrastructure(builder.Configuration);
+        .AddInfrastructure(builder.Configuration)
+        .AddPresentation();
 }
 
 var app = builder.Build();
@@ -36,6 +36,7 @@ var app = builder.Build();
     app.UseAuthorization();
 
     app.MapControllers();
+    app.UseServiceStartupPage(builder.Environment);
 }
 
 await app.RunWithLoggerAsync();

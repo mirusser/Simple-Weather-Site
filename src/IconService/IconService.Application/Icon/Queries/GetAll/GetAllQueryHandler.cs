@@ -11,30 +11,21 @@ namespace IconService.Application.Icon.Queries.GetAll;
 
 public record GetAllQuery() : IRequest<IEnumerable<GetResult>>;
 
-public class GetAllIconsHandler
+public class GetAllIconsHandler(
+    IMapper mapper,
+    IMongoRepository<IconDocument> iconRepository)
     : IRequestHandler<GetAllQuery, IEnumerable<GetResult>>
 {
-    private readonly IMapper _mapper;
-    private readonly IMongoRepository<IconDocument> _iconRepository;
-
-    public GetAllIconsHandler(
-        IMapper mapper,
-        IMongoRepository<IconDocument> iconRepository)
-    {
-        _mapper = mapper;
-        _iconRepository = iconRepository;
-    }
-
     public async Task<IEnumerable<GetResult>> Handle(
         GetAllQuery request,
         CancellationToken cancellationToken)
     {
-        var iconDocuments = await _iconRepository
+        var iconDocuments = await iconRepository
             .GetAllAsync(cancellation: cancellationToken);
 
         if (iconDocuments is not null)
         {
-            var getIconDtos = _mapper.Map<IEnumerable<GetResult>>(iconDocuments);
+            var getIconDtos = mapper.Map<IEnumerable<GetResult>>(iconDocuments);
 
             // the library ErrorOr force to make it to list (?)
             return getIconDtos;

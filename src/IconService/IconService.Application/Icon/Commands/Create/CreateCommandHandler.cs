@@ -9,26 +9,26 @@ using MapsterMapper;
 
 namespace IconService.Application.Icon.Commands.Create;
 
-public class CreateCommandHandler
+public record CreateCommand
+(
+    string? Name,
+    string? Description,
+    string? Icon,
+    bool DayIcon,
+    byte[]? FileContent
+) : IRequest<CreateResult>;
+
+public class CreateCommandHandler(
+    IMapper mapper,
+    IMongoRepository<IconDocument> iconRepository)
     : IRequestHandler<CreateCommand, CreateResult>
 {
-    private readonly IMapper _mapper;
-    private readonly IMongoRepository<IconDocument> _iconRepository;
-
-    public CreateCommandHandler(
-        IMapper mapper,
-        IMongoRepository<IconDocument> iconRepository)
-    {
-        _mapper = mapper;
-        _iconRepository = iconRepository;
-    }
-
     public async Task<CreateResult> Handle(
         CreateCommand request,
         CancellationToken cancellationToken)
     {
-        var iconDocument = _mapper.Map<IconDocument>(request);
-        iconDocument = await _iconRepository.CreateOneAsync(
+        var iconDocument = mapper.Map<IconDocument>(request);
+        iconDocument = await iconRepository.CreateOneAsync(
             iconDocument,
             null,
             cancellationToken);
@@ -40,7 +40,7 @@ public class CreateCommandHandler
                 message:Errors.Icon.IconNotCreated.Description);
         }
 
-        var createIconDto = _mapper.Map<CreateResult>(iconDocument);
+        var createIconDto = mapper.Map<CreateResult>(iconDocument);
 
         return createIconDto;
     }

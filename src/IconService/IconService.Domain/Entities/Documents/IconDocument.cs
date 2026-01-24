@@ -2,32 +2,31 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 
-namespace IconService.Domain.Entities.Documents
+namespace IconService.Domain.Entities.Documents;
+
+public class IconDocument
 {
-    public class IconDocument
-    {
-        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = null!;
+    [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = null!; // TODO: consider using `ObjectId` instead of a `string`
 
-        [BsonElement("Name")]
-        [BsonRepresentation(BsonType.String)]
-        public string Name { get; set; } = null!;
+    [BsonElement("Name")]
+    [BsonRepresentation(BsonType.String)]
+    public string Name { get; set; } = null!;
 
-        [BsonElement("Description")]
-        [BsonRepresentation(BsonType.String)]
-        public string Description { get; set; } = null!;
+    [BsonElement("Description")]
+    [BsonRepresentation(BsonType.String)]
+    public string Description { get; set; } = null!;
 
-        [BsonElement("Icon")]
-        [BsonRepresentation(BsonType.String)]
-        public string Icon { get; set; } = null!;
+    [BsonElement("Icon")]
+    [BsonRepresentation(BsonType.String)]
+    public string Icon { get; set; } = null!;
 
-        [BsonElement("DayIcon")]
-        [BsonRepresentation(BsonType.Boolean)]
-        public bool DayIcon { get; set; }
+    [BsonElement("DayIcon")]
+    [BsonRepresentation(BsonType.Boolean)]
+    public bool DayIcon { get; set; }
 
-        [BsonElement("FileContent")]
-        [BsonRepresentation(BsonType.Binary)]
-        public byte[] FileContent { get; set; } = null!;
-    }
+    [BsonElement("FileContent")]
+    [BsonRepresentation(BsonType.Binary)]
+    public byte[]? FileContent { get; set; }
 }

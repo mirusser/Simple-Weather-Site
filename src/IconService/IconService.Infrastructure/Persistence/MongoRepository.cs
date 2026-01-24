@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 using IconService.Application.Common.Interfaces.Persistence;
+using IconService.Domain.Settings;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace IconService.Infrastructure.Persistence;
@@ -8,15 +10,13 @@ namespace IconService.Infrastructure.Persistence;
 /// Wrapper around IMongoCollection
 /// </summary>
 /// <typeparam name="TMongoDocument"></typeparam>
-public class MongoRepository<TMongoDocument> 
-    : IMongoRepository<TMongoDocument> where TMongoDocument : class
+public class MongoRepository<TMongoDocument>(
+    IMongoCollectionFactory<TMongoDocument> mongoCollectionFactory,
+    IOptions<MongoSettings> options)
+    : IMongoRepository<TMongoDocument>
+    where TMongoDocument : class
 {
-    private readonly IMongoCollection<TMongoDocument> _mongoCollection;
-
-    public MongoRepository(IMongoCollectionFactory<TMongoDocument> mongoCollectionFactory)
-    {
-        _mongoCollection = mongoCollectionFactory.Get();
-    }
+    private readonly IMongoCollection<TMongoDocument> mongoCollection = mongoCollectionFactory.Get(options.Value.IconsCollectionName);
 
     #region Read
 
@@ -24,7 +24,7 @@ public class MongoRepository<TMongoDocument>
         Expression<Func<TMongoDocument, bool>> predicate,
         FindOptions? findOptions = null,
         CancellationToken cancellation = default)
-        => await _mongoCollection
+        => await mongoCollection
             .Find(predicate, findOptions)
             .FirstOrDefaultAsync(cancellation)
             .ConfigureAwait(false);
@@ -32,7 +32,7 @@ public class MongoRepository<TMongoDocument>
     public async Task<IEnumerable<TMongoDocument>> GetAllAsync(
         FindOptions<TMongoDocument, TMongoDocument>? findOptions = null,
         CancellationToken cancellation = default)
-        => (await _mongoCollection
+        => (await mongoCollection
             .FindAsync(_ => true, findOptions, cancellation))
         .ToEnumerable(cancellation);
 
@@ -47,7 +47,7 @@ public class MongoRepository<TMongoDocument>
         InsertOneOptions? insertOneOptions = null,
         CancellationToken cancellation = default)
     {
-        await _mongoCollection
+        await mongoCollection
             .InsertOneAsync(mongoDocument, insertOneOptions, cancellation)
             .ConfigureAwait(false);
 
