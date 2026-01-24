@@ -27,7 +27,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-    if (app.Environment.IsDevelopment())
     {
         using var scope = app.Services.CreateScope();
         var services = scope.ServiceProvider;
@@ -44,7 +43,7 @@ var app = builder.Build();
     }
 
     app.UseDefaultScalar();
-    
+
     app
         .UseStaticFiles() // TODO: remove after this issue is fixed: https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/issues/2130 (also wwwroot directory)
         .UseDefaultExceptionHandler()
