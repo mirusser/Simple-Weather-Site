@@ -98,6 +98,7 @@ var app = builder.Build();
     app.UseAuthorization();
 
     app.MapControllers();
+    app.UseServiceStartupPage(builder.Environment);
 }
 
 await app.RunWithLoggerAsync();

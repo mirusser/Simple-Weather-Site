@@ -133,6 +133,8 @@ var app = builder.Build();
     app.MapControllers();
     app.MapHealthChecks("/health");
     app.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
+    
+    app.UseServiceStartupPage(builder.Environment);
 }
 
 await app.RunWithLoggerAsync();

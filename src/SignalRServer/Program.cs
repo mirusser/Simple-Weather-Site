@@ -85,6 +85,8 @@ var app = builder.Build();
     //{
     //    routes.MapHub<TestHub>("/test");
     //});
+    
+    app.UseServiceStartupPage(builder.Environment);
 }
 
 await app.RunWithLoggerAsync();
