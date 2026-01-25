@@ -54,6 +54,7 @@
 ### Services
 - Create Database for CitiesService and populate it by running: `AddCityInfoToDatabase` endpoint
 - IconService: run Seed endpoint
+- WeatherSite: libman restore
 
 ## Miscellaneous
 Setup Redis on Windows 10:
