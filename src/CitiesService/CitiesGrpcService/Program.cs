@@ -11,55 +11,52 @@ using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-	var executingAssembly = Assembly.GetExecutingAssembly();
+    var executingAssembly = Assembly.GetExecutingAssembly();
 
-	builder.AddCommonPresentationLayer();
-	
-	builder.Services.AddGrpc();
+    builder.AddCommonPresentationLayer();
 
-	//Configure to user cors, needs: Grpc.AspNetCore.Web package
-	//services.AddCors(o => o.AddPolicy("AllowAll", builder =>
-	//{
-	//    builder.AllowAnyOrigin()
-	//           .AllowAnyMethod()
-	//           .AllowAnyHeader()
-	//           .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
-	//}));
+    builder.Services.AddGrpc();
 
-	builder.Services
-		.AddApplicationLayer(builder.Configuration)
-		.AddInfrastructure(builder.Configuration);
+    //Configure to user cors, needs: Grpc.AspNetCore.Web package
+    //services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+    //{
+    //    builder.AllowAnyOrigin()
+    //           .AllowAnyMethod()
+    //           .AllowAnyHeader()
+    //           .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+    //}));
 
-	builder.Services.AddHttpClient();
-	builder.Services.AddMappings(executingAssembly);
+    builder.Services
+        .AddApplicationLayer(builder.Configuration)
+        .AddInfrastructure(builder.Configuration);
+
+    builder.Services.AddHttpClient();
+    builder.Services.AddMappings(executingAssembly);
 }
 
 var app = builder.Build();
 {
-	if (builder.Environment.IsDevelopment())
-	{
-		app.UseDeveloperExceptionPage();
-	}
+    if (builder.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
 
-	app.UseRouting();
+    app.UseRouting();
 
-	//Configure to user cors, needs: Grpc.AspNetCore.Web package
-	//app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true }); // Must be added between UseRouting and UseEndpoints
-	//app.UseCors();
+    //Configure to user cors, needs: Grpc.AspNetCore.Web package
+    //app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true }); // Must be added between UseRouting and UseEndpoints
+    //app.UseCors();
 
-	app.UseEndpoints(endpoints =>
-	{
-		//To use cors
-		//endpoints.MapGrpcService<GreeterService>().RequireCors("AllowAll");
+    //To use cors
+    //app.MapGrpcService<GreeterService>().RequireCors("AllowAll");
+    app.MapGrpcService<GreeterService>();
+    app.MapGrpcService<CitiesGrpcService.Services.CitiesService>();
+    app.MapGet("/",
+        async context =>
+        {
+            await context.Response.WriteAsync(
+                "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+        });
 
-		endpoints.MapGrpcService<GreeterService>();
-		endpoints.MapGrpcService<CitiesGrpcService.Services.CitiesService>();
-
-		endpoints.MapGet("/", async context =>
-		{
-			await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
-		});
-	});
-
-	await app.RunWithLoggerAsync();
+    await app.RunWithLoggerAsync();
 }

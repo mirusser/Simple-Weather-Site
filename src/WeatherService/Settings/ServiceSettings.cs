@@ -2,6 +2,6 @@ namespace WeatherService.Settings;
 
 public class ServiceSettings
 {
-    public string OpenWeatherHost { get; set; }
-    public string ApiKey { get; set; }
+    public string OpenWeatherHost { get; set; } = null!;
+    public string ApiKey { get; set; } = null!;
 }

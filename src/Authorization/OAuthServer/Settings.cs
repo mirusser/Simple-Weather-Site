@@ -1,6 +1,5 @@
 ﻿namespace OAuthServer;
 
-// TODO: implement getting configuration from app settings
 public class Settings
 {
 	public List<Client>? Clients { get; set; }

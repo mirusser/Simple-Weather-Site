@@ -1,9 +1,15 @@
 using System.Net;
+using Common.Application.HealthChecks;
+using Common.Presentation;
+using Common.Shared;
 using Duende.IdentityServer.Models;
 using OAuthServer;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+	builder
+		.AddCommonPresentationLayer();
+	
 	if (builder.Environment.EnvironmentName == "Docker")
 	{
 		builder.WebHost.ConfigureKestrel(serverOptions =>
@@ -18,9 +24,6 @@ var builder = WebApplication.CreateBuilder(args);
 			serverOptions.Listen(IPAddress.Any, 80);
 		});
 	}
-
-	builder.Services.AddEndpointsApiExplorer();
-	builder.Services.AddSwaggerGen();
 
 	Settings settings = new();
 	builder.Configuration
@@ -54,18 +57,16 @@ var builder = WebApplication.CreateBuilder(args);
 	.AddInMemoryApiScopes(apiScopes)
 	.AddInMemoryClients(clients)
 	.AddInMemoryApiResources(apiResources);
+	
+	builder.Services.AddCommonHealthChecks();
 }
 
 var app = builder.Build();
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
-
+	app.UseDefaultScalar();
 	app.UseIdentityServer();
-
-	app
-	.MapGet("/", () => "IdentityServer is running...")
-	.WithOpenApi();
+	app.UseCommonHealthChecks();
+	app.UseServiceStartupPage(builder.Environment);
 }
 
 app.Run();

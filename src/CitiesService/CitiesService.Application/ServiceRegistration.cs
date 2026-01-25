@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using CitiesService.Domain.Settings;
-using Common.Application.Behaviors;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
-using Common.Mediator;
 using Common.Mediator.DependencyInjection;
 using FluentValidation;
 using MassTransit;
