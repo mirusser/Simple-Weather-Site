@@ -4,7 +4,6 @@ using Common.Application.Mapping;
 using Common.Presentation;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -126,14 +125,11 @@ var app = builder.Build();
     app.UseHttpsRedirection();
     app
         .UseRouting()
-        .UseCommonHealthChecks();
-
-    app.UseAuthorization();
+        .UseAuthorization();
 
     app.MapControllers();
-    app.MapHealthChecks("/health");
-    app.MapGet("/ping", ctx => ctx.Response.WriteAsync("pong"));
     
+    app.MapCommonHealthChecks();
     app.UseServiceStartupPage(builder.Environment);
 }
 

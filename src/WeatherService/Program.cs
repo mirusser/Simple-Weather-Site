@@ -94,10 +94,10 @@ var app = builder.Build();
     //app.UseHttpsRedirection();
     app
         .UseRouting()
-        .UseCommonHealthChecks();
-    app.UseAuthorization();
+        .UseAuthorization();
 
     app.MapControllers();
+    app.MapCommonHealthChecks();
     app.UseServiceStartupPage(builder.Environment);
 }
 

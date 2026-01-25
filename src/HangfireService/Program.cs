@@ -41,9 +41,8 @@ var app = builder.Build();
         .UseDefaultExceptionHandler()
         .UseHttpsRedirection()
         .UseRouting()
-        .UseCommonHealthChecks()
         .UseAuthorization();
-
+    
     app.MapControllers();
 
     app.UseHangfireDashboard("/dashboard", new DashboardOptions()
@@ -51,6 +50,7 @@ var app = builder.Build();
         Authorization = [new AuthorizationFilter()]
     });
 
+    app.MapCommonHealthChecks();
     app.UseServiceStartupPage(builder.Environment);
 }
 

@@ -1,6 +1,7 @@
 ﻿using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -24,28 +25,27 @@ public static class ServiceRegistration
         }
     }
 
-    extension(IApplicationBuilder app)
+    // UseHealthChecks vs MapHealthChecks:
+    // https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-9.0#usehealthchecks-vs-maphealthchecks
+    public static IEndpointRouteBuilder MapCommonHealthChecks(this IEndpointRouteBuilder endpoints)
     {
-        public IApplicationBuilder UseCommonHealthChecks()
+        endpoints.MapHealthChecks("/health", new HealthCheckOptions
         {
-            app.UseHealthChecks("/health", new HealthCheckOptions
-            {
-                Predicate = _ => true,
-                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            Predicate = _ => true,
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        }).AllowAnonymous();
 
-            app.UseHealthChecks("/health/live", new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            });
+        endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
+        {
+            Predicate = r => r.Tags.Contains("live")
+        }).AllowAnonymous();
 
-            app.UseHealthChecks("/health/ready", new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("ready"),
-                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+        endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate = r => r.Tags.Contains("ready"),
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        }).AllowAnonymous();
 
-            return app;
-        }
+        return endpoints;
     }
 }

@@ -51,15 +51,15 @@ var app = builder.Build();
 	//app.UseHttpsRedirection();
 	app.UseStaticFiles();
 
-	app
-	.UseRouting()
-	.UseCommonHealthChecks();
+	app.UseRouting();
 
 	//app.UseAuthorization();
 
 	app.MapControllerRoute(
 		name: "default",
 		pattern: "{controller=WeatherPrediction}/{action=Index}/{id?}");
+	
+	app.MapCommonHealthChecks();
 }
 
 await app.RunWithLoggerAsync();

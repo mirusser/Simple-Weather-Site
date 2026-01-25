@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using CitiesService.Domain.Settings;
-using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Mediator.DependencyInjection;
 using FluentValidation;
 using MassTransit;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,57 +12,53 @@ namespace CitiesService.Application;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        var executingAssembly = Assembly.GetExecutingAssembly();
-        
-        services.AddValidatorsFromAssembly(executingAssembly);
-        
-        // TODO: do we really need all assemblies here?
-        services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
-
-        services.AddMassTransit(config =>
+        public IServiceCollection AddApplicationLayer(IConfiguration configuration)
         {
-            RabbitMQSettings rabbitMQSettings = new();
-            configuration
-                .GetSection(nameof(RabbitMQSettings))
-                .Bind(rabbitMQSettings);
+            var executingAssembly = Assembly.GetExecutingAssembly();
+        
+            services.AddValidatorsFromAssembly(executingAssembly);
+        
+            // TODO: do we really need all assemblies here?
+            services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
-            // TODO: after adding a job uncomment the lines
-            //config.AddConsumer<JobListener>();
-
-            config.SetKebabCaseEndpointNameFormatter();
-            config.UsingRabbitMq((ctx, cfg) =>
+            services.AddMassTransit(config =>
             {
-                cfg.Host(rabbitMQSettings.Host);
-                cfg.ConfigureEndpoints(ctx);
-            });
-        });
+                RabbitMQSettings rabbitMqSettings = new();
+                configuration
+                    .GetSection(nameof(RabbitMQSettings))
+                    .Bind(rabbitMqSettings);
 
-        services.AddOptions<MassTransitHostOptions>()
-            .Configure(options =>
-            {
-                // if specified, waits until the bus is started before
-                // returning from IHostedService.StartAsync
-                // default is false
-                options.WaitUntilStarted = false;
+                // TODO: after adding a job uncomment the lines
+                //config.AddConsumer<JobListener>();
 
-                // if specified, limits the wait time when starting the bus
-                //options.StartTimeout = TimeSpan.FromSeconds(10);
-
-                // if specified, limits the wait time when stopping the bus
-                //options.StopTimeout = TimeSpan.FromSeconds(30);
+                config.SetKebabCaseEndpointNameFormatter();
+                config.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(rabbitMqSettings.Host);
+                    cfg.ConfigureEndpoints(ctx);
+                });
             });
 
-        services.AddMappings(executingAssembly);
+            services.AddOptions<MassTransitHostOptions>()
+                .Configure(options =>
+                {
+                    // if specified, waits until the bus is started before
+                    // returning from IHostedService.StartAsync
+                    // default is false
+                    options.WaitUntilStarted = false;
 
-        return services;
-    }
+                    // if specified, limits the wait time when starting the bus
+                    //options.StartTimeout = TimeSpan.FromSeconds(10);
 
-    public static IApplicationBuilder UseApplicationLayer(this IApplicationBuilder app, IConfiguration configuration)
-    {
-        app.UseCommonHealthChecks();
+                    // if specified, limits the wait time when stopping the bus
+                    //options.StopTimeout = TimeSpan.FromSeconds(30);
+                });
 
-        return app;
+            services.AddMappings(executingAssembly);
+
+            return services;
+        }
     }
 }

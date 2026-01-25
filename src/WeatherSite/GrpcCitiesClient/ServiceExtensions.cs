@@ -11,40 +11,43 @@ namespace GrpcCitiesClient;
 
 public static class ServiceExtensions
 {
-    public static void AddGrpcCitiesClient(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        var defaultMethodConfig = new MethodConfig
+        public void AddGrpcCitiesClient(IConfiguration configuration)
         {
-            Names = { MethodName.Default },
-            RetryPolicy = new RetryPolicy
+            var defaultMethodConfig = new MethodConfig
             {
-                MaxAttempts = 5,
-                InitialBackoff = TimeSpan.FromSeconds(1),
-                MaxBackoff = TimeSpan.FromSeconds(5),
-                BackoffMultiplier = 1.5,
-                RetryableStatusCodes = { StatusCode.Unavailable }
-            }
-        };
+                Names = { MethodName.Default },
+                RetryPolicy = new RetryPolicy
+                {
+                    MaxAttempts = 5,
+                    InitialBackoff = TimeSpan.FromSeconds(1),
+                    MaxBackoff = TimeSpan.FromSeconds(5),
+                    BackoffMultiplier = 1.5,
+                    RetryableStatusCodes = { StatusCode.Unavailable }
+                }
+            };
         
-        GrpcCitiesClientConnections citiesClientConnections = new();
-        configuration.GetSection(nameof(GrpcCitiesClientConnections)).Bind(citiesClientConnections);
+            GrpcCitiesClientConnections citiesClientConnections = new();
+            configuration.GetSection(nameof(GrpcCitiesClientConnections)).Bind(citiesClientConnections);
 
-        services.AddGrpcClient<Cities.CitiesClient>("Cities", o =>
-        {
-            o.Address = new Uri(citiesClientConnections.Uri);
-        })
-        .ConfigureChannel(o =>
-        {
-            //o.cre
-            o.ServiceConfig = new ServiceConfig { MethodConfigs = { defaultMethodConfig } };
-        })
-        //.EnableCallContextPropagation(o => o.SuppressContextNotFoundErrors = true)
-        .ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            var handler = new HttpClientHandler();
-            return handler;
-        });
+            services.AddGrpcClient<Cities.CitiesClient>("Cities", o =>
+                {
+                    o.Address = new Uri(citiesClientConnections.Uri);
+                })
+                .ConfigureChannel(o =>
+                {
+                    //o.cre
+                    o.ServiceConfig = new ServiceConfig { MethodConfigs = { defaultMethodConfig } };
+                })
+                //.EnableCallContextPropagation(o => o.SuppressContextNotFoundErrors = true)
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                {
+                    var handler = new HttpClientHandler();
+                    return handler;
+                });
 
-        services.AddScoped<ICitiesClient, CitiesClient>();
+            services.AddScoped<ICitiesClient, CitiesClient>();
+        }
     }
 }

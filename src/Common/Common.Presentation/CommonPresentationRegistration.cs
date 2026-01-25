@@ -1,8 +1,6 @@
 ﻿using Common.Presentation.Exceptions;
 using Common.Shared;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace Common.Presentation;
@@ -17,18 +15,9 @@ public static class CommonPresentationRegistration
                 cfg.ReadFrom.Configuration(ctx.Configuration)
                     .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName));
 
-            builder.Services.AddCommonPresentationLayer(builder.Configuration);
+            builder.Services.AddSharedLayer(builder.Configuration);
+            
             return builder;
-        }
-    }
-
-    extension(IServiceCollection services)
-    {
-        public IServiceCollection AddCommonPresentationLayer(IConfiguration configuration)
-        {
-            services.AddSharedLayer(configuration);
-
-            return services;
         }
     }
 

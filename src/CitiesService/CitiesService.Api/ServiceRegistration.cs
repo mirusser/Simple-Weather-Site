@@ -18,107 +18,108 @@ namespace CitiesService.Api;
 // TODO: fix magic strings
 public static class ServiceRegistration
 {
-	public static IWebHostBuilder CustomKestrelConfiguration(
-		this IWebHostBuilder hostBuilder,
-		IHostEnvironment environment)
+	extension(IWebHostBuilder hostBuilder)
 	{
-		if (environment.EnvironmentName == "Docker")
+		public IWebHostBuilder CustomKestrelConfiguration(IHostEnvironment environment)
 		{
-			hostBuilder.ConfigureKestrel(serverOptions =>
+			if (environment.EnvironmentName == "Docker")
 			{
-				// Configure Kestrel to use HTTPS
-				serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
+				hostBuilder.ConfigureKestrel(serverOptions =>
 				{
-					listenOptions.UseHttps("cert/localhost.pfx", "zaq1@WSX"); //use your_pfx_password
-				});
+					// Configure Kestrel to use HTTPS
+					serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
+					{
+						//TODO: add to settings
+						listenOptions.UseHttps("cert/localhost.pfx", "zaq1@WSX"); //use your_pfx_password
+					});
 
-				// Configure Kestrel to use HTTP on port 80
-				serverOptions.Listen(IPAddress.Any, 80);
-			});
+					// Configure Kestrel to use HTTP on port 80
+					serverOptions.Listen(IPAddress.Any, 80);
+				});
+			}
+
+			return hostBuilder;
+		}
+	}
+
+	extension(IServiceCollection services)
+	{
+		public IServiceCollection AddPresentationLayer(IConfiguration configuration,
+			IHostEnvironment environment)
+		{
+			services.AddControllers();
+			services
+				.AddCors(options =>
+				{
+					options.AddPolicy("AllowAll",
+						builder =>
+						{
+							builder
+								.AllowAnyOrigin()
+								.AllowAnyMethod()
+								.AllowAnyHeader();
+						});
+				})
+				.AddHttpClient()
+				.AddCustomAuth(configuration, environment);
+
+			services
+				.AddCommonHealthChecks()
+				.AddDbContextCheck<ApplicationDbContext>(
+					name: "SQL health check",
+					failureStatus: HealthStatus.Unhealthy,
+					tags: ["ready", nameof(HealthChecksTags.Database)])
+				.AddCheck<CitiesAvailableHealthCheck>(
+					name: "Cities available health check",
+					failureStatus: HealthStatus.Degraded,
+					tags: ["ready", nameof(HealthChecksTags.Database)]);
+
+			return services;
 		}
 
-		return hostBuilder;
-	}
+		private IServiceCollection AddCustomAuth(IConfiguration configuration,
+			IHostEnvironment environment)
+		{
+			ApiResourceAuthSettings apiResourceAuthSettings = new();
+			configuration
+				.GetSection(nameof(ApiResourceAuthSettings))
+				.Bind(apiResourceAuthSettings);
 
-	public static IServiceCollection AddPresentation(
-		this IServiceCollection services,
-		IConfiguration configuration,
-		IHostEnvironment environment)
-	{
-		services.AddControllers();
-		services
-			.AddCors(options =>
-			{
-				options.AddPolicy("AllowAll",
-					builder =>
+			services
+				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+				{
+					options.Authority = apiResourceAuthSettings.AuthorityUrl;
+					options.Audience = apiResourceAuthSettings.Audience;
+					options.TokenValidationParameters = new TokenValidationParameters
 					{
-						builder
-						.AllowAnyOrigin()
-						.AllowAnyMethod()
-						.AllowAnyHeader();
-					});
-			})
-			.AddHttpClient()
-			.AddCustomAuth(configuration, environment);
+						ValidateAudience = true,
+						ValidateIssuer = true,
+						ValidateLifetime = true,
+						ValidateIssuerSigningKey = true,
+						ClockSkew = TimeSpan.Zero
+					};
 
-		services
-			.AddCommonHealthChecks()
-			.AddDbContextCheck<ApplicationDbContext>(
-				name: "SQL health check",
-				failureStatus: HealthStatus.Unhealthy,
-				tags: [nameof(HealthChecksTags.Database)])
-			.AddCheck<CitiesAvailableHealthCheck>(
-				name: "Cities available health check",
-				failureStatus: HealthStatus.Degraded,
-				tags: [nameof(HealthChecksTags.Database)]);
-
-		return services;
-	}
-
-	private static IServiceCollection AddCustomAuth(
-		this IServiceCollection services,
-		IConfiguration configuration,
-		IHostEnvironment environment)
-	{
-		ApiResourceAuthSettings apiResourceAuthSettings = new();
-		configuration
-			.GetSection(nameof(ApiResourceAuthSettings))
-			.Bind(apiResourceAuthSettings);
-
-		services
-			.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-			.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-			{
-				options.Authority = apiResourceAuthSettings.AuthorityUrl;
-				options.Audience = apiResourceAuthSettings.Audience;
-				options.TokenValidationParameters = new TokenValidationParameters
-				{
-					ValidateAudience = true,
-					ValidateIssuer = true,
-					ValidateLifetime = true,
-					ValidateIssuerSigningKey = true,
-					ClockSkew = TimeSpan.Zero
-				};
-
-				if (!environment.IsProduction())
-				{
-					options.RequireHttpsMetadata = false;
-				}
-			});
-
-		services.AddAuthorizationBuilder()
-			.AddPolicy("ApiScope", policy =>
-			{
-				policy.RequireAuthenticatedUser();
-				foreach (var claim in apiResourceAuthSettings.RequiredClaims)
-				{
-					foreach (var allowedValue in claim.AllowedValues)
+					if (!environment.IsProduction())
 					{
-						policy.RequireClaim(claim.ClaimType, allowedValue);
+						options.RequireHttpsMetadata = false;
 					}
-				}
-			});
+				});
 
-		return services;
+			services.AddAuthorizationBuilder()
+				.AddPolicy("ApiScope", policy =>
+				{
+					policy.RequireAuthenticatedUser();
+					foreach (var claim in apiResourceAuthSettings.RequiredClaims)
+					{
+						foreach (var allowedValue in claim.AllowedValues)
+						{
+							policy.RequireClaim(claim.ClaimType, allowedValue);
+						}
+					}
+				});
+
+			return services;
+		}
 	}
 }

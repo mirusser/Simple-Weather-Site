@@ -65,7 +65,7 @@ var app = builder.Build();
 {
 	app.UseDefaultScalar();
 	app.UseIdentityServer();
-	app.UseCommonHealthChecks();
+	app.MapCommonHealthChecks();
 	app.UseServiceStartupPage(builder.Environment);
 }
 

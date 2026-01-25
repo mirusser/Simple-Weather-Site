@@ -4,6 +4,7 @@ using CitiesService.Api;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
 using CitiesService.Infrastructure.Contexts;
+using Common.Application.HealthChecks;
 using Common.Presentation;
 using Common.Shared;
 using Microsoft.AspNetCore.Builder;
@@ -21,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services
         .AddInfrastructure(builder.Configuration)
         .AddApplicationLayer(builder.Configuration)
-        .AddPresentation(builder.Configuration, builder.Environment);
+        .AddPresentationLayer(builder.Configuration, builder.Environment);
 }
 
 var app = builder.Build();
@@ -50,10 +51,10 @@ var app = builder.Build();
         .UseRouting()
         .UseAuthentication()
         .UseAuthorization()
-        .UseCors("AllowAll")
-        .UseApplicationLayer(builder.Configuration);
+        .UseCors("AllowAll");
 
     app.MapControllers();
+    app.MapCommonHealthChecks();
     app.UseServiceStartupPage(builder.Environment);
 }
 

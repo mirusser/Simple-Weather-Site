@@ -69,15 +69,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-    app.UseDefaultScalar();
     app.UseDefaultExceptionHandler();
+    app.UseDefaultScalar();
 
     app.UseCors("AllowAll");
 
     app.UseHttpsRedirection();
-    app
-        .UseRouting()
-        .UseCommonHealthChecks();
+    app.UseRouting();
 
     app.MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}");
 
@@ -86,6 +84,7 @@ var app = builder.Build();
     //    routes.MapHub<TestHub>("/test");
     //});
     
+    app.MapCommonHealthChecks();
     app.UseServiceStartupPage(builder.Environment);
 }
 
