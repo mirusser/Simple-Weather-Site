@@ -2,12 +2,15 @@
 using CitiesGrpcService.Services;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
+using CitiesService.Infrastructure.Contexts;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
+using Common.Contracts.HealthCheck;
 using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,7 +38,11 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddMappings(executingAssembly);
 
     builder.Services
-        .AddCommonHealthChecks();
+        .AddCommonHealthChecks()
+        .AddDbContextCheck<ApplicationDbContext>(
+            name: "DB health check",
+            failureStatus: HealthStatus.Unhealthy,
+            tags: [HealthChecksTags.Ready, HealthChecksTags.Database]);
 }
 
 var app = builder.Build();
@@ -59,7 +66,10 @@ var app = builder.Build();
         async context =>
         {
             await context.Response.WriteAsync(
-                "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+                """
+                Communication with gRPC endpoints must be made through a gRPC client. 
+                To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909
+                """);
         });
 
     app.MapCommonHealthChecks();

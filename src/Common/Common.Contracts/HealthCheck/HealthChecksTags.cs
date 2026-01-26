@@ -1,10 +1,11 @@
 ﻿namespace Common.Contracts.HealthCheck;
 
-public enum HealthChecksTags
+public static class HealthChecksTags
 {
-	Database,
-	ExternalService,
-	Ready,
-	Custom,
-	Memory
+    public static string Database = "database";
+    public static string ExternalService = "external-service";
+    public static string Ready = "ready";
+    public static string Custom = "custom";
+    public static string Memory = "memory";
+    public static string Live = "live";
 }

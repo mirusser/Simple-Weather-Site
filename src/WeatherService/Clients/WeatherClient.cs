@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common.ExtensionMethods;
 using Common.Infrastructure.Managers.Contracts;
+using Common.Infrastructure.Settings;
 using Common.Presentation.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -24,6 +25,7 @@ public sealed class WeatherClient(
     IOptions<ServiceSettings> options)
 {
     private const string ClientName = "OpenWeather";
+    private const string PipelineName = PipelineNames.Default;
     private const string CurrentWeatherPath = "data/2.5/weather";
     private readonly ServiceSettings settings = options.Value;
 
@@ -32,7 +34,7 @@ public sealed class WeatherClient(
         var uri = BuildWeatherUri(city: city, cityId: null, mode: null);
 
         using var req = new HttpRequestMessage(HttpMethod.Get, uri);
-        using var res = await httpExecutor.SendAsync(ClientName, req, ct);
+        using var res = await httpExecutor.SendAsync(ClientName, PipelineName, req, ct);
 
         return await HttpResult.ReadJsonAsResultAsync<Forecast>(res, ct);
     }
@@ -44,7 +46,7 @@ public sealed class WeatherClient(
         var uri = BuildWeatherUri(city: null, cityId: cityId, mode: null);
 
         using var req = new HttpRequestMessage(HttpMethod.Get, uri);
-        using var res = await httpExecutor.SendAsync(ClientName, req, ct);
+        using var res = await httpExecutor.SendAsync(ClientName,  PipelineName,req, ct);
 
         return await HttpResult.ReadJsonAsResultAsync<Forecast>(res, ct);
     }
@@ -54,7 +56,7 @@ public sealed class WeatherClient(
         var uri = BuildWeatherUri(city: city, cityId: null, mode: "xml");
 
         using var req = new HttpRequestMessage(HttpMethod.Get, uri);
-        using var res = await httpExecutor.SendAsync(ClientName, req, ct);
+        using var res = await httpExecutor.SendAsync(ClientName, PipelineName, req, ct);
 
         var xmlResult = await HttpResult.ReadStringAsResultAsync(res, ct);
         if (!xmlResult.IsSuccess)
@@ -108,7 +110,7 @@ public sealed class WeatherClient(
         return new Uri(relative, UriKind.Relative);
     }
 
-    // TODO: use it in tests
+    // TODO: use it in tests or remove
     public Task<Forecast> GetCurrentWeatherByCityNameMockAsync(string city)
     {
         Coord coord = new(Convert.ToDecimal(16.9299), Convert.ToDecimal(52.4069));

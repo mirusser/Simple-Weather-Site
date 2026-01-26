@@ -12,8 +12,10 @@ using WeatherHistoryService.Services;
 using WeatherHistoryService.Services.Contracts;
 using WeatherHistoryService.Settings;
 using Common.Application.HealthChecks;
+using Common.Contracts.HealthCheck;
 using Common.Mediator.DependencyInjection;
 using Common.Shared;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -106,7 +108,13 @@ var builder = WebApplication.CreateBuilder(args);
         });
 
     builder.Services.AddControllers();
-    builder.Services.AddCommonHealthChecks();
+    builder.Services
+        .AddCommonHealthChecks()
+        .AddMongoDb(
+            clientFactory: sp => sp.GetRequiredService<IMongoClient>(),
+            name: "Mongo health check",
+            failureStatus: HealthStatus.Unhealthy,
+            tags: [HealthChecksTags.Ready, HealthChecksTags.Database]);
 
     //register services
     builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));

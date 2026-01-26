@@ -77,7 +77,7 @@ var builder = WebApplication.CreateBuilder(args);
         .AddCheck<OpenWeatherExternalEndpointHealthCheck>(
             name: "OpenWeather",
             failureStatus: HealthStatus.Degraded,
-            tags: [nameof(HealthChecksTags.Database)]);
+            tags: [HealthChecksTags.Ready, HealthChecksTags.ExternalService]);
 }
 
 var app = builder.Build();

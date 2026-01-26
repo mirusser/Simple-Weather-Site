@@ -1,19 +1,20 @@
 using System;
-using System.Net.NetworkInformation;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Infrastructure.Managers.Contracts;
+using Common.Infrastructure.Settings;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using WeatherService.Settings;
 
 namespace WeatherService.HealthCheck;
 
-public class OpenWeatherExternalEndpointHealthCheck(
-	IOptions<ServiceSettings> options,
+public sealed class OpenWeatherExternalEndpointHealthCheck(
+	IHttpExecutor httpExecutor,
 	ILogger<OpenWeatherExternalEndpointHealthCheck> logger) : IHealthCheck
 {
-	private readonly ServiceSettings serviceSettings = options.Value;
+	private const string ClientName = "OpenWeather";
+	private const string PipelineName = PipelineNames.Health;
 
 	public async Task<HealthCheckResult> CheckHealthAsync(
 		HealthCheckContext context,
@@ -21,18 +22,19 @@ public class OpenWeatherExternalEndpointHealthCheck(
 	{
 		try
 		{
-			Ping ping = new();
+			using var request = new HttpRequestMessage(HttpMethod.Head, new Uri("/", UriKind.Relative));
+			using var response = await httpExecutor.SendAsync(ClientName, PipelineName, request, cancellationToken);
 
-			var reply = await ping.SendPingAsync(serviceSettings.OpenWeatherHost);
-
-			return reply.Status != IPStatus.Success
-				? HealthCheckResult.Degraded(reply.Status.ToString())
-				: HealthCheckResult.Healthy("Ready");
+			// If we got an HTTP response at all, DNS+TLS+HTTP path works.
+			return HealthCheckResult.Healthy($"Reachable (HTTP {(int)response.StatusCode})");
+		}
+		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+		{
+			return HealthCheckResult.Degraded("Timed out contacting OpenWeather");
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, $"In {nameof(OpenWeatherExternalEndpointHealthCheck)}");
-
+			logger.LogError(ex, "In {HealthCheck}", nameof(OpenWeatherExternalEndpointHealthCheck));
 			return HealthCheckResult.Unhealthy(ex.Message, ex);
 		}
 	}

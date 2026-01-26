@@ -68,11 +68,11 @@ public static class ServiceRegistration
 				.AddDbContextCheck<ApplicationDbContext>(
 					name: "SQL health check",
 					failureStatus: HealthStatus.Unhealthy,
-					tags: ["ready", nameof(HealthChecksTags.Database)])
+					tags: [HealthChecksTags.Ready, HealthChecksTags.Database])
 				.AddCheck<CitiesAvailableHealthCheck>(
 					name: "Cities available health check",
 					failureStatus: HealthStatus.Degraded,
-					tags: ["ready", nameof(HealthChecksTags.Database)]);
+					tags: [HealthChecksTags.Ready, HealthChecksTags.Database]);
 
 			return services;
 		}

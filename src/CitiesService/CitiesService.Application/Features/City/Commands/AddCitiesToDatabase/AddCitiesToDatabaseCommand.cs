@@ -16,6 +16,7 @@ using Common.Mediator;
 using Common.Presentation.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
 using Polly.Registry;
 
 namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
@@ -120,7 +121,7 @@ public class AddCitiesToDatabaseHandler(
         CancellationToken cancellationToken)
     {
         var client = clientFactory.CreateClient();
-        var pipeline = pipelineProvider.GetPipeline(resiliencePipelineOptions.Value.Name);
+        var pipeline = pipelineProvider.GetPipeline(PipelineNames.Default);
         HttpResponseMessage? response = null;
 
         try

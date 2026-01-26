@@ -9,7 +9,10 @@ using SignalRServer.Services;
 using SignalRServer.Services.Contracts;
 using SignalRServer.Settings;
 using Common.Application.HealthChecks;
+using Common.Contracts.HealthCheck;
 using Common.Shared;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -63,8 +66,27 @@ var builder = WebApplication.CreateBuilder(args);
             //options.StopTimeout = TimeSpan.FromSeconds(30);
         });
 
+    MongoSettings mongoSettings = new();
+    builder.Configuration.GetSection(nameof(MongoSettings)).Bind(mongoSettings);
+
+    builder.Services.AddSingleton<IMongoClient>(_ =>
+        new MongoClient(mongoSettings.ConnectionString));
+
+    builder.Services.AddSingleton(sp =>
+    {
+        var client = sp.GetRequiredService<IMongoClient>();
+        return client.GetDatabase(mongoSettings.Database);
+    });
+    
     builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
-    builder.Services.AddCommonHealthChecks();
+    
+    builder.Services
+        .AddCommonHealthChecks()
+        .AddMongoDb(
+            clientFactory: sp => sp.GetRequiredService<IMongoClient>(),
+            name: "Mongo health check",
+            failureStatus: HealthStatus.Unhealthy,
+            tags: [HealthChecksTags.Ready, HealthChecksTags.Database]);
 }
 
 var app = builder.Build();

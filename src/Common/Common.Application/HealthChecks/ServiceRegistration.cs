@@ -1,4 +1,5 @@
-﻿using HealthChecks.UI.Client;
+﻿using Common.Contracts.HealthCheck;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Routing;
@@ -19,7 +20,7 @@ public static class ServiceRegistration
             builder.AddCheck(
                 "self",
                 () => HealthCheckResult.Healthy(),
-                tags: ["live"]);
+                tags: [HealthChecksTags.Live]);
 
             return builder;
         }
@@ -37,12 +38,12 @@ public static class ServiceRegistration
 
         endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
         {
-            Predicate = r => r.Tags.Contains("live")
+            Predicate = r => r.Tags.Contains(HealthChecksTags.Live)
         }).AllowAnonymous();
 
         endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
         {
-            Predicate = r => r.Tags.Contains("ready"),
+            Predicate = r => r.Tags.Contains(HealthChecksTags.Ready),
             ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
         }).AllowAnonymous();
 
