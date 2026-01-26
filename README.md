@@ -8,7 +8,7 @@
 - Some minor refactor
 - Still there is a lot of refactoring to do till I'm gonna be at least pleased with the state of the code
 - Added health checks for each app and configured Watchdog
-- Added (a little janky but still) OAuth identity server (using duende package for test purposes)
+- Added (a little janky but still) OAuth identity server (using `duende` package for test purposes)
 
 ## TODOs:
 
@@ -27,14 +27,19 @@
 - Setup build on jenkins
 - Add tests
 - Migrate to aws, and implement with usage of aws services
-- It would be nice to be able to dowlnoad historic data in various of file types (e.g. pdg, excel, csv, html, etc)
+- It would be nice to be able to download historic data in various file types (e.g. pdg, excel, csv, html, etc)
 - Configurable via page (something like mini admin panel, at least for urls to be configurable during runtime)
-- probably not as a microservice but as a another lib: redis cache
+- probably not as a microservice but as another lib: redis cache
 - automatic backup of databases
 - in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
 - feature: unod (dunno what I can undo yet, TODO: think about it)
 - handle more requests/endpoints from openweather api
 - least important but would be nice to redo frontend (tho I lack in that area, maybe use blazor)
+- switch from sql server to postgres
+- switch from MassTransit to OpenTransit (when the package will be ready)
+- consider ditching `duende`
+- get rid of `Gateway` project? (it's not really used)
+- Proper documentation
 
 ### Things to check out:
 
@@ -55,14 +60,3 @@
 - Create Database for CitiesService and populate it by running: `AddCityInfoToDatabase` endpoint
 - IconService: run Seed endpoint
 - WeatherSite: libman restore
-
-## Miscellaneous
-Setup Redis on Windows 10:
-[Running Redis on Windows 10](https://redislabs.com/blog/redis-on-windows-10/)
-
-1. Get WSL up and running: [How to setup WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (chose any Linux distribution you like, I use Ubuntu)
-2. Install redis: `sudo apt-get install redis-server`
-3. Restart just to make sure its running: `sudo service redis-server restart`
-4. Check version: `redis-cli -v`
-5. Start, stop: `sudo service redis-server start` `sudo service redis-server stop`
-6. To use redis (to verify Redis is running): `redis-cli`

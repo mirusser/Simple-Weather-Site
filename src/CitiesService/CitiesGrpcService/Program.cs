@@ -2,6 +2,7 @@
 using CitiesGrpcService.Services;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
+using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Presentation;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +33,9 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddHttpClient();
     builder.Services.AddMappings(executingAssembly);
+
+    builder.Services
+        .AddCommonHealthChecks();
 }
 
 var app = builder.Build();
@@ -58,5 +62,6 @@ var app = builder.Build();
                 "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
         });
 
+    app.MapCommonHealthChecks();
     await app.RunWithLoggerAsync();
 }
