@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
+using System.Threading;
 using CitiesService.Api;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
 using CitiesService.Infrastructure.Contexts;
+using CitiesService.Infrastructure.Repositories;
 using Common.Application.HealthChecks;
 using Common.Presentation;
 using Common.Shared;
@@ -28,18 +30,20 @@ var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 {
     {
-        using var scope = app.Services.CreateScope();
-        var services = scope.ServiceProvider;
-        var db = services.GetRequiredService<ApplicationDbContext>();
-
-        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
-        if (pending.Count > 0)
-        {
-            Console.WriteLine($"Pending migrations: {string.Concat(pending, ", ")}");
-            Console.WriteLine("About to run migrations...");
-            await db.Database.MigrateAsync();
-            Console.WriteLine("Migrations applied.");
-        }
+        // using var scope = app.Services.CreateScope();
+        // var services = scope.ServiceProvider;
+        // var dbMigrateAndSeed = services.GetRequiredService<DbMigrateAndSeedHostedService>();
+        //
+        // await dbMigrateAndSeed.StartAsync(CancellationToken.None);
+        
+        // var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+        // if (pending.Count > 0)
+        // {
+        //     Console.WriteLine($"Pending migrations: {string.Concat(pending, ", ")}");
+        //     Console.WriteLine("About to run migrations...");
+        //     await db.Database.MigrateAsync();
+        //     Console.WriteLine("Migrations applied.");
+        // }
     }
 
     app.UseDefaultScalar();

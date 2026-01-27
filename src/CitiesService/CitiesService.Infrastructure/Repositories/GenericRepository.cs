@@ -12,109 +12,149 @@ namespace CitiesService.Infrastructure.Repositories;
 
 public class GenericRepository<T>(ApplicationDbContext context) : IGenericRepository<T> where T : class
 {
-	private readonly DbSet<T> db = context.Set<T>();
+    private readonly DbSet<T> db = context.Set<T>();
 
-	public IQueryable<T> FindAll(
-		Expression<Func<T, bool>> searchExpression = null,
-		Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
-		int skipNumberOfRows = default,
-		int takeNumberOfRows = default,
-		List<string> includes = null)
-	{
-		IQueryable<T> query = db;
+    // public async Task<bool> TryAcquireSeedLockAsync(CancellationToken ct)
+    // {
+    //     // LockTimeout = 0 => do not wait, just skip if someone else holds it
+    //     // Results >= 0 means lock acquired
+    //     var result = await context.Database.ExecuteSqlRawAsync(
+    //         "EXEC sp_getapplock @Resource = 'CitiesSeed', @LockMode = 'Exclusive', @LockTimeout = 0;",
+    //         ct);
+    //
+    //     return result >= 0;
+    // }
+    
+    public async Task<bool> TryAcquireSeedLockAsync(CancellationToken ct)
+    {
+        var conn = context.Database.GetDbConnection();
+        await context.Database.OpenConnectionAsync(ct);
 
-		if (searchExpression != null)
-		{
-			query = query.Where(searchExpression);
-		}
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+            DECLARE @result int;
+            EXEC @result = sp_getapplock
+                @Resource = @resource,
+                @LockMode = 'Exclusive',
+                @LockOwner = 'Session',
+                @LockTimeout = 0;
+            SELECT @result;";
+        cmd.CommandType = System.Data.CommandType.Text;
 
-		if (includes?.Count > 0)
-		{
-			foreach (var table in includes)
-			{
-				query = query.Include(table);
-			}
-		}
+        var p = cmd.CreateParameter();
+        p.ParameterName = "@resource";
+        p.Value = "CitiesSeed";
+        cmd.Parameters.Add(p);
 
-		if (orderByExpression != null)
-		{
-			query = orderByExpression(query);
-		}
+        var resultObj = await cmd.ExecuteScalarAsync(ct);
+        var result = Convert.ToInt32(resultObj);
 
-		if (skipNumberOfRows > 0)
-		{
-			query = query.Skip(skipNumberOfRows);
-		}
+        // >= 0 means acquired (0 granted, 1 converted, etc.)
+        return result >= 0;
+    }
 
-		if (takeNumberOfRows > 0)
-		{
-			query = query.Take(takeNumberOfRows);
-		}
 
-		return query;
-	}
+    public IQueryable<T> FindAll(
+        Expression<Func<T, bool>> searchExpression = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
+        int skipNumberOfRows = default,
+        int takeNumberOfRows = default,
+        List<string> includes = null)
+    {
+        IQueryable<T> query = db;
 
-	public async Task<T> FindAsync(
-		Expression<Func<T, bool>> searchExpression = null,
-		List<string> includes = null,
-		CancellationToken cancellationToken = default)
-	{
-		IQueryable<T> query = db;
+        if (searchExpression != null)
+        {
+            query = query.Where(searchExpression);
+        }
 
-		if (includes?.Count > 0)
-		{
-			foreach (var table in includes)
-			{
-				query = query.Include(table);
-			}
-		}
+        if (includes?.Count > 0)
+        {
+            foreach (var table in includes)
+            {
+                query = query.Include(table);
+            }
+        }
 
-		return await query.FirstOrDefaultAsync(searchExpression, cancellationToken);
-	}
+        if (orderByExpression != null)
+        {
+            query = orderByExpression(query);
+        }
 
-	public async Task<bool> CheckIfExistsAsync(
-		Expression<Func<T, bool>> searchExpression = null,
-		CancellationToken cancellationToken = default)
-	{
-		IQueryable<T> query = db;
+        if (skipNumberOfRows > 0)
+        {
+            query = query.Skip(skipNumberOfRows);
+        }
 
-		return await query.AnyAsync(searchExpression, cancellationToken);
-	}
+        if (takeNumberOfRows > 0)
+        {
+            query = query.Take(takeNumberOfRows);
+        }
 
-	public async Task<bool> CreateAsync(
-		T entity,
-		CancellationToken cancellationToken = default)
-	{
-		var entityEntry = await db.AddAsync(entity, cancellationToken);
+        return query;
+    }
 
-		return entityEntry.State == EntityState.Added;
-	}
+    public async Task<T> FindAsync(
+        Expression<Func<T, bool>> searchExpression = null,
+        List<string> includes = null,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<T> query = db;
 
-	public async Task CreateRangeAsync(
-		IEnumerable<T> entities,
-		CancellationToken cancellationToken = default)
-	{
-		await db.AddRangeAsync(entities, cancellationToken);
-	}
+        if (includes?.Count > 0)
+        {
+            foreach (var table in includes)
+            {
+                query = query.Include(table);
+            }
+        }
 
-	public bool Delete(T entity)
-	{
-		var entityEntry = db.Remove(entity);
+        return await query.FirstOrDefaultAsync(searchExpression, cancellationToken);
+    }
 
-		return entityEntry.State == EntityState.Deleted;
-	}
+    public async Task<bool> CheckIfExistsAsync(
+        Expression<Func<T, bool>> searchExpression = null,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<T> query = db;
 
-	public bool Update(T entity)
-	{
-		var entityEntry = db.Update(entity);
+        return await query.AnyAsync(searchExpression, cancellationToken);
+    }
 
-		return entityEntry.State == EntityState.Modified;
-	}
+    public async Task<bool> CreateAsync(
+        T entity,
+        CancellationToken cancellationToken = default)
+    {
+        var entityEntry = await db.AddAsync(entity, cancellationToken);
 
-	public async Task<bool> SaveAsync(CancellationToken cancellationToken = default)
-	{
-		var numberOfRowsAffected = await context.SaveChangesAsync(cancellationToken);
+        return entityEntry.State == EntityState.Added;
+    }
 
-		return numberOfRowsAffected > 0;
-	}
+    public async Task CreateRangeAsync(
+        IEnumerable<T> entities,
+        CancellationToken cancellationToken = default)
+    {
+        await db.AddRangeAsync(entities, cancellationToken);
+    }
+
+    public bool Delete(T entity)
+    {
+        var entityEntry = db.Remove(entity);
+
+        return entityEntry.State == EntityState.Deleted;
+    }
+
+    public bool Update(T entity)
+    {
+        var entityEntry = db.Update(entity);
+
+        return entityEntry.State == EntityState.Modified;
+    }
+
+    public async Task<bool> SaveAsync(CancellationToken cancellationToken = default)
+    {
+        var numberOfRowsAffected = await context.SaveChangesAsync(cancellationToken);
+
+        return numberOfRowsAffected > 0;
+    }
 }

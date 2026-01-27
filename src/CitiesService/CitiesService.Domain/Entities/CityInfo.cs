@@ -5,27 +5,23 @@ namespace CitiesService.Domain.Entities;
 
 public class CityInfo
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; init; }
 
-
-	/// <summary>
-	/// This is a `city id` from json file
-	/// </summary>
-	[Required]
-    public decimal CityId { get; set; }
-
+    /// <summary>
+    /// This is a city `id` from JSON file
+    /// </summary>
     [Required]
-    public string Name { get; set; } = null!;
+    public decimal CityId { get; init; }
 
-    public string? State { get; set; }
+    [Required] public string Name { get; init; } = null!;
 
-    [Required]
-    public string CountryCode { get; set; } = null!;
+    public string? State { get; init; }
 
-	[Column(TypeName = "decimal(18, 2)")]
-	public decimal Lon { get; set; }
+    [Required] public string CountryCode { get; init; } = null!;
 
-	[Column(TypeName = "decimal(18, 2)")]
-	public decimal Lat { get; set; }
+    [Column(TypeName = "decimal(9,6)")] 
+    public decimal Lon { get; init; }
+
+    [Column(TypeName = "decimal(9, 6)")] 
+    public decimal Lat { get; init; }
 }

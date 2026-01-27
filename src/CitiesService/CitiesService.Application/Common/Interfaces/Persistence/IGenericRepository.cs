@@ -9,6 +9,8 @@ namespace CitiesService.Application.Common.Interfaces.Persistence;
 
 public interface IGenericRepository<T> where T : class
 {
+    Task<bool> TryAcquireSeedLockAsync(CancellationToken ct);
+    
     IQueryable<T> FindAll(
         Expression<Func<T, bool>> searchExpression,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,

@@ -26,11 +26,8 @@ public static class ServiceRegistration
 
 		services.AddCommonInfrastructure(configuration);
 
-		#region Repositories
-
 		services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
-
-		#endregion Repositories
+		services.AddHostedService<DbMigrateAndSeedHostedService>();
 
 		return services;
 	}

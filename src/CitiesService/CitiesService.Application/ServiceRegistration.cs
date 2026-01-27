@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using CitiesService.Application.Features.City.Services;
 using CitiesService.Domain.Settings;
 using Common.Application.Mapping;
 using Common.Mediator.DependencyInjection;
@@ -57,7 +58,9 @@ public static class ServiceRegistration
                 });
 
             services.AddMappings(executingAssembly);
-
+            
+            services.AddScoped<ICitiesSeeder, CitiesSeeder>();
+            
             return services;
         }
     }

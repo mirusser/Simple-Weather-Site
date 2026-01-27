@@ -467,7 +467,6 @@ src/WeatherService/appsettings.Development.json
 /src/IconService/deploy
 /src/SignalRServer/deploy
 /src/CitiesService/CitiesGrpcService/deploy
-/src/EmailService/appsettings.Docker.json
 .mono/registry/CurrentUser/software/microsoft/csdevkit/v1/pids/4927_133564390224511667/values.xml
 /src/WeatherSite/Site/wwwroot/lib
 /src/CitiesService/CitiesService.Api/appsettings.Development.json
@@ -497,3 +496,5 @@ src/CitiesService/CitiesService.Api/cert/localhost.crt
 /src/Authorization/OAuthServer/keys/is-signing-key-923AC7BA10DCA78EDFC1116700E1EF0E.json
 src/localhost.crt
 src/localhost.key
+/src/CitiesService/CitiesService.Infrastructure/bin
+/src/CitiesService/CitiesService.Infrastructure/obj

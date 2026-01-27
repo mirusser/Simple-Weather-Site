@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -7,54 +7,60 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Application.Common.Helpers;
 using CitiesService.Application.Common.Interfaces.Persistence;
+using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
 using Common.Infrastructure.Settings;
-using Common.Mediator;
-using Common.Presentation.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Polly;
 using Polly.Registry;
 
-namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
+namespace CitiesService.Application.Features.City.Services;
 
-public class AddCitiesToDatabaseCommand : IRequest<Result<AddCitiesToDatabaseResult>>;
-
-// TODO: use CitiesSeeder here
-public class AddCitiesToDatabaseHandler(
+public sealed class CitiesSeeder(
     IGenericRepository<CityInfo> cityInfoRepo,
     IOptions<FileUrlsAndPaths> fileUrlsAndPathsOptions,
-    IOptions<ResiliencePipeline> resiliencePipelineOptions,
     IHttpClientFactory clientFactory,
     ResiliencePipelineProvider<string> pipelineProvider,
-    ILogger<AddCitiesToDatabaseHandler> logger,
-    JsonSerializerOptions jsonSerializerOptions)
-    : IRequestHandler<AddCitiesToDatabaseCommand, Result<AddCitiesToDatabaseResult>>
+    ILogger<CitiesSeeder> logger,
+    JsonSerializerOptions jsonSerializerOptions) : ICitiesSeeder
 {
     private readonly FileUrlsAndPaths fileUrlsAndPaths = fileUrlsAndPathsOptions.Value;
 
-    public async Task<Result<AddCitiesToDatabaseResult>> Handle(
-        AddCitiesToDatabaseCommand request,
-        CancellationToken cancellationToken)
+    public async Task SeedIfEmptyAsync(CancellationToken ct)
     {
-        var anyCityExists = await cityInfoRepo
-            .CheckIfExistsAsync(c => c.Id != 0, cancellationToken);
-
-        if (anyCityExists)
+        // Quick pre-check (fast path)
+        if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, ct))
         {
-            return Result<AddCitiesToDatabaseResult>.Fail(Problems.Conflict("Cities already added"));
+            logger.LogInformation("Cities already exist. Skipping seeding.");
+            return;
         }
 
-        var isSuccess = await SaveCitiesFromFileToDatabase(cancellationToken);
+        // Acquire a cross-instance lock (only one replica seeds)
+        if (!await cityInfoRepo.TryAcquireSeedLockAsync(ct))
+        {
+            logger.LogInformation("Another instance is seeding cities. Skipping seeding.");
+            return;
+        }
 
-        return Result<AddCitiesToDatabaseResult>.Ok(new AddCitiesToDatabaseResult
-            { IsSuccess = isSuccess, IsAlreadyAdded = anyCityExists });
+        // Re-check under lock (important!)
+        if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, ct))
+        {
+            logger.LogInformation("Cities already exist (after lock). Skipping seeding.");
+            return;
+        }
+
+        logger.LogInformation("Seeding cities...");
+
+        var ok = await SaveCitiesFromFileToDatabase(ct);
+
+        logger.LogInformation("Seeding cities finished. Success={Success}", ok);
     }
 
+    
     private async Task<bool> SaveCitiesFromFileToDatabase(CancellationToken cancellationToken)
     {
         var downloadResult = await SaveCitiesToFileAsync(cancellationToken);
@@ -74,7 +80,7 @@ public class AddCitiesToDatabaseHandler(
         var cityInfos = citiesFromJson
             .Select(c => new CityInfo()
             {
-                CityId = long.Parse(c.Id.ToString(CultureInfo.InvariantCulture)) ,
+                CityId = c.Id,
                 CountryCode = c.Country ?? string.Empty,
                 Lat = c.Coord?.Lat ?? 0,
                 Lon = c.Coord?.Lon ?? 0,
@@ -83,9 +89,19 @@ public class AddCitiesToDatabaseHandler(
             });
 
         await cityInfoRepo.CreateRangeAsync(cityInfos, cancellationToken);
-        return await cityInfoRepo.SaveAsync(cancellationToken);
+        
+        try
+        {
+            return await cityInfoRepo.SaveAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            // If you add unique index, a race/manual call can cause duplicates -> treat as "seeded enough"
+            logger.LogWarning(ex, "City seeding encountered a DB update exception (possible duplicates).");
+            return true;
+        }
     }
-
+    
     private async Task<bool> SaveCitiesToFileAsync(CancellationToken cancellationToken)
     {
         if (!File.Exists(fileUrlsAndPaths.CompressedCityListFilePath))
@@ -116,7 +132,7 @@ public class AddCitiesToDatabaseHandler(
 
         return File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath);
     }
-
+    
     private async Task DownloadFileAsync(
         string requestUri,
         string filename,

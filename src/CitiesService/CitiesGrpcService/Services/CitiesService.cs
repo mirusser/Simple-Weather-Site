@@ -12,22 +12,12 @@ using Microsoft.EntityFrameworkCore;
 namespace CitiesGrpcService.Services;
 
 //TODO: mapping (check)
-public class CitiesService : Cities.CitiesBase
+public class CitiesService(
+    IMapper mapper,
+    IGenericRepository<CityInfo> cityInfoRepo,
+    IMediator mediator)
+    : Cities.CitiesBase
 {
-    private readonly IGenericRepository<CityInfo> cityInfoRepo;
-    private readonly IMapper mapper;
-    private readonly IMediator mediator;
-
-    public CitiesService(
-        IMapper mapper,
-        IGenericRepository<CityInfo> cityInfoRepo,
-        IMediator mediator)
-    {
-        this.mapper = mapper;
-        this.cityInfoRepo = cityInfoRepo;
-        this.mediator = mediator;
-    }
-
     public override async Task<CitiesPaginationInfoReply> GetCitiesPaginationInfo(
         CitiesPaginationInfoRequest request,
         ServerCallContext context)
