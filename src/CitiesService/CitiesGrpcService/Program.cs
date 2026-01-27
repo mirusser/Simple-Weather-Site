@@ -32,13 +32,13 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services
         .AddApplicationLayer(builder.Configuration)
-        .AddInfrastructure(builder.Configuration);
+        .AddInfrastructureLayer(builder.Configuration);
 
     builder.Services.AddHttpClient();
     builder.Services.AddMappings(executingAssembly);
 
     builder.Services
-        .AddCommonHealthChecks()
+        .AddCommonHealthChecks(builder.Configuration)
         .AddDbContextCheck<ApplicationDbContext>(
             name: "DB health check",
             failureStatus: HealthStatus.Unhealthy,

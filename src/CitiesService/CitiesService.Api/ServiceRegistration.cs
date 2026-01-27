@@ -44,7 +44,8 @@ public static class ServiceRegistration
 
 	extension(IServiceCollection services)
 	{
-		public IServiceCollection AddPresentationLayer(IConfiguration configuration,
+		public IServiceCollection AddPresentationLayer(
+			IConfiguration configuration,
 			IHostEnvironment environment)
 		{
 			services.AddControllers();
@@ -64,7 +65,7 @@ public static class ServiceRegistration
 				.AddCustomAuth(configuration, environment);
 
 			services
-				.AddCommonHealthChecks()
+				.AddCommonHealthChecks(configuration)
 				.AddDbContextCheck<ApplicationDbContext>(
 					name: "SQL health check",
 					failureStatus: HealthStatus.Unhealthy,

@@ -63,7 +63,7 @@ public static class DependencyInjection
 		
 			services.AddSingleton(TimeProvider.System);
 
-			services.AddCommonHealthChecks();
+			services.AddCommonHealthChecks(configuration);
 
 			services.AddControllers();
 

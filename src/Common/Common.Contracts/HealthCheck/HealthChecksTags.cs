@@ -8,4 +8,5 @@ public static class HealthChecksTags
     public static string Custom = "custom";
     public static string Memory = "memory";
     public static string Live = "live";
+    public static string Cache = "cache";
 }

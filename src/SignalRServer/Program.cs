@@ -81,7 +81,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSingleton(typeof(IMongoCollectionFactory<>), typeof(MongoCollectionFactory<>));
     
     builder.Services
-        .AddCommonHealthChecks()
+        .AddCommonHealthChecks(builder.Configuration)
         .AddMongoDb(
             clientFactory: sp => sp.GetRequiredService<IMongoClient>(),
             name: "Mongo health check",

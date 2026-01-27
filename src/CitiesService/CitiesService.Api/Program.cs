@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
         .AddCommonPresentationLayer();
 
     builder.Services
-        .AddInfrastructure(builder.Configuration)
+        .AddInfrastructureLayer(builder.Configuration)
         .AddApplicationLayer(builder.Configuration)
         .AddPresentationLayer(builder.Configuration, builder.Environment);
 }

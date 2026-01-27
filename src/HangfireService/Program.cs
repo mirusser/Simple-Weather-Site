@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
         .AddMediator(AppDomain.CurrentDomain.GetAssemblies())
         .AddCustomMassTransit(builder.Configuration)
         .AddHangfireServices(builder.Configuration)
-        .AddCommonHealthChecks();
+        .AddCommonHealthChecks(builder.Configuration);
 
     builder.Services.AddControllers();
 

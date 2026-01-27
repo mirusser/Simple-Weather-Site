@@ -1,9 +1,11 @@
 using System;
+using System.Net.Http;
 using System.Reflection;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
 using Common.Infrastructure;
+using Common.Infrastructure.Settings;
 using Common.Mediator.DependencyInjection;
 using Common.Presentation;
 using Common.Shared;
@@ -16,7 +18,6 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using WeatherService.Clients;
-using WeatherService.HealthCheck;
 using WeatherService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,11 +74,20 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddControllers();
 
-    builder.Services.AddCommonHealthChecks()
-        .AddCheck<OpenWeatherExternalEndpointHealthCheck>(
+    builder.Services.AddCommonHealthChecks(builder.Configuration)
+        .AddExternalEndpointHealthCheck(
             name: "OpenWeather",
-            failureStatus: HealthStatus.Degraded,
-            tags: [HealthChecksTags.Ready, HealthChecksTags.ExternalService]);
+            options: new ExternalEndpointHealthCheckOptions
+            {
+                ClientName = "OpenWeather",
+                PipelineName = PipelineNames.Health,
+                Target = new Uri("/", UriKind.Relative),
+                Method = HttpMethod.Head,
+                AnyHttpStatusIsHealthy = true
+            },
+            failureStatus: HealthStatus.Unhealthy,
+            tags: [HealthChecksTags.Ready, HealthChecksTags.ExternalService],
+            timeout: TimeSpan.FromSeconds(3));
 }
 
 var app = builder.Build();

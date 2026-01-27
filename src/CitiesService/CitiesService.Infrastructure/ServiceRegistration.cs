@@ -13,7 +13,7 @@ namespace CitiesService.Infrastructure;
 
 public static class ServiceRegistration
 {
-	public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<FileUrlsAndPaths>(configuration.GetSection(nameof(FileUrlsAndPaths)));
 		services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));

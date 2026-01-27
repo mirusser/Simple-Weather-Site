@@ -109,7 +109,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddControllers();
     builder.Services
-        .AddCommonHealthChecks()
+        .AddCommonHealthChecks(builder.Configuration)
         .AddMongoDb(
             clientFactory: sp => sp.GetRequiredService<IMongoClient>(),
             name: "Mongo health check",

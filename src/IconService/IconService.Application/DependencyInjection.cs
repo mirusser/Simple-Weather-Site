@@ -20,7 +20,7 @@ public static class DependencyInjection
 			services.AddValidatorsFromAssembly(executingAssembly);
 			services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
 
-			services.AddCommonHealthChecks();
+			services.AddCommonHealthChecks(configuration);
 
 			return services;
 		}

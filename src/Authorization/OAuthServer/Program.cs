@@ -58,7 +58,7 @@ var builder = WebApplication.CreateBuilder(args);
 	.AddInMemoryClients(clients)
 	.AddInMemoryApiResources(apiResources);
 	
-	builder.Services.AddCommonHealthChecks();
+	builder.Services.AddCommonHealthChecks(builder.Configuration);
 }
 
 var app = builder.Build();

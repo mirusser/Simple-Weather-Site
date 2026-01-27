@@ -31,7 +31,7 @@ var builder = WebApplication.CreateBuilder(args);
 		.AddHttpMessageHandler<BearerTokenHandler>();
 
 	builder.Services.AddGrpcCitiesClient(builder.Configuration);
-	builder.Services.AddCommonHealthChecks();
+	builder.Services.AddCommonHealthChecks(builder.Configuration);
 }
 
 var app = builder.Build();
