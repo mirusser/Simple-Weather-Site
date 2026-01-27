@@ -496,5 +496,3 @@ src/CitiesService/CitiesService.Api/cert/localhost.crt
 /src/Authorization/OAuthServer/keys/is-signing-key-923AC7BA10DCA78EDFC1116700E1EF0E.json
 src/localhost.crt
 src/localhost.key
-/src/CitiesService/CitiesService.Infrastructure/bin
-/src/CitiesService/CitiesService.Infrastructure/obj
