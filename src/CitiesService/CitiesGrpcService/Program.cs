@@ -19,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 {
     if (!builder.Environment.IsDevelopment())
     {
+        // TODO: get ports from config (appsettings maybe)
         builder.WebHost.ConfigureKestrel(options =>
         {
             // HTTP/1 for health & diagnostics

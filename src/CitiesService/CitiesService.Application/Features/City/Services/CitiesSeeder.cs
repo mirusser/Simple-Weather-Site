@@ -29,26 +29,26 @@ public sealed class CitiesSeeder(
 {
     private readonly FileUrlsAndPaths fileUrlsAndPaths = fileUrlsAndPathsOptions.Value;
 
-    public async Task<bool> SeedIfEmptyAsync(CancellationToken ct)
+    public async Task<bool> SeedIfEmptyAsync(CancellationToken cancellationToken)
     {
         var result = true;
 
         // Quick pre-check (fast path)
-        if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, ct))
+        if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, cancellationToken))
         {
             logger.LogInformation("Cities already exist. Skipping seeding.");
             return result;
         }
 
         // Acquire a cross-instance lock (only one replica seeds)
-        if (!await cityInfoRepo.TryAcquireSeedLockAsync(ct))
+        if (!await cityInfoRepo.TryAcquireSeedLockAsync(cancellationToken))
         {
             logger.LogInformation("Another instance is seeding cities. Skipping seeding.");
             return result;
         }
 
         // Re-check under lock (important!)
-        if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, ct))
+        if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, cancellationToken))
         {
             logger.LogInformation("Cities already exist (after lock). Skipping seeding.");
             return result;
@@ -56,7 +56,7 @@ public sealed class CitiesSeeder(
 
         logger.LogInformation("Seeding cities...");
 
-        result = await SaveCitiesFromFileToDatabase(ct);
+        result = await SaveCitiesFromFileToDatabase(cancellationToken);
 
         logger.LogInformation("Seeding cities finished. Success={Success}", result);
 

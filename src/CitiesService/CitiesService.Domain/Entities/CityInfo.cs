@@ -11,6 +11,7 @@ public class CityInfo
     /// This is a city `id` from JSON file
     /// </summary>
     [Required]
+    [Column(TypeName = "decimal(9,6)")]
     public decimal CityId { get; init; }
 
     [Required] public string Name { get; init; } = null!;

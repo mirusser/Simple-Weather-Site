@@ -5,5 +5,5 @@ namespace CitiesService.Application.Features.City.Services;
 
 public interface ICitiesSeeder
 {
-    Task<bool> SeedIfEmptyAsync(CancellationToken ct);
+    Task<bool> SeedIfEmptyAsync(CancellationToken cancellationToken);
 }

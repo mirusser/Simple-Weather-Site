@@ -1,42 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using CitiesService.Application.Features.City.Models.Dto;
-using CitiesService.Application.Common.Helpers;
 using CitiesService.Application.Common.Interfaces.Persistence;
+using CitiesService.Application.Features.City.Services;
 using CitiesService.Domain.Entities;
-using CitiesService.Domain.Settings;
-using Common.Infrastructure.Settings;
 using Common.Mediator;
 using Common.Presentation.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Polly;
-using Polly.Registry;
 
 namespace CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
 
 public class AddCitiesToDatabaseCommand : IRequest<Result<AddCitiesToDatabaseResult>>;
 
-// TODO: use CitiesSeeder here
 public class AddCitiesToDatabaseHandler(
     IGenericRepository<CityInfo> cityInfoRepo,
-    IOptions<FileUrlsAndPaths> fileUrlsAndPathsOptions,
-    IOptions<ResiliencePipeline> resiliencePipelineOptions,
-    IHttpClientFactory clientFactory,
-    ResiliencePipelineProvider<string> pipelineProvider,
-    ILogger<AddCitiesToDatabaseHandler> logger,
-    JsonSerializerOptions jsonSerializerOptions)
+    ICitiesSeeder citiesSeeder)
     : IRequestHandler<AddCitiesToDatabaseCommand, Result<AddCitiesToDatabaseResult>>
 {
-    private readonly FileUrlsAndPaths fileUrlsAndPaths = fileUrlsAndPathsOptions.Value;
-
     public async Task<Result<AddCitiesToDatabaseResult>> Handle(
         AddCitiesToDatabaseCommand request,
         CancellationToken cancellationToken)
@@ -49,114 +28,9 @@ public class AddCitiesToDatabaseHandler(
             return Result<AddCitiesToDatabaseResult>.Fail(Problems.Conflict("Cities already added"));
         }
 
-        var isSuccess = await SaveCitiesFromFileToDatabase(cancellationToken);
+        var isSuccess = await citiesSeeder.SeedIfEmptyAsync(cancellationToken);
 
         return Result<AddCitiesToDatabaseResult>.Ok(new AddCitiesToDatabaseResult
             { IsSuccess = isSuccess, IsAlreadyAdded = anyCityExists });
-    }
-
-    private async Task<bool> SaveCitiesFromFileToDatabase(CancellationToken cancellationToken)
-    {
-        var downloadResult = await SaveCitiesToFileAsync(cancellationToken);
-        if (!downloadResult)
-        {
-            return false;
-        }
-
-        using StreamReader streamReader = new(fileUrlsAndPaths.DecompressedCityListFilePath);
-        var json = await streamReader.ReadToEndAsync(cancellationToken);
-
-        var citiesFromJson = JsonSerializer.Deserialize<List<GetCityResult>>(
-            json,
-            jsonSerializerOptions);
-        citiesFromJson ??= [];
-
-        var cityInfos = citiesFromJson
-            .Select(c => new CityInfo()
-            {
-                CityId = long.Parse(c.Id.ToString(CultureInfo.InvariantCulture)) ,
-                CountryCode = c.Country ?? string.Empty,
-                Lat = c.Coord?.Lat ?? 0,
-                Lon = c.Coord?.Lon ?? 0,
-                Name = c.Name ?? string.Empty,
-                State = c.State
-            });
-
-        await cityInfoRepo.CreateRangeAsync(cityInfos, cancellationToken);
-        return await cityInfoRepo.SaveAsync(cancellationToken);
-    }
-
-    private async Task<bool> SaveCitiesToFileAsync(CancellationToken cancellationToken)
-    {
-        if (!File.Exists(fileUrlsAndPaths.CompressedCityListFilePath))
-        {
-            var directory = Path.GetDirectoryName(fileUrlsAndPaths.CompressedCityListFilePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            await DownloadFileAsync(
-                fileUrlsAndPaths.CityListFileUrl,
-                fileUrlsAndPaths.CompressedCityListFilePath,
-                cancellationToken);
-        }
-
-        if (!File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath))
-        {
-            var directory = Path.GetDirectoryName(fileUrlsAndPaths.DecompressedCityListFilePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            var fileInfo = new FileInfo(fileUrlsAndPaths.CompressedCityListFilePath);
-            await GzipHelper.DecompressAsync(fileInfo, logger, cancellationToken);
-        }
-
-        return File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath);
-    }
-
-    private async Task DownloadFileAsync(
-        string requestUri,
-        string filename,
-        CancellationToken cancellationToken)
-    {
-        var client = clientFactory.CreateClient();
-        var pipeline = pipelineProvider.GetPipeline(PipelineNames.Default);
-        HttpResponseMessage? response = null;
-
-        try
-        {
-            response = await pipeline.ExecuteAsync(
-                async token => await client.GetAsync(requestUri, token),
-                cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                logger.LogError(
-                    "Failed to download file from {RequestUri}. Status: {StatusCode} ({ReasonPhrase}). Body: {Body}",
-                    requestUri,
-                    (int)response.StatusCode,
-                    response.ReasonPhrase,
-                    body);
-                return;
-            }
-
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            await using FileStream fileStream = new(filename, FileMode.Create, FileAccess.Write, FileShare.None);
-            await stream.CopyToAsync(fileStream, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Unexpected error downloading file from {RequestUri}", requestUri);
-            throw;
-        }
-        finally
-        {
-            response?.Dispose();
-        }
     }
 }

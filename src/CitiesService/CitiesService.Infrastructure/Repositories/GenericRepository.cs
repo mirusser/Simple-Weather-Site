@@ -13,17 +13,6 @@ namespace CitiesService.Infrastructure.Repositories;
 public class GenericRepository<T>(ApplicationDbContext context) : IGenericRepository<T> where T : class
 {
     private readonly DbSet<T> db = context.Set<T>();
-
-    // public async Task<bool> TryAcquireSeedLockAsync(CancellationToken ct)
-    // {
-    //     // LockTimeout = 0 => do not wait, just skip if someone else holds it
-    //     // Results >= 0 means lock acquired
-    //     var result = await context.Database.ExecuteSqlRawAsync(
-    //         "EXEC sp_getapplock @Resource = 'CitiesSeed', @LockMode = 'Exclusive', @LockTimeout = 0;",
-    //         ct);
-    //
-    //     return result >= 0;
-    // }
     
     public async Task<bool> TryAcquireSeedLockAsync(CancellationToken ct)
     {
@@ -31,14 +20,16 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
         await context.Database.OpenConnectionAsync(ct);
 
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = @"
-            DECLARE @result int;
-            EXEC @result = sp_getapplock
-                @Resource = @resource,
-                @LockMode = 'Exclusive',
-                @LockOwner = 'Session',
-                @LockTimeout = 0;
-            SELECT @result;";
+        cmd.CommandText = 
+            """
+                DECLARE @result int;
+                EXEC @result = sp_getapplock
+                    @Resource = @resource,
+                    @LockMode = 'Exclusive',
+                    @LockOwner = 'Session',
+                    @LockTimeout = 0;
+                SELECT @result;
+            """;
         cmd.CommandType = System.Data.CommandType.Text;
 
         var p = cmd.CreateParameter();
@@ -52,7 +43,6 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
         // >= 0 means acquired (0 granted, 1 converted, etc.)
         return result >= 0;
     }
-
 
     public IQueryable<T> FindAll(
         Expression<Func<T, bool>> searchExpression = null,
