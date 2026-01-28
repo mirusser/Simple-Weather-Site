@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -30,37 +29,40 @@ public sealed class CitiesSeeder(
 {
     private readonly FileUrlsAndPaths fileUrlsAndPaths = fileUrlsAndPathsOptions.Value;
 
-    public async Task SeedIfEmptyAsync(CancellationToken ct)
+    public async Task<bool> SeedIfEmptyAsync(CancellationToken ct)
     {
+        var result = true;
+
         // Quick pre-check (fast path)
         if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, ct))
         {
             logger.LogInformation("Cities already exist. Skipping seeding.");
-            return;
+            return result;
         }
 
         // Acquire a cross-instance lock (only one replica seeds)
         if (!await cityInfoRepo.TryAcquireSeedLockAsync(ct))
         {
             logger.LogInformation("Another instance is seeding cities. Skipping seeding.");
-            return;
+            return result;
         }
 
         // Re-check under lock (important!)
         if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, ct))
         {
             logger.LogInformation("Cities already exist (after lock). Skipping seeding.");
-            return;
+            return result;
         }
 
         logger.LogInformation("Seeding cities...");
 
-        var ok = await SaveCitiesFromFileToDatabase(ct);
+        result = await SaveCitiesFromFileToDatabase(ct);
 
-        logger.LogInformation("Seeding cities finished. Success={Success}", ok);
+        logger.LogInformation("Seeding cities finished. Success={Success}", result);
+
+        return result;
     }
 
-    
     private async Task<bool> SaveCitiesFromFileToDatabase(CancellationToken cancellationToken)
     {
         var downloadResult = await SaveCitiesToFileAsync(cancellationToken);
@@ -89,7 +91,7 @@ public sealed class CitiesSeeder(
             });
 
         await cityInfoRepo.CreateRangeAsync(cityInfos, cancellationToken);
-        
+
         try
         {
             return await cityInfoRepo.SaveAsync(cancellationToken);
@@ -101,7 +103,7 @@ public sealed class CitiesSeeder(
             return true;
         }
     }
-    
+
     private async Task<bool> SaveCitiesToFileAsync(CancellationToken cancellationToken)
     {
         if (!File.Exists(fileUrlsAndPaths.CompressedCityListFilePath))
@@ -132,7 +134,7 @@ public sealed class CitiesSeeder(
 
         return File.Exists(fileUrlsAndPaths.DecompressedCityListFilePath);
     }
-    
+
     private async Task DownloadFileAsync(
         string requestUri,
         string filename,

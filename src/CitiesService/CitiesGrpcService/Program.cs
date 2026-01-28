@@ -7,15 +7,27 @@ using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
 using Common.Presentation;
+using Common.Shared;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    var executingAssembly = Assembly.GetExecutingAssembly();
+    if (!builder.Environment.IsDevelopment())
+    {
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            // HTTP/1 for health & diagnostics
+            options.ListenAnyIP(80, lo => lo.Protocols = HttpProtocols.Http1);
+
+            // gRPC (HTTP/2, no TLS inside container)
+            options.ListenAnyIP(5043, lo => lo.Protocols = HttpProtocols.Http2);
+        });
+    }
 
     builder.AddCommonPresentationLayer();
 
@@ -35,6 +47,8 @@ var builder = WebApplication.CreateBuilder(args);
         .AddInfrastructureLayer(builder.Configuration);
 
     builder.Services.AddHttpClient();
+
+    var executingAssembly = Assembly.GetExecutingAssembly();
     builder.Services.AddMappings(executingAssembly);
 
     builder.Services
@@ -62,16 +76,10 @@ var app = builder.Build();
     //app.MapGrpcService<GreeterService>().RequireCors("AllowAll");
     app.MapGrpcService<GreeterService>();
     app.MapGrpcService<CitiesGrpcService.Services.CitiesService>();
-    app.MapGet("/",
-        async context =>
-        {
-            await context.Response.WriteAsync(
-                """
-                Communication with gRPC endpoints must be made through a gRPC client. 
-                To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909
-                """);
-        });
+
 
     app.MapCommonHealthChecks();
-    await app.RunWithLoggerAsync();
+    app.UseServiceStartupPage(builder.Environment);
 }
+
+await app.RunWithLoggerAsync();

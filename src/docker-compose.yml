@@ -52,6 +52,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
     ports:
       - 8681:80
+      - 8682:5043
     networks:
       - default
       - overlaynetwork
