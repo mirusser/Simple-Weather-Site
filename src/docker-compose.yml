@@ -150,6 +150,21 @@ services:
       - default
       - overlaynetwork
 
+  backupservice:
+    image: backupservice
+    container_name: backupservice
+    hostname: backupservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - 8090:80
+    volumes:
+      - /home/mirusser/docker/volumes/mssql/data/Backups/sql:/var/opt/mssql/Backups/sql
+    networks:
+      - default
+      - overlaynetwork
+
 networks:
   default:
     driver: bridge

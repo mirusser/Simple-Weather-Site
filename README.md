@@ -57,6 +57,7 @@
 4. Set up your api key secret in WeatherService project: `dotnet user-secrets set "ServiceSettings:ApiKey" "your_api_key_here"`
 
 ### Services
-- Create Database for CitiesService and populate it by running: `AddCityInfoToDatabase` endpoint
-- IconService: run Seed endpoint
-- WeatherSite: libman restore
+- CitiesService at startup creates sql database, runs migrations and seed is, make sure the user have permissions to do so
+  (alternatively: create db and run migrations manually, use endpoint to seed the table with data)
+- IconService: at startup it creates mongo database, collection and seeds it
+- WeatherSite: manually restore css and js by using: `libman restore`

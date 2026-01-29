@@ -67,4 +67,8 @@
     <File Path="publish.bat" />
     <File Path="publish.sh" />
   </Folder>
+  <Folder Name="/BackupService/">
+    <Project Path="BackupService/BackupService.Api/BackupService.Api.csproj" />
+    <Project Path="BackupService/BackupService.Application/BackupService.Application.csproj" />
+  </Folder>
 </Solution>
