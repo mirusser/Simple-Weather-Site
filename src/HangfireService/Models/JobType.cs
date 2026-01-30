@@ -4,5 +4,7 @@ public enum JobType
 {
 	RunJob,
 	CallEndpointJob,
-	CallHealthCheck
+	CallHealthCheck,
+	CallEndpointHttpJob,
+	CallSqlBackupJob
 }

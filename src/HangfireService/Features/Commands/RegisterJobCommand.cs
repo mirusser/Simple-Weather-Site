@@ -11,6 +11,9 @@ public class RegisterJobCommand : IRequest<bool>
 	public string CronExpression { get; set; } = null!;
 	public JobType JobType { get; set; }
 	public string? Url { get; set; }
+	public string? HttpMethod { get; set; }
+	public string? BodyJson { get; set; }
+	public Dictionary<string, string>? Headers { get; set; }
 }
 
 public class RegisterJobHandler(
@@ -24,7 +27,10 @@ public class RegisterJobHandler(
 			request.JobType,
 			request.JobName,
 			request.ServiceName,
-			request.Url);
+			request.Url,
+			request.HttpMethod,
+			request.BodyJson,
+			request.Headers);
 
 		recurringJobManager.AddOrUpdate(
 			request.JobName,
@@ -40,14 +46,28 @@ public class RegisterJobHandler(
 		return Task.FromResult(true);
 	}
 
-	private IRequest<bool> GetJobCommand(JobType jobType, string jobName, string serviceName, string? url) 
+	private IRequest<bool> GetJobCommand(
+		JobType jobType,
+		string jobName,
+		string serviceName,
+		string? url,
+		string? httpMethod,
+		string? bodyJson,
+		Dictionary<string, string>? headers) 
 		=> jobType switch
 		{
 			JobType.RunJob => new RunJobCommand() { JobName = jobName, ServiceName = serviceName },
-			JobType.CallEndpointJob => new CallEndpointJobCommand()
-				{ JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
 			JobType.CallHealthCheck => new CallHealthCheckJobCommand()
 				{ JobName = jobName, ServiceName = serviceName, Url = url ?? "" },
+			JobType.CallEndpointHttpJob => new CallEndpointHttpJobCommand()
+			{
+				JobName = jobName,
+				ServiceName = serviceName,
+				Url = url ?? "",
+				HttpMethod = httpMethod ?? "POST",
+				BodyJson = bodyJson,
+				Headers = headers
+			},
 			_ => throw new ArgumentException($"Wrong argument: {nameof(JobType)}, value: {jobType}"),
 		};
 }

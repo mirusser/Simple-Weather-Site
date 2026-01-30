@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
-using HangfireService.Clients.Contracts;
 using Common.Contracts.HealthCheck;
+using Common.Infrastructure.Managers.Contracts;
+using Common.Infrastructure.Settings;
 using Common.Mediator;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MQModels.Email;
@@ -18,21 +19,32 @@ public class CallHealthCheckJobCommand : IRequest<bool>
 }
 
 public class CallHealthCheckJobHandler(
-	IHangfireHttpClient hangfireHttpClient,
+	IHttpExecutor httpExecutor,
+	IHttpRequestFactory requestFactory,
 	IPublishEndpoint publishEndpoint,
 	IOptions<MailSettings> options,
 	JsonSerializerOptions jsonSerializerOptions) : IRequestHandler<CallHealthCheckJobCommand, bool>
 {
 	private readonly MailSettings mailSettings = options.Value;
+	private const string ClientName = "default";
+	
 	public async Task<bool> Handle(CallHealthCheckJobCommand request, CancellationToken cancellationToken)
 	{
-		var response = await hangfireHttpClient.GetMethodAsync(request.Url, cancellationToken);
+		using var httpRequest = requestFactory.Create(
+			request.Url,
+			HttpMethod.Get.Method);
+
+		var response = await httpExecutor.SendAsync(
+			ClientName,
+			PipelineNames.Health,
+			httpRequest,
+			cancellationToken);
 		response.EnsureSuccessStatusCode();
 
 		var content = await response.Content.ReadAsStringAsync(cancellationToken);
 		var healthCheckResponse = JsonSerializer.Deserialize<HealthCheckResponse>(content, jsonSerializerOptions);
 
-		if (healthCheckResponse?.Status == HealthStatus.Healthy.ToString())
+		if (healthCheckResponse?.Status == nameof(HealthStatus.Healthy))
 		{
 			SendEmail sendEmailModel = new()
 			{

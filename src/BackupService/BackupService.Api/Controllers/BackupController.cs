@@ -1,6 +1,7 @@
 using BackupService.Api.Models;
 using BackupService.Api.Services;
 using BackupService.Application.Features.Commands;
+using BackupService.Application.Models.Requests;
 using Common.Presentation.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,12 @@ namespace BackupService.Api.Controllers;
 public sealed class BackupController(IBackupJobRunner jobRunner) : ApiController
 {
     [HttpPost]
-    public async Task<IActionResult> CreateSqlBackup(CreateSqlBackupCommand request)
+    public async Task<IActionResult> CreateSqlBackup(CreateSqlBackupRequest request)
     {
-        var result = await Mediator.SendAsync(request);
+        var command = Mapper.Map<CreateSqlBackupCommand>(request);
+
+        var result = await Mediator.SendAsync(command);
+
         return FromResult(result);
     }
 

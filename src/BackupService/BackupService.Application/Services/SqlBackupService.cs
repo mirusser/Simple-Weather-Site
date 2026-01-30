@@ -52,10 +52,8 @@ public sealed class SqlBackupService(
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand(sql, connection)
-        {
-            CommandTimeout = settings.CommandTimeoutSeconds
-        };
+        await using var command = new SqlCommand(sql, connection);
+        command.CommandTimeout = settings.CommandTimeoutSeconds;
 
         await command.ExecuteNonQueryAsync(cancellationToken);
 
@@ -141,17 +139,18 @@ public sealed class SqlBackupService(
     {
         try
         {
-            const string sql = """
-                               SELECT TOP 1 b.backup_size
-                               FROM msdb.dbo.backupset b
-                               INNER JOIN msdb.dbo.backupmediafamily m
-                                   ON b.media_set_id = m.media_set_id
-                               WHERE b.database_name = @DatabaseName
-                                 AND m.physical_device_name = @BackupFilePath
-                               ORDER BY b.backup_finish_date DESC;
-                               """;
+            const string sql = 
+                """
+                SELECT TOP 1 b.backup_size
+                FROM msdb.dbo.backupset b
+                INNER JOIN msdb.dbo.backupmediafamily m
+                    ON b.media_set_id = m.media_set_id
+                WHERE b.database_name = @DatabaseName
+                  AND m.physical_device_name = @BackupFilePath
+                ORDER BY b.backup_finish_date DESC;
+                """;
 
-            using var command = new SqlCommand(sql, connection);
+            await using var command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@DatabaseName", databaseName);
             command.Parameters.AddWithValue("@BackupFilePath", backupFilePath);
 
@@ -164,7 +163,7 @@ public sealed class SqlBackupService(
         }
     }
 
-    private static void CleanupOldBackups(string directory, string filePrefix, int retentionDays)
+    private void CleanupOldBackups(string directory, string filePrefix, int retentionDays)
     {
         if (retentionDays <= 0)
         {
@@ -174,19 +173,32 @@ public sealed class SqlBackupService(
         var cutoff =  DateTimeOffset.UtcNow.AddDays(-retentionDays);
         var pattern = $"{filePrefix}_*.bak";
 
-        foreach (var file in Directory.EnumerateFiles(directory, pattern))
+        IEnumerable<string> fileNames;
+        
+        try
+        {
+            fileNames = Directory.EnumerateFiles(directory, pattern);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Could not get file names from {Directory}", directory);
+            return;
+        }
+        
+        foreach (var fullFileName in fileNames)
         {
             try
             {
-                var info = new FileInfo(file);
+                var info = new FileInfo(fullFileName);
                 if (info.Exists && info.CreationTimeUtc < cutoff)
                 {
                     info.Delete();
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 // best-effort cleanup
+                logger.LogError(ex, "Could not delete file {File}", fullFileName);
             }
         }
     }

@@ -54,6 +54,7 @@ public static class ServiceRegistration
 			});
 		
 			services.AddSingleton<IHttpExecutor, HttpExecutor>();
+			services.AddSingleton<IHttpRequestFactory, HttpRequestFactory>();
 		
 			return services;
 		}
