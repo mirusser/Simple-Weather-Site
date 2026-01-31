@@ -134,7 +134,7 @@ check_port_binding() {
 }
 
 forward_ports() {
-    local ports=(5672 27017 6379 5432 5341 1435 1433 9200 9300 8079 8078 8181 8081)
+    local ports=(5672 27017 6379 5432 5341 1435 1433 9200 9300 8079 8078 8181 8081 8090)
     for port in "${ports[@]}"; do
         echo "Checking port: $port"
         update_iptables $port
@@ -159,12 +159,11 @@ build_and_dockerize "/EmailService/EmailService.Api" "emailservice"
 build_and_dockerize "/IconService/IconService.Api" "iconservice"
 build_and_dockerize "/SignalRServer" "signalrserver"
 build_and_dockerize "/HangfireService" "hangfireservice"
+build_and_dockerize "/BackupService/BackupService.Api" "backupservice"
 build_and_dockerize "/WeatherSite/Site" "weathersite"
 
 build_and_run_docker_compose
 
 forward_ports
 
-# Wait for user input to continue
-read -p "Press enter to continue . . ."
-
+echo -e "${BLUE}Process has finished.${NC}"

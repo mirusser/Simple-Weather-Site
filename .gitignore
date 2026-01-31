@@ -496,3 +496,4 @@ src/CitiesService/CitiesService.Api/cert/localhost.crt
 src/localhost.crt
 src/localhost.key
 /src/BackupService/BackupService.Api/appsettings.Development.json
+/src/BackupService/BackupService.Api/deploy
