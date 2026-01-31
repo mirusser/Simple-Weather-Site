@@ -6,5 +6,5 @@ public enum JobType
 	CallEndpointJob,
 	CallHealthCheck,
 	CallEndpointHttpJob,
-	CallSqlBackupJob
+	StartSqlBackupAndMonitor
 }

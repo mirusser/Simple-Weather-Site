@@ -4,7 +4,7 @@ using Common.Mediator.DependencyInjection;
 using Common.Presentation;
 using Common.Shared;
 using BackupService.Application;
-using BackupService.Api.Services;
+using BackupService.Application.Services;
 using Common.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,9 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
     builder.Services.AddMappings(Assembly.GetExecutingAssembly());
     builder.Services.AddApplicationLayer(builder.Configuration);
-    
-    builder.Services.AddSingleton<IBackupJobStore, BackupJobStore>();
-    builder.Services.AddSingleton<IBackupJobRunner, BackupJobRunner>();
 
     builder.AddCommonPresentationLayer();
     

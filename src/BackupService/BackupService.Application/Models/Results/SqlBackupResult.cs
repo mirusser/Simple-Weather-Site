@@ -1,4 +1,4 @@
-namespace BackupService.Application.Models;
+namespace BackupService.Application.Models.Results;
 
 public sealed class SqlBackupResult
 {

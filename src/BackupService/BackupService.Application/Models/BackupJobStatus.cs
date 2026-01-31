@@ -1,6 +1,6 @@
-using BackupService.Application.Models;
+using BackupService.Application.Models.Results;
 
-namespace BackupService.Api.Models;
+namespace BackupService.Application.Models;
 
 public sealed class BackupJobStatus
 {

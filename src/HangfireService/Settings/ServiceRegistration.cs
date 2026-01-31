@@ -8,61 +8,64 @@ namespace HangfireService.Settings;
 
 public static class ServiceRegistration
 {
-	public static IServiceCollection AddHangfireServices(this IServiceCollection services, IConfiguration configuration)
+	extension(IServiceCollection services)
 	{
-		//StackOverflow post on how to register hangfire with mongo:
-		//https://stackoverflow.com/questions/58340247/how-to-use-hangfire-in-net-core-with-mongodb
-
-		MongoSettings mongoSettings = new();
-		configuration.GetSection(nameof(MongoSettings)).Bind(mongoSettings);
-
-		var migrationOptions = new MongoMigrationOptions
+		public IServiceCollection AddHangfireServices(IConfiguration configuration)
 		{
-			MigrationStrategy = new MigrateMongoMigrationStrategy(),
-			BackupStrategy = new CollectionMongoBackupStrategy()
-		};
+			//StackOverflow post on how to register hangfire with mongo:
+			//https://stackoverflow.com/questions/58340247/how-to-use-hangfire-in-net-core-with-mongodb
 
-		services.AddHangfire(config =>
-		{
-			config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
-			config.UseSimpleAssemblyNameTypeSerializer();
-			config.UseRecommendedSerializerSettings();
-			config.UseMongoStorage(
-				mongoSettings.ConnectionString,
-				mongoSettings.Database,
-				new MongoStorageOptions
-				{
-					MigrationOptions = migrationOptions,
-					CheckQueuedJobsStrategy = CheckQueuedJobsStrategy.TailNotificationsCollection,
-					QueuePollInterval = TimeSpan.FromSeconds(1)
-				});
-		});
-		services.AddHangfireServer();
+			MongoSettings mongoSettings = new();
+			configuration.GetSection(nameof(MongoSettings)).Bind(mongoSettings);
 
-		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
-		return services;
-	}
-
-	public static IServiceCollection AddCustomMassTransit(this IServiceCollection services, IConfiguration configuration)
-	{
-		services.AddMassTransit(config =>
-		{
-			RabbitMQSettings rabbitMQSettings = new();
-			configuration
-				.GetSection(nameof(RabbitMQSettings))
-				.Bind(rabbitMQSettings);
-
-			config.SetKebabCaseEndpointNameFormatter();
-			config.UsingRabbitMq((ctx, cfg) =>
+			var migrationOptions = new MongoMigrationOptions
 			{
-				cfg.Host(rabbitMQSettings.Host);
-				cfg.ConfigureEndpoints(ctx);
+				MigrationStrategy = new MigrateMongoMigrationStrategy(),
+				BackupStrategy = new CollectionMongoBackupStrategy()
+			};
+
+			services.AddHangfire(config =>
+			{
+				config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
+				config.UseSimpleAssemblyNameTypeSerializer();
+				config.UseRecommendedSerializerSettings();
+				config.UseMongoStorage(
+					mongoSettings.ConnectionString,
+					mongoSettings.Database,
+					new MongoStorageOptions
+					{
+						MigrationOptions = migrationOptions,
+						CheckQueuedJobsStrategy = CheckQueuedJobsStrategy.TailNotificationsCollection,
+						QueuePollInterval = TimeSpan.FromSeconds(1)
+					});
 			});
-		});
+			services.AddHangfireServer();
 
-		services.AddOptions<MassTransitHostOptions>()
-			.Configure(options => options.WaitUntilStarted = false);
+			services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+			return services;
+		}
 
-		return services;
+		public IServiceCollection AddCustomMassTransit(IConfiguration configuration)
+		{
+			services.AddMassTransit(config =>
+			{
+				RabbitMQSettings rabbitMQSettings = new();
+				configuration
+					.GetSection(nameof(RabbitMQSettings))
+					.Bind(rabbitMQSettings);
+
+				config.SetKebabCaseEndpointNameFormatter();
+				config.UsingRabbitMq((ctx, cfg) =>
+				{
+					cfg.Host(rabbitMQSettings.Host);
+					cfg.ConfigureEndpoints(ctx);
+				});
+			});
+
+			services.AddOptions<MassTransitHostOptions>()
+				.Configure(options => options.WaitUntilStarted = false);
+
+			return services;
+		}
 	}
 }

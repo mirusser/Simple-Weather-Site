@@ -1,4 +1,5 @@
 using BackupService.Application.Models;
+using BackupService.Application.Models.Results;
 using BackupService.Application.Settings;
 using Common.Infrastructure.Settings;
 using Microsoft.Data.SqlClient;

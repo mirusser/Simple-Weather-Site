@@ -1,6 +1,6 @@
-using BackupService.Api.Models;
+using BackupService.Application.Models;
 
-namespace BackupService.Api.Services;
+namespace BackupService.Application.Services;
 
 public interface IBackupJobRunner
 {

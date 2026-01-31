@@ -1,9 +1,8 @@
-using BackupService.Api.Models;
-using BackupService.Application.Services;
+using BackupService.Application.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace BackupService.Api.Services;
+namespace BackupService.Application.Services;
 
 public sealed class BackupJobRunner(
     IBackupJobStore store,

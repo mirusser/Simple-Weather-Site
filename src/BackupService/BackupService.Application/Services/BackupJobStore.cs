@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using BackupService.Api.Models;
+using BackupService.Application.Models;
 
-namespace BackupService.Api.Services;
+namespace BackupService.Application.Services;
 
 public sealed class BackupJobStore : IBackupJobStore
 {

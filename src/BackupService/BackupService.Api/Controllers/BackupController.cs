@@ -1,20 +1,19 @@
-using BackupService.Api.Models;
-using BackupService.Api.Services;
 using BackupService.Application.Features.Commands;
+using BackupService.Application.Features.Queries;
 using BackupService.Application.Models.Requests;
 using Common.Presentation.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BackupService.Api.Controllers;
 
-public sealed class BackupController(IBackupJobRunner jobRunner) : ApiController
+public sealed class BackupController : ApiController
 {
     [HttpPost]
     public async Task<IActionResult> CreateSqlBackup(CreateSqlBackupRequest request)
     {
         var command = Mapper.Map<CreateSqlBackupCommand>(request);
 
-        var result = await Mediator.SendAsync(command);
+        var result = await Mediator.SendAsync(command, HttpContext.RequestAborted);
 
         return FromResult(result);
     }
@@ -22,19 +21,20 @@ public sealed class BackupController(IBackupJobRunner jobRunner) : ApiController
     [HttpPost]
     public async Task<IActionResult> StartSqlBackup(StartSqlBackupRequest request)
     {
-        var jobId = await jobRunner.StartSqlBackupAsync(request.BackupName, HttpContext.RequestAborted);
-        return Ok(new { jobId });
+        var command = Mapper.Map<StartSqlBackupCommand>(request);
+
+        var result = await Mediator.SendAsync(command, HttpContext.RequestAborted);
+
+        return FromResult(result);
     }
 
-    [HttpGet("{jobId}")]
-    public IActionResult GetSqlBackupStatus(string jobId)
+    [HttpPost]
+    public async Task<IActionResult> GetSqlBackupStatus(GetSqlBackupStatusRequest request)
     {
-        var status = jobRunner.GetStatus(jobId);
-        if (status is null)
-        {
-            return NotFound();
-        }
+        var query = Mapper.Map<GetSqlBackupStatusQuery>(request);
 
-        return Ok(status);
+        var result = await Mediator.SendAsync(query, HttpContext.RequestAborted);
+
+        return FromResult(result);
     }
 }

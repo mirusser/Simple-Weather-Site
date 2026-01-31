@@ -1,8 +1,10 @@
+using BackupService.Application.Models.Results;
+
 namespace BackupService.Application.Services;
 
 public interface ISqlBackupService
 {
-    Task<Models.SqlBackupResult> CreateBackupAsync(
+    Task<SqlBackupResult> CreateBackupAsync(
         string? backupName = null,
         CancellationToken cancellationToken = default);
 }

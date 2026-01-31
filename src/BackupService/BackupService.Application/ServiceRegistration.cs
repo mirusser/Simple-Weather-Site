@@ -17,6 +17,9 @@ public static class ServiceRegistration
 
             services.AddScoped<ISqlBackupService, SqlBackupService>();
 
+            services.AddSingleton<IBackupJobStore, BackupJobStore>();
+            services.AddSingleton<IBackupJobRunner, BackupJobRunner>();
+
             return services;
         }
     }

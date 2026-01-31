@@ -1,4 +1,4 @@
-namespace BackupService.Api.Models;
+namespace BackupService.Application.Models.Requests;
 
 public sealed class StartSqlBackupRequest
 {
