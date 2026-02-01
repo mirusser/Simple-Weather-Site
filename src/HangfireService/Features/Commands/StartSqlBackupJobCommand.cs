@@ -20,7 +20,8 @@ public sealed class StartSqlBackupJobHandler(
     IBackgroundJobClient backgroundJobs,
     JsonSerializerOptions jsonSerializerOptions,
     ILogger<StartSqlBackupJobHandler> logger,
-    IOptions<BackupJobSettings> backupJobOptions)
+    IOptions<BackupJobSettings> backupJobOptions,
+    IHangfireJobContextAccessor jobContextAccessor)
     : IRequestHandler<StartSqlBackupJobCommand, bool>
 {
     public async Task<bool> Handle(StartSqlBackupJobCommand request, CancellationToken cancellationToken)
@@ -43,6 +44,10 @@ public sealed class StartSqlBackupJobHandler(
             startRequest,
             cancellationToken);
 
+        var responseBody = await startResponse.Content.ReadAsStringAsync(cancellationToken);
+        SetJobParameter(jobContextAccessor, "startResponse", responseBody);
+        logger.LogInformation("StartSqlBackup response: {Response}", Truncate(responseBody));
+
         if (!startResponse.IsSuccessStatusCode)
         {
             var statusCode = (int)startResponse.StatusCode;
@@ -50,10 +55,10 @@ public sealed class StartSqlBackupJobHandler(
                 "StartSqlBackup failed. JobName={JobName}, Status={Status}",
                 settings.JobStartName,
                 statusCode);
-            
+
             throw new InvalidOperationException($"StartSqlBackup failed with HTTP {statusCode}.");
         }
-
+        
         var startResult = await HttpResult.ReadJsonAsResultAsync<StartSqlBackupResultDto>(
             startResponse,
             cancellationToken);
@@ -64,7 +69,7 @@ public sealed class StartSqlBackupJobHandler(
                 "StartSqlBackup returned invalid payload. JobName={JobName}, Error={Error}",
                 settings.JobStartName,
                 startResult.Problem?.Message ?? "empty JobId");
-            
+
             throw new InvalidOperationException(
                 $"StartSqlBackup failed: {startResult.Problem?.Message ?? "empty JobId"}");
         }
@@ -73,7 +78,7 @@ public sealed class StartSqlBackupJobHandler(
 
         backgroundJobs.Schedule<HangfireMediatorExecutor>(
             x => x.ExecuteNamed(
-                settings.JobCheckStatusName, 
+                settings.JobCheckStatusName,
                 new CheckSqlBackupStatusJobCommand
                 {
                     JobId = jobId,
@@ -82,5 +87,23 @@ public sealed class StartSqlBackupJobHandler(
             TimeSpan.FromSeconds(settings.PollIntervalSeconds));
 
         return true;
+    }
+
+    private static void SetJobParameter(
+        IHangfireJobContextAccessor accessor,
+        string key,
+        string? value)
+    {
+        accessor.Context?.SetJobParameter(key, Truncate(value));
+    }
+
+    private static string? Truncate(string? value, int maxLength = 4000)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= maxLength)
+        {
+            return value;
+        }
+
+        return value[..maxLength];
     }
 }

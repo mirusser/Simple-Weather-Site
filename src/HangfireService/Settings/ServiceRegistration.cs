@@ -2,6 +2,7 @@
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using HangfireService.Features.Filters;
 using MassTransit;
 
 namespace HangfireService.Settings;
@@ -24,13 +25,14 @@ public static class ServiceRegistration
 				BackupStrategy = new CollectionMongoBackupStrategy()
 			};
 
-			services.AddHangfire(config =>
-			{
-				config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
-				config.UseSimpleAssemblyNameTypeSerializer();
-				config.UseRecommendedSerializerSettings();
-				config.UseMongoStorage(
-					mongoSettings.ConnectionString,
+		services.AddHangfire((sp, config) =>
+		{
+			config.UseFilter(sp.GetRequiredService<PerformContextAccessorFilter>());
+			config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
+			config.UseSimpleAssemblyNameTypeSerializer();
+			config.UseRecommendedSerializerSettings();
+			config.UseMongoStorage(
+				mongoSettings.ConnectionString,
 					mongoSettings.Database,
 					new MongoStorageOptions
 					{
@@ -38,8 +40,10 @@ public static class ServiceRegistration
 						CheckQueuedJobsStrategy = CheckQueuedJobsStrategy.TailNotificationsCollection,
 						QueuePollInterval = TimeSpan.FromSeconds(1)
 					});
-			});
-			services.AddHangfireServer();
+		});
+		services.AddHangfireServer();
+
+		services.AddSingleton<PerformContextAccessorFilter>();
 
 			services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 			return services;

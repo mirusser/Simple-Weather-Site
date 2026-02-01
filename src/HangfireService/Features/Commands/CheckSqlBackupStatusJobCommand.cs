@@ -23,7 +23,9 @@ public sealed class CheckSqlBackupStatusJobHandler(
     IHttpRequestFactory requestFactory,
     IBackgroundJobClient backgroundJobs,
     IOptions<BackupJobSettings> backupJobOptions,
-    ILogger<CheckSqlBackupStatusJobHandler> logger)
+    ILogger<CheckSqlBackupStatusJobHandler> logger,
+    IHangfireJobContextAccessor jobContextAccessor,
+    JsonSerializerOptions jsonSerializerOptions)
     : IRequestHandler<CheckSqlBackupStatusJobCommand, bool>
 {
     private readonly BackupJobSettings settings = backupJobOptions.Value;
@@ -49,6 +51,10 @@ public sealed class CheckSqlBackupStatusJobHandler(
             PipelineNames.Default,
             statusRequest,
             cancellationToken);
+
+        var responseBody = await statusResponse.Content.ReadAsStringAsync(cancellationToken);
+        SetJobParameter(jobContextAccessor, "statusResponse", responseBody);
+        logger.LogInformation("GetSqlBackupStatus response: {Response}", Truncate(responseBody));
 
         var statusResult = await HttpResult.ReadJsonAsResultAsync<GetSqlBackupStatusResultDto>(
             statusResponse,
@@ -99,6 +105,24 @@ public sealed class CheckSqlBackupStatusJobHandler(
             status.State);
         
         return RescheduleOrFail(request);
+    }
+
+    private static void SetJobParameter(
+        IHangfireJobContextAccessor accessor,
+        string key,
+        string? value)
+    {
+        accessor.Context?.SetJobParameter(key, Truncate(value));
+    }
+
+    private static string? Truncate(string? value, int maxLength = 4000)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= maxLength)
+        {
+            return value;
+        }
+
+        return value[..maxLength];
     }
 
     private bool RescheduleOrFail(CheckSqlBackupStatusJobCommand request)

@@ -10,6 +10,7 @@ using Common.Shared;
 using Hangfire;
 using HangfireService.Features.Filters;
 using HangfireService.Features.HealthChecks;
+using HangfireService.Features.Jobs;
 using HangfireService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddCommonResiliencePipelines(builder.Configuration);
     builder.Services.AddHttpExecutor();
+    builder.Services.AddSingleton<IHangfireJobContextAccessor, HangfireJobContextAccessor>();
 
     builder.Services.Configure<BackupJobSettings>(
         builder.Configuration.GetSection(nameof(BackupJobSettings)));
