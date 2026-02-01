@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Common.Infrastructure.Consts;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
 using Common.Mediator;
@@ -6,46 +7,45 @@ using Common.Presentation.Http;
 using HangfireService.Models;
 using Hangfire;
 using HangfireService.Features.Jobs;
+using HangfireService.Settings;
+using Microsoft.Extensions.Options;
 
 namespace HangfireService.Features.Commands;
 
 public sealed class CheckSqlBackupStatusJobCommand : IRequest<bool>
 {
-	public string JobName { get; set; } = null!;
-	public string StatusUrl { get; set; } = null!;
-	public string JobId { get; set; } = null!;
+    public string JobId { get; set; } = null!;
     public int Attempt { get; set; }
-    public int PollIntervalSeconds { get; set; } = 60;
-    public int MaxPollAttempts { get; set; } = 60;
-    public Dictionary<string, string>? Headers { get; set; }
-    public string ClientName { get; set; } = "default";
 }
 
 public sealed class CheckSqlBackupStatusJobHandler(
     IHttpExecutor httpExecutor,
     IHttpRequestFactory requestFactory,
     IBackgroundJobClient backgroundJobs,
+    IOptions<BackupJobSettings> backupJobOptions,
     ILogger<CheckSqlBackupStatusJobHandler> logger)
     : IRequestHandler<CheckSqlBackupStatusJobCommand, bool>
 {
+    private readonly BackupJobSettings settings = backupJobOptions.Value;
+
     public async Task<bool> Handle(CheckSqlBackupStatusJobCommand request, CancellationToken cancellationToken)
     {
         logger.LogInformation(
             "Checking SQL backup status. JobId={JobId}, Attempt={Attempt}/{MaxAttempts}",
             request.JobId,
             request.Attempt,
-            request.MaxPollAttempts);
+            settings.MaxPollAttempts);
 
         var statusBody = JsonSerializer.Serialize(new { jobId = request.JobId });
 
         using var statusRequest = requestFactory.Create(
-            request.StatusUrl,
+            settings.StatusUrl,
             HttpMethod.Post.Method,
             statusBody,
-            request.Headers);
+            null);
 
         var statusResponse = await httpExecutor.SendAsync(
-            request.ClientName,
+            HttpClientConsts.DefaultName,
             PipelineNames.Default,
             statusRequest,
             cancellationToken);
@@ -62,7 +62,7 @@ public sealed class CheckSqlBackupStatusJobHandler(
                 request.Attempt,
                 statusResult.Problem?.Message);
             // Rely on resilience pipeline + reschedule until attempts are exhausted.
-            return RescheduleOrFail(request, backgroundJobs);
+            return RescheduleOrFail(request);
         }
 
         var status = statusResult.Value?.Status;
@@ -72,7 +72,7 @@ public sealed class CheckSqlBackupStatusJobHandler(
                 "Status check returned empty status. JobId={JobId}, Attempt={Attempt}",
                 request.JobId,
                 request.Attempt);
-            return RescheduleOrFail(request, backgroundJobs);
+            return RescheduleOrFail(request);
         }
 
         if (status.State == BackupJobState.Succeeded)
@@ -97,30 +97,27 @@ public sealed class CheckSqlBackupStatusJobHandler(
             "SQL backup still in progress. JobId={JobId}, State={State}",
             request.JobId,
             status.State);
-        return RescheduleOrFail(request, backgroundJobs);
+        
+        return RescheduleOrFail(request);
     }
 
-    private static bool RescheduleOrFail(CheckSqlBackupStatusJobCommand request, IBackgroundJobClient backgroundJobs)
+    private bool RescheduleOrFail(CheckSqlBackupStatusJobCommand request)
     {
-        if (request.Attempt >= request.MaxPollAttempts)
+        if (request.Attempt >= settings.MaxPollAttempts)
         {
             throw new TimeoutException(
-                $"Backup status did not complete within {request.MaxPollAttempts} attempts.");
+                $"Backup status did not complete within {settings.MaxPollAttempts} attempts.");
         }
 
         backgroundJobs.Schedule<HangfireMediatorExecutor>(
-            x => x.Execute(new CheckSqlBackupStatusJobCommand
-            {
-                JobName = request.JobName,
-                StatusUrl = request.StatusUrl,
-                JobId = request.JobId,
-                Attempt = request.Attempt + 1,
-                PollIntervalSeconds = request.PollIntervalSeconds,
-                MaxPollAttempts = request.MaxPollAttempts,
-                Headers = request.Headers,
-                ClientName = request.ClientName
-            }),
-            TimeSpan.FromSeconds(request.PollIntervalSeconds));
+            x => x.ExecuteNamed(
+                settings.JobCheckStatusName, 
+                new CheckSqlBackupStatusJobCommand
+                {
+                    JobId = request.JobId,
+                    Attempt = request.Attempt + 1
+                }),
+            TimeSpan.FromSeconds(settings.PollIntervalSeconds));
 
         return true;
     }

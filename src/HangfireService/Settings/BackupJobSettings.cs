@@ -3,7 +3,8 @@ namespace HangfireService.Settings;
 public sealed class BackupJobSettings
 {
     public bool Enabled { get; set; } = true;
-    public string JobName { get; set; } = "sql-backup-nightly";
+    public string JobStartName { get; set; } = "sql-backup-nightly-start";
+    public string JobCheckStatusName { get; set; } = "sql-backup-nightly-check-status";
     public string CronExpression { get; set; } = "0 2 * * *";
     public string StartUrl { get; set; } = null!;
     public string StatusUrl { get; set; } = null!;

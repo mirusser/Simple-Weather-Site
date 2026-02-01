@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Common.Contracts.HealthCheck;
+using Common.Infrastructure.Consts;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
 using Common.Mediator;
@@ -26,7 +27,6 @@ public class CallHealthCheckJobHandler(
 	JsonSerializerOptions jsonSerializerOptions) : IRequestHandler<CallHealthCheckJobCommand, bool>
 {
 	private readonly MailSettings mailSettings = options.Value;
-	private const string ClientName = "default";
 	
 	public async Task<bool> Handle(CallHealthCheckJobCommand request, CancellationToken cancellationToken)
 	{
@@ -35,7 +35,7 @@ public class CallHealthCheckJobHandler(
 			HttpMethod.Get.Method);
 
 		var response = await httpExecutor.SendAsync(
-			ClientName,
+			HttpClientConsts.DefaultName,
 			PipelineNames.Health,
 			httpRequest,
 			cancellationToken);

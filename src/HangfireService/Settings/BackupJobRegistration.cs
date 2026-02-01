@@ -23,13 +23,13 @@ public static class BackupJobRegistration
             var recurring = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
             recurring.AddOrUpdate<HangfireMediatorExecutor>(
-                settings.JobName,
-                x => x.Execute(new StartSqlBackupJobCommand()),
+                settings.JobStartName,
+                x => x.ExecuteNamed(settings.JobStartName, new StartSqlBackupJobCommand()),
                 settings.CronExpression);
 
             logger.LogInformation(
                 "Registered backup job {JobName} with cron {CronExpression}",
-                settings.JobName,
+                settings.JobStartName,
                 settings.CronExpression);
 
             return app;

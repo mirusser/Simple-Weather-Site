@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Common.Infrastructure.Consts;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
 using Common.Mediator;
@@ -11,11 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace HangfireService.Features.Commands;
 
-public sealed class StartSqlBackupJobCommand : IRequest<bool>
-{
-    public Dictionary<string, string>? Headers { get; set; }
-    public string ClientName { get; set; } = "default";
-}
+public sealed class StartSqlBackupJobCommand : IRequest<bool>;
 
 public sealed class StartSqlBackupJobHandler(
     IHttpExecutor httpExecutor,
@@ -38,10 +35,10 @@ public sealed class StartSqlBackupJobHandler(
             settings.StartUrl,
             HttpMethod.Post.Method,
             startBody,
-            request.Headers);
+            null);
 
         var startResponse = await httpExecutor.SendAsync(
-            request.ClientName,
+            HttpClientConsts.DefaultName,
             PipelineNames.Default,
             startRequest,
             cancellationToken);
@@ -51,7 +48,7 @@ public sealed class StartSqlBackupJobHandler(
             var statusCode = (int)startResponse.StatusCode;
             logger.LogError(
                 "StartSqlBackup failed. JobName={JobName}, Status={Status}",
-                settings.JobName,
+                settings.JobStartName,
                 statusCode);
             
             throw new InvalidOperationException($"StartSqlBackup failed with HTTP {statusCode}.");
@@ -65,7 +62,7 @@ public sealed class StartSqlBackupJobHandler(
         {
             logger.LogError(
                 "StartSqlBackup returned invalid payload. JobName={JobName}, Error={Error}",
-                settings.JobName,
+                settings.JobStartName,
                 startResult.Problem?.Message ?? "empty JobId");
             
             throw new InvalidOperationException(
@@ -75,20 +72,15 @@ public sealed class StartSqlBackupJobHandler(
         var jobId = startResult.Value.JobId;
 
         backgroundJobs.Schedule<HangfireMediatorExecutor>(
-            x => x.Execute(new CheckSqlBackupStatusJobCommand
-            {
-                JobName = settings.JobName,
-                StatusUrl = settings.StatusUrl,
-                JobId = jobId,
-                Attempt = 1,
-                PollIntervalSeconds = settings.PollIntervalSeconds,
-                MaxPollAttempts = settings.MaxPollAttempts,
-                Headers = request.Headers,
-                ClientName = request.ClientName
-            }),
+            x => x.ExecuteNamed(
+                settings.JobCheckStatusName, 
+                new CheckSqlBackupStatusJobCommand
+                {
+                    JobId = jobId,
+                    Attempt = 1
+                }),
             TimeSpan.FromSeconds(settings.PollIntervalSeconds));
 
         return true;
     }
-
 }

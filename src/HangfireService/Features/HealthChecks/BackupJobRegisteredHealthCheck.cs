@@ -23,7 +23,7 @@ public sealed class BackupJobRegisteredHealthCheck(IOptions<BackupJobSettings> o
         using var connection = JobStorage.Current.GetConnection();
         var jobs = connection.GetRecurringJobs();
 
-        var exists = jobs.Any(j => string.Equals(j.Id, settings.JobName, StringComparison.OrdinalIgnoreCase));
+        var exists = jobs.Any(j => string.Equals(j.Id, settings.JobStartName, StringComparison.OrdinalIgnoreCase));
 
         return Task.FromResult(
             exists

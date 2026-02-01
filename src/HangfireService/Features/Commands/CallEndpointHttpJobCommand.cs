@@ -1,3 +1,4 @@
+using Common.Infrastructure.Consts;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
 using Common.Mediator;
@@ -19,8 +20,6 @@ public sealed class CallEndpointHttpJobHandler(
     IHttpRequestFactory requestFactory)
     : IRequestHandler<CallEndpointHttpJobCommand, bool>
 {
-    private const string ClientName = "default";
-
     public async Task<bool> Handle(CallEndpointHttpJobCommand request, CancellationToken cancellationToken)
     {
         using var httpRequest = requestFactory.Create(
@@ -30,7 +29,7 @@ public sealed class CallEndpointHttpJobHandler(
             request.Headers);
 
         var response = await httpExecutor.SendAsync(
-            ClientName,
+            HttpClientConsts.DefaultName,
             PipelineNames.Default,
             httpRequest,
             cancellationToken);
