@@ -94,12 +94,15 @@ var app = builder.Build();
     app.UseDefaultExceptionHandler();
     app.UseDefaultScalar();
 
-    app.UseCors("AllowAll");
 
-    app.UseHttpsRedirection();
+    // app.UseHttpsRedirection(); TODO: configure https in docker
     app.UseRouting();
 
-    app.MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}");
+    app.UseCors("AllowAll");
+
+    app
+        .MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}")
+        .RequireCors("AllowAll");
 
     //app.UseSignalR(routes =>
     //{
