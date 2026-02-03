@@ -28,3 +28,13 @@ README.md
 !.git/config
 !.git/packed-refs
 !.git/refs/heads/**
+
+**/bin/
+**/obj/
+**/deploy/
+.git/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp

@@ -128,31 +128,18 @@ create_network(){
     fi
 }
 
-build_and_dockerize() {
+build_docker_image() {
 
     # Arguments:
     local project_local_dir="$1" # $1 = relative path to the project from BASE_DIR (e.g. "/CitiesService/CitiesService.Api")
     local docker_image_name="$2" # $2 = docker image name/tag to build (e.g. "citiesservice")
 
     local project_dir="$BASE_DIR/$project_local_dir"
-    local publish_dir="$project_dir/deploy"
 
-    # Clean up the previous publish directory and create a new one
-    rm -rf "$publish_dir"
-    mkdir -p "$publish_dir"
+    cd "$BASE_DIR" || { echo -e "${RED}Failed to navigate to $BASE_DIR.${NC}"; exit 1; }
 
-    # Navigate to the project directory or exit if it fails
-    cd "$project_dir" || { echo -e "${RED}Failed to navigate to $project_dir.${NC}"; exit 1; }
-
-    # Publish the .NET project and build the Docker image
-    # NOTE:
-    # - dotnet publish writes the compiled output into deploy/
-    # - docker build copies deploy/ into the image (per Dockerfile COPY deploy .)
-    # - deploy/ is removed after build to keep workspace clean (image already contains the bits)
-    dotnet publish -c Release -f "$FRAMEWORK" -o "$publish_dir" && \
-    docker build -t "$docker_image_name" . && \
-    rm -rf "$publish_dir" || \
-    { echo -e "${RED}Build or Docker build failed for $docker_image_name.${NC}"; exit 1; }
+    docker build -t "$docker_image_name" -f "$project_dir/Dockerfile" . || \
+    { echo -e "${RED}Docker build failed for $docker_image_name.${NC}"; exit 1; }
 }
 
 build_and_run_docker_compose(){
@@ -250,19 +237,19 @@ check_dependencies
 # 2) Ensure the shared external docker network exists
 create_network
 
-# 3) Build each service (publish -> docker build) and tag images locally
-# NOTE: Each build uses the project's Dockerfile from its own folder.
-build_and_dockerize "/Authorization/OAuthServer" "oauthserver"
-build_and_dockerize "/CitiesService/CitiesService.Api" "citiesservice"
-build_and_dockerize "/CitiesService/CitiesGrpcService" "citiesgrpcservice"
-build_and_dockerize "/WeatherService" "weatherservice"
-build_and_dockerize "/WeatherHistoryService" "weatherhistoryservice"
-build_and_dockerize "/EmailService/EmailService.Api" "emailservice"
-build_and_dockerize "/IconService/IconService.Api" "iconservice"
-build_and_dockerize "/SignalRServer" "signalrserver"
-build_and_dockerize "/HangfireService" "hangfireservice"
-build_and_dockerize "/BackupService/BackupService.Api" "backupservice"
-build_and_dockerize "/WeatherSite/Site" "weathersite"
+# 3) Build each service docker image and tag images locally
+# NOTE: Each build uses the project's Dockerfile from its own directory.
+build_docker_image "/Authorization/OAuthServer" "oauthserver"
+build_docker_image "/CitiesService/CitiesService.Api" "citiesservice"
+build_docker_image "/CitiesService/CitiesGrpcService" "citiesgrpcservice"
+build_docker_image "/WeatherService" "weatherservice"
+build_docker_image "/WeatherHistoryService" "weatherhistoryservice"
+build_docker_image "/EmailService/EmailService.Api" "emailservice"
+build_docker_image "/IconService/IconService.Api" "iconservice"
+build_docker_image "/SignalRServer" "signalrserver"
+build_docker_image "/HangfireService" "hangfireservice"
+build_docker_image "/BackupService/BackupService.Api" "backupservice"
+build_docker_image "/WeatherSite/Site" "weathersite"
 
 # 4) Bring the docker-compose stack up (build optional, then run detached)
 build_and_run_docker_compose

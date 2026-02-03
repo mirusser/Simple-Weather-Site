@@ -1,13 +1,27 @@
-# Use the appropriate ASP.NET Core runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+# Build stage
 
+# Use the appropriate.NET sdk image
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy the entire /src directory (build context should be src/)
+COPY . .
+
+# Publish only this project (includes referenced projects via ProjectReference)
+RUN dotnet publish -c Release -f net10.0 \
+    CitiesService/CitiesService.Api/CitiesService.Api.csproj \
+    -o /app/publish
+
+# Runtime stage
+
+# Use the appropriate ASP.NET Core runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-# Copy the compiled app to the container
-COPY deploy .
+COPY --from=build /app/publish .
 
 # Copy the .pfx certificate into the container
-COPY cert/localhost.pfx /https/localhost.pfx
+COPY CitiesService/CitiesService.Api/cert/localhost.pfx /https/localhost.pfx
 
 # Set environment variables
 ENV ASPNETCORE_URLS="https://+:443;http://+:80"
