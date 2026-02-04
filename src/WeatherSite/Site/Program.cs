@@ -18,17 +18,25 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.Configure<ApiEndpoints>(builder.Configuration.GetSection(nameof(ApiEndpoints)));
 	builder.Services.Configure<ApiConsumerAuthSettings>(builder.Configuration.GetSection(nameof(ApiConsumerAuthSettings)));
 
-	builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
-	builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+	builder.Services
+		.AddControllersWithViews()
+		.AddRazorRuntimeCompilation();
+	
+	builder.Services
+		.AddRazorPages()
+		.AddRazorRuntimeCompilation();
 
+	builder.Services.AddTransient<IconClient>();
+	builder.Services.AddTransient<CityManager>();
+	
+	// TODO: add BearerTokenHandler to IHttpExecutor
 	builder.Services.AddTransient<BearerTokenHandler>();
 
 	builder.Services.AddHttpClient<WeatherForecastClient>();
 	builder.Services.AddHttpClient<WeatherHistoryClient>();
-	builder.Services.AddHttpClient<IconClient>();
 
-	builder.Services.AddHttpClient<CityClient>()
-		.AddHttpMessageHandler<BearerTokenHandler>();
+	// builder.Services.AddHttpClient<CityClient>()
+	// 	.AddHttpMessageHandler<BearerTokenHandler>();
 
 	builder.Services.AddGrpcCitiesClient(builder.Configuration);
 	builder.Services.AddCommonHealthChecks(builder.Configuration);

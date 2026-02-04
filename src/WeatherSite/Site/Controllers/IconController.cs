@@ -7,9 +7,10 @@ namespace WeatherSite.Controllers;
 public class IconController(IconClient iconClient) : Controller
 {
     [HttpPost]
-    public async Task<byte[]?> Get(string icon)
+    public async Task<byte[]> Get(string icon)
     {
-        var iconDto = await iconClient.GetIcon(icon);
-        return iconDto?.FileContent;
+        var result = await iconClient.GetIconAsync(icon, HttpContext.RequestAborted);
+
+        return result.IsSuccess ? result.Value.FileContent : null;
     }
 }
