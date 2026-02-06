@@ -40,7 +40,7 @@ public class CityWeatherForecastService(IMongoCollectionFactory<CityWeatherForec
 
         dto.WeatherForecastDocuments = await cityWeatherForecastCollection
             .Find(filter)
-            .SortByDescending(x => x.SearchDate)
+            .SortByDescending(x => x.SearchDateUtc)
             .Skip(skip)
             .Limit(numberOfEntities)
             .ToListAsync(cancellationToken);
@@ -122,7 +122,7 @@ public class CityWeatherForecastService(IMongoCollectionFactory<CityWeatherForec
             .SetOnInsert(x => x.EventId, cityWeatherForecast.EventId)
             .SetOnInsert(x => x.City, cityWeatherForecast.City)
             .SetOnInsert(x => x.CountryCode, cityWeatherForecast.CountryCode)
-            .SetOnInsert(x => x.SearchDate, cityWeatherForecast.SearchDate)
+            .SetOnInsert(x => x.SearchDateUtc, cityWeatherForecast.SearchDateUtc)
             .SetOnInsert(x => x.Temperature, cityWeatherForecast.Temperature)
             .SetOnInsert(x => x.Summary, cityWeatherForecast.Summary)
             .SetOnInsert(x => x.Icon, cityWeatherForecast.Icon);

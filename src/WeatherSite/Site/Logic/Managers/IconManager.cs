@@ -6,10 +6,10 @@ using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
 using Common.Presentation.Http;
 using Microsoft.Extensions.Options;
-using WeatherSite.Logic.Clients.Models.Records;
+using WeatherSite.Logic.Managers.Models.Records;
 using WeatherSite.Logic.Settings;
 
-namespace WeatherSite.Logic.Clients;
+namespace WeatherSite.Logic.Managers;
 
 public class IconManager(
     IHttpExecutor httpExecutor,

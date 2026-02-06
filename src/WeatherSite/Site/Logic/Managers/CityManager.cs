@@ -12,11 +12,11 @@ using Common.Presentation.Http;
 using GrpcCitiesClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WeatherSite.Logic.Clients.Models.Records;
+using WeatherSite.Logic.Managers.Models.Records;
 using WeatherSite.Logic.Settings;
 using WeatherSite.Models;
 
-namespace WeatherSite.Logic.Clients;
+namespace WeatherSite.Logic.Managers;
 
 public class CityManager(
     IHttpExecutor httpExecutor,

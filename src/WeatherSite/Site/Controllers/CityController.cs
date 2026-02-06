@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using WeatherSite.Logic.Clients;
-using WeatherSite.Logic.Clients.Models.Records;
 using WeatherSite.Logic.Helpers;
+using WeatherSite.Logic.Managers;
+using WeatherSite.Logic.Managers.Models.Records;
 using WeatherSite.Models.City;
+using WeatherSite.Models.City.Requests;
 
 namespace WeatherSite.Controllers;
 
 public class CityController(CityManager cityManager) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> GetCitiesPagination()
+    public IActionResult GetCitiesPagination()
     {
         CitiesPaginationVM vm = new();
 
-        return await Task.FromResult(View(vm));
+        return View(vm);
     }
 
     [HttpPost]
@@ -31,15 +32,9 @@ public class CityController(CityManager cityManager) : Controller
     }
 
     [HttpPost]
-    public async Task<List<City>> GetCitiesByName([FromBody] Request request)
+    public async Task<List<City>> GetCitiesByName([FromBody] GetCitiesByNameRequest request)
     {
         var result = await cityManager.GetCitiesByName(request.CityName);
         return result;
     }
-}
-
-public class Request
-{
-    public string CityName { get; set; }
-    public int Limit { get; set; }
 }

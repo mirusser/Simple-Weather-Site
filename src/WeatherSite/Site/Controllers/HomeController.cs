@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WeatherSite.Models;
 
@@ -8,12 +7,12 @@ namespace WeatherSite.Controllers;
 public class HomeController : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
         return View();
     }
 
-    public async Task<IActionResult> ErrorPartial(string code, string message)
+    public IActionResult ErrorPartial(string code, string message)
     {
         var vm = new ErrorPartialVM()
         {

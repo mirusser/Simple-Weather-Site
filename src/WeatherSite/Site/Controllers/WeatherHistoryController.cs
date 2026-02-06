@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using WeatherSite.Logic.Clients;
 using WeatherSite.Logic.Helpers;
-using WeatherSite.Models.WeatherHistory;
+using WeatherSite.Logic.Managers;
 
 namespace WeatherSite.Controllers;
 
@@ -10,9 +9,9 @@ public class WeatherHistoryController(WeatherHistoryManager weatherHistoryManage
     : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> GetWeatherHistoryPagination()
+    public IActionResult GetWeatherHistoryPagination()
     {
-        WeatherHistoryVM vm = weatherHistoryManager.GetWeatherHistoryVm();
+        var vm = weatherHistoryManager.GetWeatherHistoryVm();
 
         return View(vm);
     }

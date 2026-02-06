@@ -2,5 +2,5 @@
 
 public class WeatherHistoryVM
 {
-    public string SignalRServerUrl { get; set; }
+    public required string SignalRServerUrl { get; init; }
 }

@@ -7,7 +7,7 @@ using GrpcCitiesClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using WeatherSite.Logic.Clients;
+using WeatherSite.Logic.Managers;
 using WeatherSite.Logic.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,12 +29,11 @@ var builder = WebApplication.CreateBuilder(args);
 	builder.Services.AddTransient<IconManager>();
 	builder.Services.AddTransient<CityManager>();
 	builder.Services.AddTransient<WeatherHistoryManager>();
+	builder.Services.AddTransient<WeatherForecastManager>();
 	
 	// TODO: add BearerTokenHandler to IHttpExecutor
 	builder.Services.AddTransient<BearerTokenHandler>();
-
-	builder.Services.AddHttpClient<WeatherForecastClient>();
-
+	
 	// builder.Services.AddHttpClient<CityClient>()
 	// 	.AddHttpMessageHandler<BearerTokenHandler>();
 

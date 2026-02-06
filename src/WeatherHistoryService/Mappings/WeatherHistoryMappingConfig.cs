@@ -14,6 +14,7 @@ public class WeatherHistoryMappingConfig : IRegister
             .Map(dest => dest.City, src => src.City)
             .Map(dest => dest.CountryCode, src => src.CountryCode)
             .Map(dest => dest.SearchDate, src => src.Date)
+            .Map(dest => dest.SearchDateUtc, src => src.Date.UtcDateTime)
             .Map(dest => dest.Summary, src => src.Summary)
             .Map(dest => dest.Temperature.TemperatureC, src => src.TemperatureC)
             .Map(dest => dest.Temperature.TemperatureF, src => src.TemperatureF);
@@ -26,6 +27,7 @@ public class WeatherHistoryMappingConfig : IRegister
             .Map(dest => dest.EventId, src => src.EventId)
             .Map(dest => dest.City, src => src.City)
             .Map(dest => dest.CountryCode, src => src.CountryCode)
+            .Map(dest => dest.SearchDateUtc, src => src.Date.UtcDateTime)
             .Map(dest => dest.SearchDate, src => src.Date)
             .Map(dest => dest.Temperature.TemperatureC, src => src.TemperatureC)
             .Map(dest => dest.Temperature.TemperatureF, src => src.TemperatureF)

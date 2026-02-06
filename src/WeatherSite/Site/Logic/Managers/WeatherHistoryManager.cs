@@ -9,12 +9,12 @@ using Common.Presentation.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WeatherSite.Logic.Clients.Models.Records;
+using WeatherSite.Logic.Managers.Models.Records;
 using WeatherSite.Logic.Settings;
 using WeatherSite.Models;
 using WeatherSite.Models.WeatherHistory;
 
-namespace WeatherSite.Logic.Clients;
+namespace WeatherSite.Logic.Managers;
 
 public class WeatherHistoryManager(
     IHttpExecutor httpExecutor,
@@ -68,7 +68,7 @@ public class WeatherHistoryManager(
     }
     
     // TODO: get rid of magic string
-    public async Task<Result<WeatherHistoryForecastPagination>> GetWeatherHistoryForecastPaginationAsync(
+    private async Task<Result<WeatherHistoryForecastPagination>> GetWeatherHistoryForecastPaginationAsync(
         int pageNumber = 1,
         int numberOfEntities = 25,
         CancellationToken  ct = default)

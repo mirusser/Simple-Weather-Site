@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using WeatherSite.Logic.Clients;
+using WeatherSite.Logic.Managers;
 
 namespace WeatherSite.Controllers;
 

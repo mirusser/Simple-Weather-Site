@@ -21,9 +21,16 @@ public class CityWeatherForecastDocument
     [Required(ErrorMessage = "Country code is required")]
     public string CountryCode { get; set; } = null!;
 
-    [BsonElement("search date")]
-    [Required(ErrorMessage = "Search date is required")]
-    public DateTimeOffset SearchDate { get; set; }
+    [BsonElement("searchDateUtc")]
+    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+    public DateTime SearchDateUtc { get; set; }
+
+    [BsonIgnore]
+    public DateTimeOffset SearchDate
+    {
+        get => new DateTimeOffset(SearchDateUtc, TimeSpan.Zero);
+        set => SearchDateUtc = value.UtcDateTime;
+    }
 
     public Temperature Temperature { get; set; } = new();
     public string? Summary { get; set; }
