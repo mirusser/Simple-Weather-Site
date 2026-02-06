@@ -26,14 +26,14 @@ var builder = WebApplication.CreateBuilder(args);
 		.AddRazorPages()
 		.AddRazorRuntimeCompilation();
 
-	builder.Services.AddTransient<IconClient>();
+	builder.Services.AddTransient<IconManager>();
 	builder.Services.AddTransient<CityManager>();
+	builder.Services.AddTransient<WeatherHistoryManager>();
 	
 	// TODO: add BearerTokenHandler to IHttpExecutor
 	builder.Services.AddTransient<BearerTokenHandler>();
 
 	builder.Services.AddHttpClient<WeatherForecastClient>();
-	builder.Services.AddHttpClient<WeatherHistoryClient>();
 
 	// builder.Services.AddHttpClient<CityClient>()
 	// 	.AddHttpMessageHandler<BearerTokenHandler>();

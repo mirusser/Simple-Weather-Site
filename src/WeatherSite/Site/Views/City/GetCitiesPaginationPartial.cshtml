@@ -1,26 +1,23 @@
 ﻿
-@using WeatherSite.Models.City
-@using WeatherSite.Controllers
-
-@model CitiesPaginationPartialVM
+@model PaginationVM<CitiesGrpcService.CityReply>
 
 <div class="card">
     <div class="card-header" style="display: flex; justify-content: center">
         <h1 class="card-title">
             <strong>
-                Available cities table, page no. #@Model.PaginationVM.PageNumber
+                Available cities table, page no. #@Model.PageNumber
             </strong>
         </h1>
     </div>
 
     <div class="card-body p-0">
-        @if (Model != null && Model.Cities != null)
+        @if (Model.IsSuccess)
         {
             var number = 1;
 
-            if (Model.PaginationVM.PageNumber > 1)
+            if (Model.PageNumber > 1)
             {
-                number += (Model.PaginationVM.PageNumber - 1) * Model.PaginationVM.NumberOfEntitiesOnPage;
+                number += (Model.PageNumber - 1) * Model.NumberOfEntitiesOnPage;
             }
 
             <table class="table table-striped">
@@ -36,7 +33,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var city in Model.Cities)
+                    @foreach (var city in Model.Values)
                     {
                         <tr>
                             <td>
@@ -60,13 +57,13 @@
         {
             //TODO: display something better here
             <span>
-                There aren't any cities in the database.
+                Couldn't get cities from the database.
             </span>
         }
     </div>
 
     <div class="card-footer clearfix">
-        @await Html.PartialAsync("_paginationPartial", Model.PaginationVM)
+        @await Html.PartialAsync("_paginationPartial", Model)
     </div>
 
 </div>

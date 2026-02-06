@@ -4,12 +4,12 @@ using WeatherSite.Logic.Clients;
 
 namespace WeatherSite.Controllers;
 
-public class IconController(IconClient iconClient) : Controller
+public class IconController(IconManager iconManager) : Controller
 {
     [HttpPost]
     public async Task<byte[]> Get(string icon)
     {
-        var result = await iconClient.GetIconAsync(icon, HttpContext.RequestAborted);
+        var result = await iconManager.GetIconAsync(icon, HttpContext.RequestAborted);
 
         return result.IsSuccess ? result.Value.FileContent : null;
     }

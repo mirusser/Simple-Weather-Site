@@ -1,26 +1,26 @@
 ﻿
 @using WeatherSite.Models.WeatherHistory
-@using WeatherSite.Controllers
+@using WeatherSite.Models
 
-@model WeatherHistoryPaginationPartialVM
+@model PaginationVM<WeatherSite.Logic.Clients.Models.Records.CityWeatherForecastDocument>
 
 <div class="card">
     <div class="card-header" style="display: flex; justify-content: center">
         <h1 class="card-title">
             <strong>
-                Searched weather forecasts, page no. #@Model.PaginationVM.PageNumber
+                Searched weather forecasts, page no. #@Model.PageNumber
             </strong>
         </h1>
     </div>
 
     <div class="card-body p-0">
-        @if (Model != null && Model.CityWeatherForecastDocuments != null)
+        @if (Model.IsSuccess)
         {
             var number = 1;
 
-            if (Model.PaginationVM.PageNumber > 1)
+            if (Model.PageNumber > 1)
             {
-                number += (Model.PaginationVM.PageNumber - 1) * Model.PaginationVM.NumberOfEntitiesOnPage;
+                number += (Model.PageNumber - 1) * Model.NumberOfEntitiesOnPage;
             }
 
             <table class="table table-striped">
@@ -45,7 +45,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var weatherHistoryForecast in Model.CityWeatherForecastDocuments)
+                    @foreach (var weatherHistoryForecast in Model.Values)
                     {
                         <tr>
                             <td>
@@ -78,13 +78,13 @@
         {
             //TODO: display something better here
             <span>
-                There aren't any weather history forecasts in the database.
+                Couldn't get weather history forecasts in the database.
             </span>
         }
     </div>
 
     <div class="card-footer clearfix">
-        @await Html.PartialAsync("_paginationPartial", Model.PaginationVM)
+        @await Html.PartialAsync("_paginationPartial", Model)
     </div>
 
 </div>

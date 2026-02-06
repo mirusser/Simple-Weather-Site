@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using CitiesGrpcService;
 using Common.Infrastructure.Consts;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
@@ -13,7 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WeatherSite.Logic.Clients.Models.Records;
 using WeatherSite.Logic.Settings;
-using WeatherSite.Models.City;
+using WeatherSite.Models;
 
 namespace WeatherSite.Logic.Clients;
 
@@ -60,7 +61,7 @@ public class CityManager(
         return result.Value.Cities;
     }
 
-    public async Task<CitiesPaginationPartialVM> GetCitiesPaginationPartialVMAsync(
+    public async Task<PaginationVM<CityReply>> GetCitiesPaginationPartialVMAsync(
         string url,
         int pageNumber = 1,
         int numberOfEntitiesOnPage = 25)
@@ -69,26 +70,24 @@ public class CityManager(
         var citiesPaginationReply = await citiesClient.GetCitiesPagination(pageNumber, numberOfEntitiesOnPage);
 
         //using gRPC (stream from server)
-        //var foo = new List<CityReply>();
+        //var cities = new List<CityReply>();
         //await foreach (var cityReply in _citiesClient.GetCitiesStream(pageNumber, numberOfEntitiesOnPage))
         //{
-        //    foo.Add(cityReply);
+        //    cities.Add(cityReply);
         //}
 
         var numberOfPages = Convert.ToInt32(
             Math.Ceiling((decimal)citiesPaginationReply?.NumberOfAllCities / numberOfEntitiesOnPage));
 
-        CitiesPaginationPartialVM vm = new()
+        PaginationVM<CityReply> vm = new()
         {
-            Cities = citiesPaginationReply?.Cities?.ToList(),
-            PaginationVM = new()
-            {
-                ElementId = "#cities-pagination-partial-div",
-                Url = url,
-                PageNumber = pageNumber,
-                NumberOfEntitiesOnPage = numberOfEntitiesOnPage,
-                NumberOfPages = numberOfPages
-            }
+            IsSuccess = citiesPaginationReply?.Cities is not null,
+            Values = citiesPaginationReply?.Cities?.ToList(),
+            ElementId = "#cities-pagination-partial-div",
+            Url = url,
+            PageNumber = pageNumber,
+            NumberOfEntitiesOnPage = numberOfEntitiesOnPage,
+            NumberOfPages = numberOfPages
         };
 
         return vm;

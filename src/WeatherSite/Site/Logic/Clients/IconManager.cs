@@ -1,5 +1,4 @@
 ﻿using System.Net.Http;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Infrastructure.Consts;
@@ -12,27 +11,21 @@ using WeatherSite.Logic.Settings;
 
 namespace WeatherSite.Logic.Clients;
 
-public class IconClient(
+public class IconManager(
     IHttpExecutor httpExecutor,
     IHttpRequestFactory  requestFactory,
-    IOptions<ApiEndpoints> options,
-    JsonSerializerOptions jsonSerializerOptions)
+    IOptions<ApiEndpoints> options)
 {
     private readonly ApiEndpoints apiEndpoints = options.Value;
 
     public async Task<Result<IconDto>> GetIconAsync(string icon, CancellationToken ct)
     {   
         var url = $"{apiEndpoints.IconServiceApiUrl}Get";
-
-        var jsonBody = JsonSerializer.Serialize(
-            new { icon },
-            jsonSerializerOptions);
-
+        
         using var request = requestFactory.Create(
             url,
-            HttpMethod.Post.Method,
-            jsonBody,
-            null);
+            new { icon },
+            HttpMethod.Post.Method);
         
         using var res = await httpExecutor.SendAsync(
             HttpClientConsts.DefaultName, 
