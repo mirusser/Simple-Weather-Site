@@ -1,0 +1,174 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: postgres
+    volumes:
+      - /opt/sws/volumes/postgresql:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - default
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    volumes:
+      - /opt/sws/volumes/mongo/data/db:/data/db
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    expose:
+      - "27017"
+    networks:
+      - default
+
+  elastic:
+    image: elasticsearch:8.12.1
+    container_name: elastic
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      # For a quick single-node dev-like setup; consider enabling security later
+      - xpack.security.enabled=false
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /opt/sws/volumes/elasticsearch/data:/usr/share/elasticsearch/data
+    expose:
+      - "9200"
+      - "9300"
+    networks:
+      - default
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    restart: unless-stopped
+    user: root
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-change-me}
+    volumes:
+      - /opt/sws/volumes/mssql/data:/var/opt/mssql
+    expose:
+      - "1433"
+    networks:
+      - default
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - /opt/sws/volumes/redis/data:/data
+    command: redis-server --appendonly yes
+    expose:
+      - "6379"
+    networks:
+      - default
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
+    volumes:
+      - /opt/sws/volumes/seq/data:/data
+    expose:
+      - "80"
+    networks:
+      - default
+
+  rabbitmq:
+    image: heidiks/rabbitmq-delayed-message-exchange:latest
+    container_name: rabbitmq
+    restart: unless-stopped
+    volumes:
+      - /opt/sws/volumes/rabbitmq/data:/var/lib/rabbitmq
+    expose:
+      - "5672"
+      - "15672"
+    networks:
+      - default
+
+  # OPTIONAL (I recommend not running these on first internet deploy; enable later if you want)
+  jenkins:
+    image: jenkins/jenkins:latest
+    container_name: jenkins
+    restart: unless-stopped
+    user: root
+    volumes:
+      - /opt/sws/volumes/jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+    expose:
+      - "8080"
+      - "50000"
+    networks:
+      - default
+
+  healthchecks:
+    image: xabarilcoding/healthchecksui:latest
+    container_name: healthchecks
+    restart: unless-stopped
+    depends_on:
+      - sqlserver
+    environment:
+      - ui_path=/
+      - storage_provider=SqlServer
+      - storage_connection=Server=sqlserver;User Id=sa;Password=${MSSQL_SA_PASSWORD:-change-me};Initial Catalog=DockerUI
+      - 'HealthChecksUI:HealthChecks:0:Name=OAuthServer'
+      - 'HealthChecksUI:HealthChecks:0:Uri=http://oauthserver:80/health'
+      - 'HealthChecksUI:HealthChecks:1:Name=CitiesService'
+      - 'HealthChecksUI:HealthChecks:1:Uri=http://citiesservice:80/health'
+      - 'HealthChecksUI:HealthChecks:2:Name=WeatherService'
+      - 'HealthChecksUI:HealthChecks:2:Uri=http://weatherservice:80/health'
+      - 'HealthChecksUI:HealthChecks:3:Name=WeatherHistoryService'
+      - 'HealthChecksUI:HealthChecks:3:Uri=http://weatherhistoryservice:80/health'
+      - 'HealthChecksUI:HealthChecks:4:Name=CitiesGrpcService'
+      - 'HealthChecksUI:HealthChecks:4:Uri=http://citiesgrpcservice:80/health'
+      - 'HealthChecksUI:HealthChecks:5:Name=EmailService'
+      - 'HealthChecksUI:HealthChecks:5:Uri=http://emailservice:80/health'
+      - 'HealthChecksUI:HealthChecks:6:Name=IconService'
+      - 'HealthChecksUI:HealthChecks:6:Uri=http://iconservice:80/health'
+      - 'HealthChecksUI:HealthChecks:7:Name=SignalRServer'
+      - 'HealthChecksUI:HealthChecks:7:Uri=http://signalrserver:80/health'
+      - 'HealthChecksUI:HealthChecks:8:Name=HangfireService'
+      - 'HealthChecksUI:HealthChecks:8:Uri=http://hangfireservice:80/health'
+      - 'HealthChecksUI:HealthChecks:9:Name=WeatherSite'
+      - 'HealthChecksUI:HealthChecks:9:Uri=http://weathersite:80/health'
+    expose:
+      - "80"
+    networks:
+      - default
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/sws/volumes/portainer/data:/data
+    expose:
+      - "9000"
+    networks:
+      - default
+
+networks:
+  default:
+    name: sws-containers-bridge-network
+    external: true

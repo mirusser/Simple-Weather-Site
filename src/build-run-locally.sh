@@ -142,18 +142,7 @@ build_docker_image() {
     { echo -e "${RED}Docker build failed for $docker_image_name.${NC}"; exit 1; }
 }
 
-build_and_run_docker_compose(){
-
-    # Optional no-cache build:
-    # Run with: NO_CACHE=1 ./publish.sh
-    # NOTE:
-    # --no-cache forces docker to rebuild everything from scratch; it's slower but helps when
-    # debugging caching issues or when you suspect base images/layers changed.
-    if [ "${NO_CACHE:-0}" = "1" ]; then
-        docker compose build --no-cache
-    else
-        docker compose build
-    fi
+run_docker_compose(){
 
     # Start containers in detached mode (-d)
     # -p sets an explicit compose project name so container naming is predictable
@@ -231,13 +220,13 @@ forward_ports() {
 
 # ---- Script entrypoint (runs in order) ----
 
-# 1) Validate tools and environment
+# Validate tools and environment
 check_dependencies
 
-# 2) Ensure the shared external docker network exists
+# Ensure the shared external docker network exists
 create_network
 
-# 3) Build each service docker image and tag images locally
+# Build each service docker image and tag images locally
 # NOTE: Each build uses the project's Dockerfile from its own directory.
 build_docker_image "/Authorization/OAuthServer" "oauthserver"
 build_docker_image "/CitiesService/CitiesService.Api" "citiesservice"
@@ -251,11 +240,11 @@ build_docker_image "/HangfireService" "hangfireservice"
 build_docker_image "/BackupService/BackupService.Api" "backupservice"
 build_docker_image "/WeatherSite/Site" "weathersite"
 
-# 4) Bring the docker-compose stack up (build optional, then run detached)
-build_and_run_docker_compose
+# Bring the docker-compose stack up
+run_docker_compose
 
-# 5) Open host firewall ports and persist rules
+# Open host firewall ports and persist rules
 forward_ports
 
-# 6) Final status message
+# Final status message
 echo -e "${BLUE}Process has finished.${NC}"

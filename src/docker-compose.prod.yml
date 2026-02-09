@@ -1,0 +1,166 @@
+services:
+  oauthserver:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/oauthserver:${IMAGE_TAG}
+    container_name: oauthserver
+    hostname: oauthserver
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    networks:
+      - default
+
+  citiesservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/citiesservice:${IMAGE_TAG}
+    container_name: citiesservice
+    hostname: citiesservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    networks:
+      - default
+
+  citiesgrpcservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/citiesgrpcservice:${IMAGE_TAG}
+    container_name: citiesgrpcservice
+    hostname: citiesgrpcservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+      # If you really use a separate gRPC port internally, keep it internal only:
+      - "5043"
+    networks:
+      - default
+
+  weatherservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/weatherservice:${IMAGE_TAG}
+    container_name: weatherservice
+    hostname: weatherservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    networks:
+      - default
+
+  weatherhistoryservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/weatherhistoryservice:${IMAGE_TAG}
+    container_name: weatherhistoryservice
+    hostname: weatherhistoryservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    networks:
+      - default
+
+  # EDGE service: only this one is reachable from the EC2 host (and thus from ALB)
+  weathersite:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/weathersite:${IMAGE_TAG}
+    container_name: weathersite
+    hostname: weathersite
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      # Optional: if your app supports forwarded headers behind ALB
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+    ports:
+      - "80:80"
+    networks:
+      - default
+    depends_on:
+      - weatherservice
+      - signalrserver
+      - citiesservice
+
+  iconservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/iconservice:${IMAGE_TAG}
+    container_name: iconservice
+    hostname: iconservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    volumes:
+      - iconservice:/var/lib/iconservicefiles
+    networks:
+      - default
+
+  signalrserver:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/signalrserver:${IMAGE_TAG}
+    container_name: signalrserver
+    hostname: signalrserver
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+    expose:
+      - "80"
+    networks:
+      - default
+
+  emailservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/emailservice:${IMAGE_TAG}
+    container_name: emailservice
+    hostname: emailservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    networks:
+      - default
+
+  hangfireservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/hangfireservice:${IMAGE_TAG}
+    container_name: hangfireservice
+    hostname: hangfireservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    networks:
+      - default
+
+  backupservice:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/backupservice:${IMAGE_TAG}
+    container_name: backupservice
+    hostname: backupservice
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    volumes:
+      - /home/mirusser/docker/volumes/mssql/data/Backups/sql:/var/opt/mssql/Backups/sql
+    networks:
+      - default
+
+networks:
+  default:
+    name: sws-containers-bridge-network
+    external: true
+
+volumes:
+  iconservice:
+    driver: local
