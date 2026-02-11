@@ -55,9 +55,9 @@ var app = builder.Build();
 
     app
         .UseDefaultExceptionHandler()
-        .UseHttpsRedirection()
-        .UseRouting()
-        .UseAuthorization();
+        //.UseHttpsRedirection()
+        .UseRouting();
+        //.UseAuthorization();
     
     app.MapControllers();
     app.RegisterRecurringBackupJobs();
