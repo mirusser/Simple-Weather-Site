@@ -67,7 +67,7 @@ public static class ServiceRegistration
 			});
 
 			services.AddOptions<MassTransitHostOptions>()
-				.Configure(options => options.WaitUntilStarted = false);
+				.Configure(options => options.WaitUntilStarted = true);
 
 			return services;
 		}
