@@ -6,6 +6,16 @@ trap 'echo "Error on line $LINENO: $BASH_COMMAND"' ERR
 APP_DIR="${APP_DIR:-/opt/sws}"
 cd "$APP_DIR"
 
+# Load .env.prod into shell env
+if [ -f .env.prod ]; then
+    set -a
+    . ./.env.prod
+    set +a
+else
+    echo "Missing $APP_DIR/.env.prod"
+    exit 1
+fi  
+
 AWS_REGION="${AWS_REGION:-us-east-1}"
 ECR_REGISTRY="${ECR_REGISTRY:?Set ECR_REGISTRY in .env.prod}"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-sws}"
@@ -27,6 +37,31 @@ docker compose \
     --env-file .env.infra \
     -f docker-compose.infra.prod.yml \
     up -d
+
+echo "Waiting for mongo..."
+until docker exec mongo mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok" | grep -qE '^(1|true)$'; do
+    sleep 2
+done
+echo "Mongo is up."
+
+echo "Ensuring mongo replica set is initialized..."
+docker exec mongo mongosh --quiet --eval '
+try {
+  const st = rs.status();
+  if (st.ok === 1) { print("Replica set already initialized"); }
+} catch (e) {
+  print("Initializing replica set...");
+  rs.initiate({_id:"rs0", members:[{_id:0, host:"mongo:27017"}]});
+  // wait until primary
+  while (true) {
+    try {
+      const s = rs.status();
+      if (s.myState === 1) { print("Replica set PRIMARY ready"); break; }
+    } catch (e2) {}
+    sleep(1000);
+  }
+}
+'
 
 echo "==> Pulling app images"
 docker compose \

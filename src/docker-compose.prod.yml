@@ -1,16 +1,4 @@
 services:
-  oauthserver:
-    image: ${ECR_REGISTRY}/${ECR_PREFIX}/oauthserver:${IMAGE_TAG}
-    container_name: oauthserver
-    hostname: oauthserver
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
-    expose:
-      - "80"
-    networks:
-      - default
 
   citiesservice:
     image: ${ECR_REGISTRY}/${ECR_PREFIX}/citiesservice:${IMAGE_TAG}
@@ -39,6 +27,8 @@ services:
       - "5043"
     networks:
       - default
+    depends_on:
+      - citiesservice
 
   weatherservice:
     image: ${ECR_REGISTRY}/${ECR_PREFIX}/weatherservice:${IMAGE_TAG}
@@ -83,8 +73,11 @@ services:
       - default
     depends_on:
       - weatherservice
+      - weatherhistoryservice
       - signalrserver
       - citiesservice
+      - citiesgrpcservice
+      - iconservice
 
   iconservice:
     image: ${ECR_REGISTRY}/${ECR_PREFIX}/iconservice:${IMAGE_TAG}

@@ -101,10 +101,14 @@ public static class ServiceRegistration
 						ClockSkew = TimeSpan.Zero
 					};
 
-					if (!environment.IsProduction())
-					{
-						options.RequireHttpsMetadata = false;
-					}
+					options.RequireHttpsMetadata = false;
+					
+					// TODO: later in production enable https:
+					
+					// if (!environment.IsProduction())
+					// {
+					// 	options.RequireHttpsMetadata = false;
+					// }
 				});
 
 			services.AddAuthorizationBuilder()

@@ -34,7 +34,6 @@ ECR_PREFIX="${ECR_PREFIX:-sws}" # namespace/prefix in ECR, e.g. sws/oauthserver
 IMAGE_TAG="${IMAGE_TAG:-$(git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M)}"
 
 SERVICES=(
-    "oauthserver"
     "citiesservice"
     "citiesgrpcservice"
     "weatherservice"

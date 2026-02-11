@@ -29,8 +29,8 @@ var app = builder.Build();
         .UseDefaultExceptionHandler()
         //.UseHttpsRedirection() // TODO: Redirect deletes authorization header - figure out/apply the solution https://stackoverflow.com/questions/28564961/authorization-header-is-lost-on-redirect
         .UseRouting()
-        .UseAuthentication()
-        .UseAuthorization()
+        // .UseAuthentication()
+        // .UseAuthorization()
         .UseCors("AllowAll");
 
     app.MapControllers();
