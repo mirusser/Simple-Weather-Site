@@ -26,30 +26,6 @@ services:
     networks:
       - default
 
-  elastic:
-    image: elasticsearch:8.12.1
-    container_name: elastic
-    restart: unless-stopped
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-      # For a quick single-node dev-like setup; consider enabling security later
-      - xpack.security.enabled=false
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - /opt/sws/volumes/elasticsearch/data:/usr/share/elasticsearch/data
-    expose:
-      - "9200"
-      - "9300"
-    networks:
-      - default
-
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
@@ -103,24 +79,6 @@ services:
     networks:
       - default
 
-  # OPTIONAL (I recommend not running these on first internet deploy; enable later if you want)
-  jenkins:
-    image: jenkins/jenkins:latest
-    container_name: jenkins
-    restart: unless-stopped
-    user: root
-    volumes:
-      - /opt/sws/volumes/jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
-    environment:
-      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
-    expose:
-      - "8080"
-      - "50000"
-    networks:
-      - default
-
   healthchecks:
     image: xabarilcoding/healthchecksui:latest
     container_name: healthchecks
@@ -153,18 +111,6 @@ services:
       - 'HealthChecksUI:HealthChecks:9:Uri=http://weathersite:80/health'
     expose:
       - "80"
-    networks:
-      - default
-
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/sws/volumes/portainer/data:/data
-    expose:
-      - "9000"
     networks:
       - default
 
