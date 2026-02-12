@@ -28,8 +28,11 @@
             1,
             25);
 
-        var connectionUrl = "@(Model.SignalRServerUrl)WeatherHistoryHub"; //TODO: add to settings
-        var hubConnection = new signalR.HubConnectionBuilder().withUrl(connectionUrl).build();
+        var connectionUrl = "/signalr/WeatherHistoryHub"; //TODO: get it from settings
+        var hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl(connectionUrl)
+            .withAutomaticReconnect()
+            .build();
 
         hubConnection.start().then(function () {
             $(document).Toasts('create', {

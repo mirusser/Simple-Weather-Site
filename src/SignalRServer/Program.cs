@@ -101,6 +101,10 @@ var app = builder.Build();
     app.UseCors("AllowAll");
 
     app
+        .MapHub<WeatherHistoryHub>($"/signalr/{nameof(WeatherHistoryHub)}")
+        .RequireCors("AllowAll");
+
+    app
         .MapHub<WeatherHistoryHub>($"/{nameof(WeatherHistoryHub)}")
         .RequireCors("AllowAll");
 

@@ -56,29 +56,6 @@ services:
     networks:
       - default
 
-  # EDGE service: only this one is reachable from the EC2 host (and thus from ALB)
-  weathersite:
-    image: ${ECR_REGISTRY}/${ECR_PREFIX}/weathersite:${IMAGE_TAG}
-    container_name: weathersite
-    hostname: weathersite
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
-      # Optional: if your app supports forwarded headers behind ALB
-      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
-    ports:
-      - "80:80"
-    networks:
-      - default
-    depends_on:
-      - weatherservice
-      - weatherhistoryservice
-      - signalrserver
-      - citiesservice
-      - citiesgrpcservice
-      - iconservice
-
   iconservice:
     image: ${ECR_REGISTRY}/${ECR_PREFIX}/iconservice:${IMAGE_TAG}
     container_name: iconservice
@@ -148,6 +125,42 @@ services:
       - /home/mirusser/docker/volumes/mssql/data/Backups/sql:/var/opt/mssql/Backups/sql
     networks:
       - default
+
+  weathersite:
+    image: ${ECR_REGISTRY}/${ECR_PREFIX}/weathersite:${IMAGE_TAG}
+    container_name: weathersite
+    hostname: weathersite
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      # Optional: if your app supports forwarded headers behind ALB
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+    expose:
+      - "80"
+    networks:
+      - default
+    depends_on:
+      - weatherservice
+      - weatherhistoryservice
+      - signalrserver
+      - citiesservice
+      - citiesgrpcservice
+      - iconservice
+
+  gateway:
+    image: nginx:alpine
+    container_name: gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - default
+    depends_on:
+      - weathersite
+      - signalrserver
 
 networks:
   default:
