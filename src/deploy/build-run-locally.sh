@@ -24,10 +24,21 @@ set -Eeuo pipefail
 # Print a helpful message when something fails (line number + failing command)
 trap 'echo -e "${RED}Error on line $LINENO: $BASH_COMMAND${NC}"' ERR
 
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# script will be in: <repo>/src/deploy
+SRC_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"       # <repo>/src
+DEPLOY_DIR="$SCRIPT_DIR"                      # <repo>/src/deploy
+
+# Defines where solution and projects are located
+# You can override this by passing a first argument:
+#   ./publish.sh /path/to/src
+BASE_DIR="${1:-$SRC_DIR}"
+
 # Defines where solution and its docker-compose.yml files are located
 # You can override this by passing a first argument:
 #   ./publish.sh /path/to/src
-BASE_DIR="${1:-/home/mirusser/Repos/Simple-Weather-Site/src}"
+# BASE_DIR="${1:-/home/mirusser/Repos/Simple-Weather-Site/src}"
 
 # Explicitly configure framework to publish .NET projects
 # You can override this via env var:
@@ -138,7 +149,7 @@ build_docker_image() {
 
     cd "$BASE_DIR" || { echo -e "${RED}Failed to navigate to $BASE_DIR.${NC}"; exit 1; }
 
-    docker build -t "$docker_image_name" -f "$project_dir/Dockerfile" . || \
+    docker build -t "$docker_image_name" -f "$project_dir/Dockerfile" "$BASE_DIR" || \
     { echo -e "${RED}Docker build failed for $docker_image_name.${NC}"; exit 1; }
 }
 
@@ -146,7 +157,11 @@ run_docker_compose(){
 
     # Start containers in detached mode (-d)
     # -p sets an explicit compose project name so container naming is predictable
-    docker compose -p "sws-containers" up -d && \
+    #docker compose -p "sws-containers" up -d && \
+    docker compose \
+        --project-directory "$BASE_DIR" \
+        -f "$DEPLOY_DIR/docker-compose.local.yml" \
+        -p "sws-containers" up -d && \
     echo -e "${GREEN}=> The containers started in the background.${NC}" || \
     { echo -e "${RED}=> Docker compose failed.${NC}"; exit 1; }
 }
