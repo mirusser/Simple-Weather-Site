@@ -28,9 +28,6 @@
     <Project Path="EmailService/EmailService.Contracts/EmailService.Contracts.csproj" />
     <Project Path="EmailService/EmailService.Domain/EmailService.Domain.csproj" />
   </Folder>
-  <Folder Name="/Gateway/">
-    <Project Path="Gateway/Gateway.csproj" />
-  </Folder>
   <Folder Name="/HangfireService/">
     <Project Path="HangfireService/HangfireService.csproj" />
   </Folder>
