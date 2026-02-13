@@ -1,42 +1,20 @@
 # Simple Weather Site
 
-## Current state of the project
+## Overview (TODO)
+
+...
+
+---
+
+## Simplified backlog
 
 - Migrated from .NET 5 to .NET 10
 - Changed folder structure to be more usable and 'friendly'
 - Fixed general errors that prevented project from being fully operational when running on Docker
 - Some minor refactor
-- Still there is a lot of refactoring to do till I'm gonna be at least pleased with the state of the code
 - Added health checks for each app and configured Watchdog
 - Added (a little janky but still) OAuth identity server (using `duende` package for test purposes)
-
-### Features that I may add:
-
-- Setup build with jenkins
-- Add tests
-- Migrate to aws, and implement with usage of aws services
-- It would be nice to be able to download historic data in various file types (e.g. pdg, excel, csv, html, etc)
-- Configurable via page (something like mini admin panel, at least for urls to be configurable during runtime)
-- probably not as a microservice but as another lib: redis cache
-- automatic backup of databases
-- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
-- feature: unod (dunno what I can undo yet, TODO: think about it)
-- handle more requests/endpoints from openweather api
-- least important but would be nice to redo frontend (tho I lack in that area, maybe use blazor)
-- switch from sql server to postgres
-- switch from MassTransit to OpenTransit (when the package will be ready)
-- consider ditching `duende`
-- get rid of `Gateway` project? (it's not really used)
-- Proper documentation
-
-### Things to check out:
-
-- **Prometheus and Grafana:** For more complex scenarios, especially when you need more than just health status (e.g., metrics and detailed monitoring), using Prometheus for collecting metrics and Grafana for visualization can be a powerful combination. You would use Prometheus exporters to expose metrics from your services, including health check statuses, and then aggregate and visualize them in Grafana.
-
-- **Consul:** Offers service discovery and health checking capabilities. You can use Consul to keep track of the health of various services in your infrastructure. It requires more setup and infrastructure changes but is powerful for microservices architectures.
-
----
-
+- dev deploy to AWS
 ---
 
 ## Setup Guide (Local + AWS EC2 Dev Deploy)
@@ -340,7 +318,30 @@ Use logs:
 docker logs --tail 200 <container_name>
 ```
 
+---
 
+## Features that I may add:
+
+- Setup build with jenkins (CI/CD pipeline)
+- Add tests
+- Migrate fully to AWS (Use AWS services e.g. SQS, DynamoDB, automatic backup of databases etc.)
+- It would be nice to be able to download historic data in various file types (e.g. pdg, excel, csv, html, etc)
+- Configurable via page (something like mini admin panel, at least for urls to be configurable during runtime)
+- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
+- feature: unod (dunno what I can undo yet, TODO: think about it)
+- handle more requests/endpoints from openweather api
+- least important but would be nice to redo frontend (tho I lack in that area, maybe use blazor)
+- switch from sql server to postgres
+- switch from MassTransit to OpenTransit (when the package will be ready)
+- consider ditching `duende`
+
+### Things to check out:
+
+- **Prometheus and Grafana:** For more complex scenarios, especially when you need more than just health status (e.g., metrics and detailed monitoring), using Prometheus for collecting metrics and Grafana for visualization can be a powerful combination. You would use Prometheus exporters to expose metrics from your services, including health check statuses, and then aggregate and visualize them in Grafana.
+
+- **Consul:** Offers service discovery and health checking capabilities. You can use Consul to keep track of the health of various services in your infrastructure. It requires more setup and infrastructure changes but is powerful for microservices architectures.
+
+---
 
 
 
