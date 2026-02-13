@@ -131,8 +131,10 @@ Verify the site is running on your browser, check health checks
 ### AWS Dev Deployment (EC2 + ECR + Docker Compose)
 
 This is a “single VM” deployment:
-You build locally → push images to ECR
-EC2 pulls images from ECR and runs everything with Docker Compose
+You build locally → push images to ECR.
+
+EC2 pulls images from ECR and runs everything with Docker Compose.
+
 Reverse proxy (nginx) exposes port 80 on the instance
 
 > This is meant for dev/testing. Not HA, not autoscaled, not hardened.
@@ -143,7 +145,6 @@ Reverse proxy (nginx) exposes port 80 on the instance
 
 ##### Installation
 
-To install:
 ```bash
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
@@ -186,8 +187,9 @@ aws ecr create-repository \
   --image-scanning-configuration scanOnPush=true \
   --profile <profile_name>
 ```
+---
 
-#### AWS Network basics
+### AWS Network basics
 - Use the default VPC (fine for dev), and a public subnet. 
 - Create a **Security Group for EC2**:
     - inbound: `80` from your IP (public test: 0.0.0.0/0 (and optionally ::/0 if IPv6))
@@ -197,7 +199,9 @@ aws ecr create-repository \
 
 > Keep infra ports (DB, Redis, RabbitMQ, etc.) internal-only (do not open them to the internet).
 
-#### EC2 instance launch
+---
+
+### EC2 instance launch
 Recommended for your stack (lots of infra containers):
 
 - Instance type: **t3.xlarge** (4 vCPU, 16GB RAM)
@@ -208,7 +212,8 @@ Recommended for your stack (lots of infra containers):
 `AmazonEC2ContainerRegistryReadOnly`
 
 #### EC2 SSH connection
-Generate key
+On AWS create and then download key pair (`*.pem` file)
+
 (Debian default user is typically: `admin`)
 
 Connect using the key:
