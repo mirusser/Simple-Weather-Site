@@ -4,15 +4,17 @@
 
 *Simple Weather Site* is a .NET 10 microservices-style application that provides a web UI for checking weather, browsing/searching cities, and viewing historical results. The system is designed to run locally via Docker Compose and can be deployed in a “single VM” dev setup on AWS (EC2 + Docker Compose), pulling images from AWS ECR.
 
+---
+
 ### High-level architecture
 
 The solution consists of:
 
 ### Edge/UI
 
-WeatherSite – Razor Pages web UI (end-user entry point). Calls internal APIs, consumes gRPC for city queries, and connects to SignalR for live updates.
+- WeatherSite – Razor Pages web UI (end-user entry point). Calls internal APIs, consumes gRPC for city queries, and connects to SignalR for live updates.
 
-Gateway (nginx) – reverse proxy used in EC2 deployment to expose a single HTTP entrypoint and route traffic to internal containers (WeatherSite + SignalR hub).
+- Gateway (nginx) – reverse proxy used in EC2 deployment to expose a single HTTP entrypoint and route traffic to internal containers (WeatherSite + SignalR hub).
 
 ### Core services
 
@@ -58,6 +60,8 @@ Gateway (nginx) – reverse proxy used in EC2 deployment to expose a single HTTP
 
 - (Optional dev tooling: Portainer, Jenkins)
 
+---
+
 ## Communication patterns
 
 - HTTP REST between WeatherSite and most internal services.
@@ -68,17 +72,19 @@ Gateway (nginx) – reverse proxy used in EC2 deployment to expose a single HTTP
 
 - Message bus (MassTransit over RabbitMQ) for async/event-driven flows (e.g., background processing).
 
+---
+
 ## Deployment modes
 
 - Local development: build and run everything with Docker Compose. Some services can use HTTPS certificates locally.
 
 - AWS dev deployment (single VM):
 
-images are built locally and pushed to AWS ECR
+> images are built locally and pushed to AWS ECR
 
-EC2 pulls and runs containers using Docker Compose
+> EC2 pulls and runs containers using Docker Compose
 
-nginx provides a single HTTP entrypoint and routes / to WeatherSite and the SignalR hub route(s) to SignalRServer
+> nginx provides a single HTTP entrypoint and routes / to WeatherSite and the SignalR hub route(s) to SignalRServer
 
 ## Health & observability
 
