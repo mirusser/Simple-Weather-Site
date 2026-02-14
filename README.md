@@ -48,9 +48,9 @@ The solution consists of:
 
 - PostgreSQL – available for services that use it (optional depending on your config).
 
-- MongoDB – used by IconService and SignalRServer.
+- MongoDB – used by WeatherHistoryService, IconService and SignalRServer.
 
-- Redis – caching/health checks.
+- Redis – caching.
 
 - RabbitMQ – messaging transport for MassTransit.
 
@@ -434,6 +434,7 @@ docker ps -aq | xargs -r docker rm -f
 - switch from MassTransit to OpenTransit (when the package will be ready)
 - consider ditching `duende`
 - update frontend (Blazor maybe (?))
+- elastic search for cities service (and weather site (?))
 
 ### Things to check out:
 
