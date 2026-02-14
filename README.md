@@ -1,27 +1,113 @@
 # Simple Weather Site
 
-## Overview (TODO)
+## Overview
 
-...
+*Simple Weather Site* is a .NET 10 microservices-style application that provides a web UI for checking weather, browsing/searching cities, and viewing historical results. The system is designed to run locally via Docker Compose and can be deployed in a “single VM” dev setup on AWS (EC2 + Docker Compose), pulling images from AWS ECR.
+
+### High-level architecture
+
+The solution consists of:
+
+### Edge/UI
+
+WeatherSite – Razor Pages web UI (end-user entry point). Calls internal APIs, consumes gRPC for city queries, and connects to SignalR for live updates.
+
+Gateway (nginx) – reverse proxy used in EC2 deployment to expose a single HTTP entrypoint and route traffic to internal containers (WeatherSite + SignalR hub).
+
+### Core services
+
+- WeatherService – integrates with external weather provider (OpenWeatherMap) and exposes an HTTP API consumed by WeatherSite.
+
+- WeatherHistoryService – stores/retrieves historical weather results and exposes an HTTP API.
+
+- CitiesService – HTTP API for cities; uses SQL Server and runs EF Core migrations/seeding (optionally at startup).
+
+- CitiesGrpcService – gRPC service for city-related queries/operations (consumed by WeatherSite).
+
+- IconService – stores/serves icon metadata/files; uses MongoDB and may seed initial data.
+
+- SignalRServer – hosts SignalR hubs used by the UI for real-time events (e.g., refreshing history views).
+
+- EmailService – sends emails/notifications (internal service).
+
+- HangfireService – background jobs/scheduling; uses RabbitMQ (via MassTransit) for messaging/event handling.
+
+- BackupService – handles backup-related tasks (e.g., database backups).
+
+### Authorization
+
+- OAuthServer – identity/token authority used by internal clients/services.
+
+- JwtAuth – shared auth-related components/utilities.
+
+### Infrastructure (containers)
+
+- SQL Server – used by CitiesService (+ healthchecks UI storage).
+
+- PostgreSQL – available for services that use it (optional depending on your config).
+
+- MongoDB – used by IconService and SignalRServer.
+
+- Redis – caching/health checks.
+
+- RabbitMQ – messaging transport for MassTransit.
+
+- Seq – centralized logging (Serilog sink).
+
+- HealthChecks UI – dashboards health endpoints across services.
+
+- (Optional dev tooling: Portainer, Jenkins)
+
+## Communication patterns
+
+- HTTP REST between WeatherSite and most internal services.
+
+- gRPC between WeatherSite and CitiesGrpcService.
+
+- SignalR for real-time updates from SignalRServer to the browser.
+
+- Message bus (MassTransit over RabbitMQ) for async/event-driven flows (e.g., background processing).
+
+## Deployment modes
+
+- Local development: build and run everything with Docker Compose. Some services can use HTTPS certificates locally.
+
+- AWS dev deployment (single VM):
+
+images are built locally and pushed to AWS ECR
+
+EC2 pulls and runs containers using Docker Compose
+
+nginx provides a single HTTP entrypoint and routes / to WeatherSite and the SignalR hub route(s) to SignalRServer
+
+## Health & observability
+
+Each service exposes a /health endpoint.
+
+HealthChecks UI aggregates health endpoints for a quick status overview.
+
+Serilog outputs to console and can ship logs to Seq.
 
 ---
 
 ## Simplified backlog
 
-- Migrated from .NET 5 to .NET 10
-- Changed folder structure to be more usable and 'friendly'
-- Fixed general errors that prevented project from being fully operational when running on Docker
-- Some minor refactor
-- Added health checks for each app and configured Watchdog
-- Added (a little janky but still) OAuth identity server (using `duende` package for test purposes)
+- migrated from .NET 5 to .NET 10
+- solution structure changed to 'mimic microservices' approach
+- fixed general errors that prevented projects from being operational when running on Docker and EC2
+- general overall refactor and cleanup
+- added health checks for each app and configured Watchdog
+- added OAuth identity server (using `duende` package for test purposes) // still needs work
+- multi-stage Dockerfiles for all services
+- backup service added
 - dev deploy to AWS
 ---
 
 ## Setup Guide (Local + AWS EC2 Dev Deploy)
 
 This guide describes:
-- how to run the system locally (Docker Compose)
-- how to publish images to AWS ECR
+- how to run the system locally (Docker Compose on debian based linux)
+- how to publish images to AWS ECR (using AWS CLI)
 - how to deploy and run on a single EC2 instance (Docker Compose on the VM)
 
 > **Repo layout note**
@@ -33,12 +119,14 @@ This guide describes:
 
 ### Prerequisites
 
-#### Local machine (Debian-based Linux recommended)
+#### Local machine (Debian-based Linux)
 - `git`
 - `.NET SDK` (`dotnet`)
 - Docker Engine + Docker Compose plugin (`docker compose`)
 - AWS CLI v2 (for pushing to ECR)
 - `libman` (WeatherSite static assets)
+- build/deploy scripts will guide you if some required packages are missing
+- verify that each project have configured `appsettings.json` file
 
 #### AWS account
 - IAM user or SSO credentials for AWS CLI usage
@@ -47,7 +135,7 @@ This guide describes:
 
 #### External Api key
 -  Api key from: [open weather map](https://home.openweathermap.org/api_keys)
-  and put it in `appsettings.Production.json` of `WeatherService`
+  and put it in `appsettings.json` of `WeatherService`
 
 ---
 
@@ -66,7 +154,7 @@ Install `libman` tool (if not installed):
 dotnet tool install -g Microsoft.Web.LibraryManager.Cli
 ```
 
-Restore in the WeatherSite project directory:
+Then restore in the WeatherSite project directory:
 ```bash
 cd WeatherSite/Site
 libman restore
@@ -261,7 +349,7 @@ cd /opt/sws
 From repo:
 ```bash
 cd <YOUR_REPO>/src/deploy
-./build-run-locally.sh
+./build-run-locally.sh # if not build yet do it now
 ./push-ecr.sh
 ```
 > `push-ecr.sh` script pushes images and writes .env.prod 
@@ -311,19 +399,24 @@ curl -i http://<EC2_PUBLIC_IP>/health
 ---
 
 ### Troubleshooting
-Containers stuck restarting
-
-Use logs:
+Containers stuck restarting, use logs:
 ```bash
 docker logs --tail 200 <container_name>
+```
+
+Stop and remove all docker containers: 
+(doesn't remove volumes)
+```bash
+docker ps -aq | xargs -r docker rm -f
 ```
 
 ---
 
 ## Features that I may add:
 
-- Setup build with jenkins (CI/CD pipeline)
-- Add tests
+- Setup build with jenkins (CI/CD pipeline (or with something else than jenkins))
+- Add tests for each project
+- MCP server for projects (demo: [My repo for MCP](https://github.com/mirusser/MCP))
 - Migrate fully to AWS (Use AWS services e.g. SQS, DynamoDB, automatic backup of databases etc.)
 - It would be nice to be able to download historic data in various file types (e.g. pdg, excel, csv, html, etc)
 - Configurable via page (something like mini admin panel, at least for urls to be configurable during runtime)
@@ -334,6 +427,7 @@ docker logs --tail 200 <container_name>
 - switch from sql server to postgres
 - switch from MassTransit to OpenTransit (when the package will be ready)
 - consider ditching `duende`
+- update frontend (Blazor maybe (?))
 
 ### Things to check out:
 

@@ -48,7 +48,6 @@ FRAMEWORK="${FRAMEWORK:-net10.0}"
 check_dependencies() {
 
     # Make sure that iptables,iptables-persistent, netstat packages are installed, if not run:
-    # > sudo apt-get update
     # > sudo apt-get update # optional, but maybe it's worth to upgrade
     # > sudo apt-get install iptables
     # > sudo apt-get install net-tools
@@ -57,6 +56,7 @@ check_dependencies() {
     # > sudo apt-get install -y iproute2
 
     # install .net sdk (version may change in the future)
+    # (.net is not necesserily required but recommended to have)
     # on debain based linux distros:
     # > sudo apt update
     # > sudo apt install -y wget apt-transport-https ca-certificates gnupg
