@@ -497,5 +497,10 @@ src/localhost.crt
 src/localhost.key
 /src/BackupService/BackupService.Api/appsettings.Development.json
 /src/BackupService/BackupService.Api/deploy
-src/.env.infra
-src/.env.prod
+
+# local env files (do not commit)
+src/deploy/.env.*
+!.env.example
+
+# optional: local volumes if you ever keep them in-repo
+src/deploy/volumes/

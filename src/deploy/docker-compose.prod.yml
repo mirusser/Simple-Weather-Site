@@ -23,7 +23,7 @@ services:
       - ASPNETCORE_URLS=http://+:80
     expose:
       - "80"
-      # If you really use a separate gRPC port internally, keep it internal only:
+      # gRPC internal port:
       - "5043"
     networks:
       - default
