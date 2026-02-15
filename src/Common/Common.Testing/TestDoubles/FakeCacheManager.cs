@@ -1,8 +1,14 @@
 using System.Collections.Concurrent;
 using Common.Infrastructure.Managers.Contracts;
 
-namespace CitiesService.Tests.TestDoubles;
+namespace Common.Testing.TestDoubles;
 
+/// <summary>
+/// Simple in-memory implementation of <see cref="ICacheManager"/> for tests.
+///
+/// Why: Most unit/integration tests want deterministic caching behavior without Redis.
+/// This fake also provides lightweight observability (last keys + set call count).
+/// </summary>
 public sealed class FakeCacheManager : ICacheManager
 {
     private readonly ConcurrentDictionary<string, object?> store = new();
@@ -11,12 +17,13 @@ public sealed class FakeCacheManager : ICacheManager
     public string? LastSetKey { get; private set; }
     public int SetCallCount { get; private set; }
 
+    /// <summary>
+    /// Optional override to force cache hit/miss behavior.
+    /// Return (true, value) to simulate a cache hit.
+    /// </summary>
     public Func<string, (bool IsSuccess, object? Value)>? TryGetOverride { get; set; }
 
-    public Task SetAsync<T>(
-        string key,
-        T value,
-        CancellationToken cancellationToken = default)
+    public Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         LastSetKey = key;
         SetCallCount++;
@@ -24,9 +31,7 @@ public sealed class FakeCacheManager : ICacheManager
         return Task.CompletedTask;
     }
 
-    public Task<(bool IsSuccess, T? Value)> TryGetValueAsync<T>(
-        string key,
-        CancellationToken cancellationToken = default)
+    public Task<(bool IsSuccess, T? Value)> TryGetValueAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         LastTryGetKey = key;
 
@@ -36,15 +41,12 @@ public sealed class FakeCacheManager : ICacheManager
             return Task.FromResult((isSuccess, (T?)value));
         }
 
-        return Task.FromResult(!store.TryGetValue(key, out var obj) 
-            ? (false, default) 
+        return Task.FromResult(!store.TryGetValue(key, out var obj)
+            ? (false, default(T))
             : (true, (T?)obj));
     }
 
-    public async Task<T?> GetOrSetAsync<T>(
-        string key,
-        Func<Task<T>> task,
-        CancellationToken cancellationToken = default)
+    public async Task<T?> GetOrSetAsync<T>(string key, Func<Task<T>> task, CancellationToken cancellationToken = default)
     {
         var (isSuccess, value) = await TryGetValueAsync<T>(key, cancellationToken);
         if (isSuccess && value is not null)

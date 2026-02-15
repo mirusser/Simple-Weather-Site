@@ -1,7 +1,7 @@
 using CitiesService.Domain.Entities;
 using CitiesService.IntegrationTests.Infrastructure.Collections;
+using Common.Testing.SqlServer;
 using CitiesService.IntegrationTests.Infrastructure.Db;
-using CitiesService.IntegrationTests.Infrastructure.SqlServer;
 using Grpc.Net.Client;
 using Microsoft.EntityFrameworkCore;
 using Xunit;

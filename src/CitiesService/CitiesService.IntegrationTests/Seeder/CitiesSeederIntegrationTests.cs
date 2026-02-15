@@ -9,7 +9,9 @@ using CitiesService.Domain.Settings;
 using CitiesService.Infrastructure.Repositories;
 using CitiesService.IntegrationTests.Infrastructure.Collections;
 using CitiesService.IntegrationTests.Infrastructure.Db;
-using CitiesService.IntegrationTests.Infrastructure.SqlServer;
+using Common.Testing.Http;
+using Common.Testing.IO;
+using Common.Testing.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -29,17 +31,15 @@ public class CitiesSeederIntegrationTests(SqlServerFixture sql)
     [SqlServerFact]
     public async Task SeedIfEmptyAsync_DownloadsDecompressesAndSavesCities()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), "CitiesService.IntegrationTests", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempDir);
+        using var tempDir = TempDirectory.Create("CitiesService.IntegrationTests");
 
-        var compressedPath = Path.Combine(tempDir, "city.list.json.gz");
-        var decompressedPath = Path.Combine(tempDir, "city.list.json");
+        var compressedPath = tempDir.Combine("city.list.json.gz");
+        var decompressedPath = tempDir.Combine("city.list.json");
         var url = "http://local.test/city.list.json.gz";
 
         var dbName = DbTestHelpers.CreateDatabaseName("cities_seed");
         var cs = sql.GetConnectionStringForDatabase(dbName);
 
-        try
         {
             await using (var db = DbTestHelpers.CreateDbContext(cs))
             {
@@ -55,7 +55,21 @@ public class CitiesSeederIntegrationTests(SqlServerFixture sql)
             // Polly v8 pipeline used by CitiesSeeder for HTTP calls (minimal provider for tests)
             services.AddSingleton<ResiliencePipelineProvider<string>, TestPipelineProvider>();
 
-            services.AddSingleton<IHttpClientFactory>(new SingleClientFactory(new HttpClient(new FakeDownloadHandler(url, CreateGzPayload()))));
+            var gzPayload = CreateGzPayload();
+            var handler = new StubHttpMessageHandler((request, _) =>
+            {
+                if (request.RequestUri?.ToString() != url)
+                {
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+                }
+
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new ByteArrayContent(gzPayload)
+                });
+            });
+
+            services.AddSingleton<IHttpClientFactory>(new SingleClientFactory(new HttpClient(handler)));
 
             services.AddSingleton<IOptions<FileUrlsAndPaths>>(
                 Options.Create(new FileUrlsAndPaths
@@ -80,13 +94,6 @@ public class CitiesSeederIntegrationTests(SqlServerFixture sql)
             var count = await repo.FindAll(_ => true).CountAsync();
             Assert.Equal(2, count);
         }
-        finally
-        {
-            if (Directory.Exists(tempDir))
-            {
-                Directory.Delete(tempDir, recursive: true);
-            }
-        }
     }
 
     private static byte[] CreateGzPayload()
@@ -105,28 +112,6 @@ public class CitiesSeederIntegrationTests(SqlServerFixture sql)
         }
 
         return ms.ToArray();
-    }
-
-    private sealed class SingleClientFactory(HttpClient client) : IHttpClientFactory
-    {
-        public HttpClient CreateClient(string name) => client;
-    }
-
-    private sealed class FakeDownloadHandler(string expectedUrl, byte[] payload) : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            if (request.RequestUri?.ToString() != expectedUrl)
-            {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
-            }
-
-            var resp = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new ByteArrayContent(payload)
-            };
-            return Task.FromResult(resp);
-        }
     }
 
     private sealed class TestPipelineProvider : ResiliencePipelineProvider<string>

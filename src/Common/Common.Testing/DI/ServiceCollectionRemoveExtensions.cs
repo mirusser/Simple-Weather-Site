@@ -1,8 +1,14 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CitiesService.IntegrationTests.Infrastructure.Host;
+namespace Common.Testing.DI;
 
-public static class ServiceCollectionExtensions
+/// <summary>
+/// Small helper extensions for integration tests that need to modify DI registrations.
+///
+/// Why: In integration tests we often want to disable hosted services (seeders, message bus)
+/// and replace external dependencies (Redis, etc.) to keep tests fast and deterministic.
+/// </summary>
+public static class ServiceCollectionRemoveExtensions
 {
     extension(IServiceCollection services)
     {
@@ -27,6 +33,7 @@ public static class ServiceCollectionExtensions
             var descriptors = services
                 .Where(d => d.ServiceType.FullName?.Contains(serviceTypeFullNameContains, StringComparison.OrdinalIgnoreCase) == true)
                 .ToList();
+
             foreach (var d in descriptors)
             {
                 services.Remove(d);

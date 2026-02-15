@@ -2,7 +2,7 @@ using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 using CitiesService.Domain.Entities;
 using CitiesService.Infrastructure.Repositories;
-using CitiesService.Tests.TestDoubles;
+using Common.Testing.TestDoubles;
 using CitiesService.Tests.TestInfrastructure;
 
 namespace CitiesService.Tests.Features.City.Queries;

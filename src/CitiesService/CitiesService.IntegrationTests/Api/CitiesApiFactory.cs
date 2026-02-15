@@ -1,6 +1,6 @@
 using CitiesService.Infrastructure.Repositories;
-using CitiesService.IntegrationTests.Infrastructure.Host;
-using CitiesService.IntegrationTests.TestDoubles;
+using Common.Testing.DI;
+using Common.Testing.TestDoubles;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
 using Microsoft.AspNetCore.Hosting;

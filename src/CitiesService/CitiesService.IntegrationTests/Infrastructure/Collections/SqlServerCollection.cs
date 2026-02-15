@@ -1,10 +1,11 @@
-using CitiesService.IntegrationTests.Infrastructure.SqlServer;
+using Common.Testing.SqlServer;
 using Xunit;
 
 namespace CitiesService.IntegrationTests.Infrastructure.Collections;
 
 /// <summary>
-/// Collection to share a single SQL Server container across tests.
+/// xUnit collection definition (must live in the test assembly) to share a single
+/// <see cref="SqlServerFixture"/> across SQL Server integration tests.
 /// </summary>
 [CollectionDefinition(Name)]
 public sealed class SqlServerCollection : ICollectionFixture<SqlServerFixture>

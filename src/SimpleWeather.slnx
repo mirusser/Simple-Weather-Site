@@ -22,6 +22,7 @@
     <Project Path="Common/Common.Mediator/Common.Mediator.csproj" />
     <Project Path="Common/Common.Presentation/Common.Presentation.csproj" />
     <Project Path="Common/Common.Shared/Common.Shared.csproj" />
+    <Project Path="Common/Common.Testing/Common.Testing.csproj" />
     <Project Path="Common/Common.TestConsole/Common.TestConsole.csproj" />
   </Folder>
   <Folder Name="/EmailService/">

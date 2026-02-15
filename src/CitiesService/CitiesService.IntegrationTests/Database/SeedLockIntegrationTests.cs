@@ -1,8 +1,8 @@
 using CitiesService.Domain.Entities;
 using CitiesService.Infrastructure.Repositories;
 using CitiesService.IntegrationTests.Infrastructure.Collections;
+using Common.Testing.SqlServer;
 using CitiesService.IntegrationTests.Infrastructure.Db;
-using CitiesService.IntegrationTests.Infrastructure.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
