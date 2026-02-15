@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Data.SqlClient;
 using CitiesService.IntegrationTests.Infrastructure.Config;
 
@@ -19,12 +18,7 @@ public sealed class SqlServerFixture
 {
     public const string BaseConnectionStringEnv = "CITIES_IT_SQLSERVER_BASE_CONNECTION";
 
-    private readonly string baseConnectionString;
-
-    public SqlServerFixture()
-    {
-        baseConnectionString = IntegrationTestConfiguration.GetSqlServerBaseConnectionString();
-    }
+    private readonly string baseConnectionString = IntegrationTestConfiguration.GetSqlServerBaseConnectionString();
 
     public string GetConnectionStringForDatabase(string databaseName)
     {

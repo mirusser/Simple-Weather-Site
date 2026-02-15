@@ -36,12 +36,9 @@ public sealed class FakeCacheManager : ICacheManager
             return Task.FromResult((isSuccess, (T?)value));
         }
 
-        if (!store.TryGetValue(key, out var obj))
-        {
-            return Task.FromResult((false, default(T)));
-        }
-
-        return Task.FromResult((true, (T?)obj));
+        return Task.FromResult(!store.TryGetValue(key, out var obj) 
+            ? (false, default) 
+            : (true, (T?)obj));
     }
 
     public async Task<T?> GetOrSetAsync<T>(

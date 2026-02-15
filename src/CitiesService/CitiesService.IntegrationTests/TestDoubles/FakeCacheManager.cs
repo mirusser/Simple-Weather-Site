@@ -15,12 +15,9 @@ public sealed class FakeCacheManager : ICacheManager
 
     public Task<(bool IsSuccess, T? Value)> TryGetValueAsync<T>(string key, CancellationToken cancellationToken = default)
     {
-        if (!store.TryGetValue(key, out var obj))
-        {
-            return Task.FromResult((false, default(T)));
-        }
-
-        return Task.FromResult((true, (T?)obj));
+        return Task.FromResult(!store.TryGetValue(key, out var obj) 
+            ? (false, default(T)) 
+            : (true, (T?)obj));
     }
 
     public async Task<T?> GetOrSetAsync<T>(string key, Func<Task<T>> task, CancellationToken cancellationToken = default)

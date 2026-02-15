@@ -10,7 +10,7 @@ namespace CitiesService.Tests.Mappings;
 
 public class CitiesServiceMappingConfigTests
 {
-    private static IMapper CreateMapper()
+    private static Mapper CreateMapper()
     {
         var config = new TypeAdapterConfig();
         new CitiesServiceMappingConfig().Register(config);

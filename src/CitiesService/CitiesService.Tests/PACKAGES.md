@@ -1,6 +1,8 @@
 # CitiesService.Tests packages
 
-This test project intentionally keeps dependencies small and focused. Below is why each NuGet package is included in `src/CitiesService/CitiesService.Tests/CitiesService.Tests.csproj`.
+This test project intentionally keeps dependencies small and focused. 
+
+Below is why each NuGet package is included in `src/CitiesService/CitiesService.Tests/CitiesService.Tests.csproj`.
 
 ## Test framework + runner
 
@@ -26,7 +28,7 @@ This test project intentionally keeps dependencies small and focused. Below is w
   - AutoFixture customization to automatically create mocks with Moq when needed.
 
 - `AutoFixture.Xunit2`
-  - Adds xUnit attributes/integration for AutoFixture (when we choose to use it).
+  - Adds xUnit attributes/integration for AutoFixture.
 
 ## Realistic handler tests (EF Core)
 

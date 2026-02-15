@@ -92,7 +92,7 @@ The solution consists of:
 - Each service expose a `/health` endpoint.
 - HealthChecks UI aggregates health endpoints for a quick status overview.
 - Serilog outputs to console and can ship logs to Seq.
-- Unit Tests - xUnit (in progress...)
+- Unit Tests - xUnit (in progress... (CitiesServer only so far))
 
 ---
 

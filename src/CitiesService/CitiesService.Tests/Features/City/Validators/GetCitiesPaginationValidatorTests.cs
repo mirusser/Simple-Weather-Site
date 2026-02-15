@@ -1,6 +1,5 @@
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 using FluentValidation.TestHelper;
-using Xunit;
 
 namespace CitiesService.Tests.Features.City.Validators;
 
