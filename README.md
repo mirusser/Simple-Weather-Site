@@ -92,6 +92,7 @@ The solution consists of:
 - Each service expose a `/health` endpoint.
 - HealthChecks UI aggregates health endpoints for a quick status overview.
 - Serilog outputs to console and can ship logs to Seq.
+- Unit Tests - xUnit (in progress...)
 
 ---
 
@@ -106,6 +107,7 @@ The solution consists of:
 - multi-stage Dockerfiles for all services
 - backup service added (with Hangfire integration)
 - dev deploy to AWS
+- started writing tests
 ---
 
 ## Setup Guide (Local + AWS EC2 Dev Deploy)

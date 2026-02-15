@@ -1,0 +1,5 @@
+{
+  "IntegrationTests": {
+    "SqlServerBaseConnection": "Server=localhost,1433;User ID=sa;Password=Your_password123;Encrypt=False;TrustServerCertificate=True;"
+  }
+}

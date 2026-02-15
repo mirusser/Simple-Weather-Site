@@ -10,6 +10,7 @@
     <Project Path="CitiesService/CitiesService.Contracts/CitiesService.Contracts.csproj" />
     <Project Path="CitiesService/CitiesService.Domain/CitiesService.Domain.csproj" />
     <Project Path="CitiesService/CitiesService.Infrastructure/CitiesService.Infrastructure.csproj" />
+    <Project Path="CitiesService/CitiesService.IntegrationTests/CitiesService.IntegrationTests.csproj" />
     <Project Path="CitiesService/CitiesService.Tests/CitiesService.Tests.csproj" />
   </Folder>
   <Folder Name="/Commons/">
