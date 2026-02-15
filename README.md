@@ -28,7 +28,7 @@ The solution consists of:
 
 - **CitiesGrpcService** – gRPC service for city-related queries/operations (consumed by WeatherSite).
 
-- **IconService** – stores/serves icon metadata/files; uses MongoDB and may seed initial data.
+- **IconService** – stores/serves icon metadata/files; uses MongoDB and may seed initial data. (a bit overkill, consider hosting them on CDN)
 
 - **SignalRServer** – hosts SignalR hubs used by the UI for real-time events (e.g., refreshing history views).
 
@@ -67,7 +67,7 @@ The solution consists of:
 
 ---
 
-## Communication patterns
+### Communication patterns
 
 - HTTP REST between WeatherSite and most internal services.
 
@@ -79,7 +79,7 @@ The solution consists of:
 
 ---
 
-## Deployment modes
+### Deployment modes
 - **Local development:** build and run everything with Docker Compose (some services may use HTTPS locally).
 - **AWS dev deployment (single VM):**
   - images built locally and pushed to AWS ECR
@@ -88,8 +88,8 @@ The solution consists of:
 
 ---
 
-## Health & observability
-- Each service exposes a `/health` endpoint.
+### Health & observability
+- Each service expose a `/health` endpoint.
 - HealthChecks UI aggregates health endpoints for a quick status overview.
 - Serilog outputs to console and can ship logs to Seq.
 
@@ -104,14 +104,14 @@ The solution consists of:
 - added health checks for each app and configured Watchdog
 - added OAuth identity server (using `duende` package for test purposes) // still needs work
 - multi-stage Dockerfiles for all services
-- backup service added (with hangfire integration)
+- backup service added (with Hangfire integration)
 - dev deploy to AWS
 ---
 
 ## Setup Guide (Local + AWS EC2 Dev Deploy)
 
 This guide describes:
-- how to run the system locally (Docker Compose on debian based linux)
+- how to run the system locally (Docker Compose on Debian based Linux)
 - how to publish images to AWS ECR (using AWS CLI)
 - how to deploy and run on a single EC2 instance (Docker Compose on the VM)
 
@@ -212,7 +212,7 @@ Reverse proxy (nginx) exposes port 80 on the instance
 
 ---
 
-#### Setup AWS CLI on your local machine (debian-based linux) 
+#### Setup AWS CLI on your local machine (debian-based Linux) 
 
 ##### Installation
 
@@ -245,7 +245,7 @@ Verify:
 aws sts get-caller-identity --profile <profile_name>
 ```
 
-Get account Id:
+Get account ID:
 ```bash
 aws sts get-caller-identity --query Account --output text --profile <profile_name>
 ```
@@ -428,25 +428,25 @@ docker compose \
 
 ## Roadmap ideas:
 
-- CI/CD pipeline (Jenkins or alternatives)
+- CI/CD pipeline (Jenkins/Aspire (?)) or alternatives)
 - there is still some hardcoded stuff and some TODOs to be handled
-- Add tests for each project
+- Add tests for each project (xUnit)
 - MCP server for projects (demo: [My repo for MCP](https://github.com/mirusser/MCP))
-- continuing with 'refactor', 'cleanup' and modernization
+- continue with 'refactor', 'cleanup' and modernization
 - deeper AWS-native migration (Use AWS services e.g. SQS, DynamoDB, automatic backup of databases etc.)
-- It would be nice to be able to download historic data in various file types (e.g. pdf, excel, csv, markdown, html, etc)
-- Configurable via page (something like mini admin panel, at least for urls to be configurable during runtime)
-- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?) - so there is no need for an user to manually search for city
+- It would be nice to be able to download historic data in various file types (e.g. PDF, excel, csv, Markdown, HTML etc.)
+- Configurable via page (something like mini admin panel, at least for URLs to be configurable during runtime)
+- in weather prediction will be good if there would be an option to get user location (by IP I guess, microservice for that?) - so there is no need for a user to manually search for city
 - feature: unod (dunno what I can undo yet, TODO: think about it)
-- handle more requests/endpoints from openweather api
-- least important but would be nice to redo frontend (tho I lack in that area, maybe use blazor)
-- switch from sql server to postgres
+- handle more requests/endpoints from openweather api (more features yay!)
+- switch from SQL server to postgres
 - switch from MassTransit to OpenTransit (when the package will be ready)
-- consider ditching `duende`
+- consider ditching `duende` (for alternative, what? do research)
 - update (!) UI/frontend (Blazor maybe (?))
 - elastic search for cities service searches (and weather site (?)) (and graphql endpoint (?))
 - update HealthChecks UI
 - overview and general upgrade of 'security'
+- GraphQL endpoint (for cities service (?))
 
 ### Things to check out:
 
