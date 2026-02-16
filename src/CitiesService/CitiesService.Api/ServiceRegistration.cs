@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using CitiesService.Application.Features.HealthChecks;
+using CitiesService.GraphQL;
 using CitiesService.Infrastructure.Contexts;
 using Common.Application.HealthChecks;
 using Common.Contracts.HealthCheck;
@@ -73,7 +74,11 @@ public static class ServiceRegistration
 				.AddCheck<CitiesAvailableHealthCheck>(
 					name: "Cities available health check",
 					failureStatus: HealthStatus.Degraded,
-					tags: [HealthChecksTags.Ready, HealthChecksTags.Database]);
+					tags: [HealthChecksTags.Ready, HealthChecksTags.Database])
+				.AddCheck<GraphQlExecutableHealthCheck>(
+					name: "GraphQL executable health check",
+					failureStatus: HealthStatus.Degraded,
+					tags: [HealthChecksTags.Ready]);
 
 			return services;
 		}

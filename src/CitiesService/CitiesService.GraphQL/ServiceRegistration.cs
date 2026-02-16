@@ -18,6 +18,8 @@ public static class ServiceRegistration
             .AddQueryType<CityQueries>()
             .AddMutationType<CityMutations>()
             .AddType<CityInfoType>();
+        
+        services.AddSingleton<GraphQlExecutableHealthCheck>();
 
         return services;
     }

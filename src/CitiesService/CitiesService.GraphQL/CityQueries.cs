@@ -6,6 +6,8 @@ namespace CitiesService.GraphQL;
 
 public class CityQueries
 {
+    public string Ping() => "pong";
+    
     [UsePaging(IncludeTotalCount = true, DefaultPageSize = 20, MaxPageSize = 100)]
     [UseProjection]
     [UseFiltering]
