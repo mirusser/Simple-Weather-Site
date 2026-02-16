@@ -1,5 +1,6 @@
 using CitiesService.Api;
 using CitiesService.Application;
+using CitiesService.GraphQL;
 using CitiesService.Infrastructure;
 using Common.Application.HealthChecks;
 using Common.Presentation;
@@ -14,7 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services
         .AddInfrastructureLayer(builder.Configuration)
         .AddApplicationLayer(builder.Configuration)
-        .AddPresentationLayer(builder.Configuration, builder.Environment);
+        .AddPresentationLayer(builder.Configuration, builder.Environment)
+        .AddGraphQlLayer(builder.Configuration);
     
     builder
         .AddCommonPresentationLayer();
@@ -34,6 +36,8 @@ var app = builder.Build();
         .UseCors("AllowAll");
 
     app.MapControllers();
+    app.MapGraphQL();
+    
     app.MapCommonHealthChecks();
     app.UseServiceStartupPage(builder.Environment);
 }

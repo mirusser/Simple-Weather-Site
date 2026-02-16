@@ -20,6 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj"/>
         <ProjectReference Include="..\CitiesService.Application\CitiesService.Application.csproj"/>
+        <ProjectReference Include="..\CitiesService.GraphQL\CitiesService.GraphQL.csproj" />
         <ProjectReference Include="..\CitiesService.Infrastructure\CitiesService.Infrastructure.csproj"/>
     </ItemGroup>
 

@@ -73,6 +73,8 @@ The solution consists of:
 
 - gRPC between WeatherSite and CitiesGrpcService.
 
+- GraphQL endpoint for querying cities in CitiesService
+
 - SignalR for real-time updates from SignalRServer to the browser.
 
 - Message bus (MassTransit over RabbitMQ) for async/event-driven flows (e.g., background processing).
@@ -449,6 +451,7 @@ docker compose \
 - update HealthChecks UI
 - overview and general upgrade of 'security'
 - GraphQL endpoint (for cities service (?))
+- add [semantic kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) integration (e.g. summary for weather forecast (?))
 
 ### Things to check out:
 
