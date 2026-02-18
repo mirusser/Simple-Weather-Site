@@ -1,42 +1,73 @@
-using CitiesService.Application.Features.City.Commands.AddCitiesToDatabase;
-using CitiesService.Application.Features.City.Models.Dto;
+using CitiesService.Application.Features.City.Commands.UpdateCity;
+using CitiesService.GraphQL.Types;
 using Common.Mediator;
+using Common.Presentation.Http;
 
 namespace CitiesService.GraphQL;
 
 public class CityMutations
 {
-    // TODO: add real mutation here:
-    public async Task<AddCitiesToDatabasePayload> AddCitiesToDatabaseAsync(
-        AddCitiesToDatabaseInput input,
+    public async Task<UpdateCityPayload> UpdateCityAsync(
+        UpdateCityInput input,
         [Service] IMediator mediator,
         CancellationToken ct)
     {
-        var command = new AddCitiesToDatabaseCommand
+        var cmd = new UpdateCityCommand
         {
-            // map fields from input
-            // ...
+            Id = input.Id,
+            CityId = input.CityId,
+            Name = input.Name,
+            State = input.State,
+            CountryCode = input.CountryCode,
+            Lon = input.Lon,
+            Lat = input.Lat,
+            RowVersion = input.RowVersion
         };
 
-        var result =
-            await mediator.SendAsync(command, ct);
+        var result = await mediator.SendAsync(cmd, ct);
 
         if (!result.IsSuccess)
-        {;
-            // Raise a GraphQL error with nice extensions
-            throw new GraphQLException(
-                ErrorBuilder.New()
-                    .SetMessage(result.Problem?.Message)
-                    .SetCode(result.Problem?.Code)
-                    .SetExtension("status", result.Problem?.Status)
-                    .Build());
+        {
+            throw ToGraphQlException(result.Problem!);
         }
 
-        var v = result.Value;
-        return new AddCitiesToDatabasePayload(v.IsSuccess, v.IsAlreadyAdded);
+        return new UpdateCityPayload(result.Value!.City);
+        //return new UpdateCityPayload(result);
     }
+
+    public async Task<UpdateCityPayload> PatchCityAsync(
+        PatchCityInput input,
+        [Service] IMediator mediator,
+        CancellationToken ct)
+    {
+        var cmd = new PatchCityCommand
+        {
+            Id = input.Id,
+            CityId = input.CityId,
+            Name = input.Name,
+            State = input.State,
+            CountryCode = input.CountryCode,
+            Lon = input.Lon,
+            Lat = input.Lat,
+            RowVersion = input.RowVersion
+        };
+
+        var result = await mediator.SendAsync(cmd, ct);
+
+        if (!result.IsSuccess)
+        {
+            throw ToGraphQlException(result.Problem!);
+        }
+
+        return new UpdateCityPayload(result.Value!.City);
+        //return new UpdateCityPayload(result);
+    }
+
+    private static GraphQLException ToGraphQlException(Problem p) =>
+        new GraphQLException(
+            ErrorBuilder.New()
+                .SetMessage(p.Message)
+                .SetCode(p.Code)
+                .SetExtension("status", p.Status)
+                .Build());
 }
-
-public record AddCitiesToDatabaseInput(bool Run);
-
-public record AddCitiesToDatabasePayload(bool IsSuccess, bool IsAlreadyAdded);

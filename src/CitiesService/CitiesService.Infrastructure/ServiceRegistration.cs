@@ -30,15 +30,10 @@ public static class ServiceRegistration
 			services.AddScoped<ApplicationDbContext>(sp =>
 				sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 
-			// TODO: remove later:
-			// services.AddDbContext<ApplicationDbContext>(options =>
-			// 	options.UseSqlServer(configuration.GetConnectionString(nameof(ConnectionStrings.DefaultConnection)),
-			// 		b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
-			// services.AddTransient<ApplicationDbContext>();
-
 			services.AddCommonInfrastructure(configuration);
 
 			services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
+			services.AddTransient<ICityRepository, CityRepository>();
 			services.AddHostedService<DbMigrateAndSeedHostedService>();
 
 			return services;

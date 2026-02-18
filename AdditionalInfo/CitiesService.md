@@ -9,7 +9,7 @@ cd <Repository_directory>/src/CitiesService
 
 Create migration:
 ```bash
-dotnet ef migrations add Added_indexed \
+dotnet ef migrations add Migration_name \
   --project CitiesService.Infrastructure/CitiesService.Infrastructure.csproj \
   --context ApplicationDbContext
 ```
@@ -45,7 +45,6 @@ query($after: String!) {
     nodes { id name }
   }
 }
-
 ```
 
 Filter + sort + page
@@ -53,12 +52,59 @@ Filter + sort + page
 query {
   cities(
     first: 10,
-    where: { name: { contains: "mad" } },
+    where: { name: { contains: "Wars" } },
     order: [{ name: ASC }, { id: ASC }]
   ) {
-    nodes { id name countryCode }
+    nodes { id cityId name countryCode state lat lon rowVersion}
     pageInfo { endCursor hasNextPage }
   }
 }
+```
 
+Mutations - full edit:
+```graphql
+mutation {
+  updateCity(input: {
+    id: 62305
+    cityId: 2634736
+    name: "Warsop-mutated"
+    state: ""
+    countryCode: "GB"
+    lon: 53.21402
+    lat: -1.15091
+    rowVersion: "AAAAAAABt6k="  # optional base64 - must be included
+  }) {
+    city {
+      id
+      cityId
+      name
+      state
+      countryCode
+      lat
+      lon
+      rowVersion
+    }
+  }
+}
+```
+
+Mutations - patch:
+```graphql
+mutation {
+  patchCity(input: {
+    id: 62305
+    name: "Warsop-patched"
+  }) {
+    city {
+      id
+      cityId
+      name
+      state
+      countryCode
+      lat
+      lon
+      rowVersion
+    }
+  }
+}
 ```

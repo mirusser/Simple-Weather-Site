@@ -1,3 +1,4 @@
+using CitiesService.GraphQL.Types;
 using CitiesService.Infrastructure.Contexts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +18,8 @@ public static class ServiceRegistration
             .AddSorting()
             .AddQueryType<CityQueries>()
             .AddMutationType<CityMutations>()
-            .AddType<CityInfoType>();
+            .AddType<CityInfoType>()
+            .AddType<PatchCityInputType>();
         
         services.AddSingleton<GraphQlExecutableHealthCheck>();
 

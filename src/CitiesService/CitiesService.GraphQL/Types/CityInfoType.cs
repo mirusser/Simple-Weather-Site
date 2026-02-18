@@ -1,6 +1,6 @@
 using CitiesService.Domain.Entities;
 
-namespace CitiesService.GraphQL;
+namespace CitiesService.GraphQL.Types;
 
 public class CityInfoType : ObjectType<CityInfo>
 {
@@ -15,5 +15,11 @@ public class CityInfoType : ObjectType<CityInfo>
         d.Field(x => x.CountryCode).Name("countryCode").Type<NonNullType<StringType>>();
         d.Field(x => x.Lat).Type<NonNullType<DecimalType>>();
         d.Field(x => x.Lon).Type<NonNullType<DecimalType>>();
+
+        // Exposes as base64 string for concurrency token round-trip
+        d.Field(x => x.RowVersion)
+            .Name("rowVersion")
+            .Type<NonNullType<StringType>>()
+            .Resolve(ctx => Convert.ToBase64String(ctx.Parent<CityInfo>().RowVersion));
     }
 }

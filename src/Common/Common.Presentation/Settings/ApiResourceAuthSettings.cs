@@ -4,11 +4,11 @@ public class ApiResourceAuthSettings
 {
 	public string? AuthorityUrl { get; set; }
 	public string? Audience { get; set; }
-	public List<RequiredClaim>? RequiredClaims { get; set; }
+	public List<RequiredClaim>? RequiredClaims { get; init; }
 
 	public class RequiredClaim
 	{
-		public string? ClaimType { get; set; }
-		public string[]? AllowedValues { get; set; }
+		public required string ClaimType { get; set; }
+		public required string[] AllowedValues { get; set; }
 	}
 }
