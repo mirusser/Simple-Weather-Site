@@ -1,0 +1,21 @@
+name: Build and run on build machine
+
+on:
+  push:
+    branches: ["main"]
+
+concurrency:
+  group: buildbox-main
+  cancel-in-progress: false
+
+jobs:
+  build_run:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & run
+        run: |
+          cd src/deploy
+          ./build-run-locally.sh

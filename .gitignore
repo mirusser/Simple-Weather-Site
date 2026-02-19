@@ -511,4 +511,3 @@ src/CitiesService/CitiesService.IntegrationTests/appsettings.local.json
 src/deploy/volumes/
 
 actions-runner/
-.github/
