@@ -102,11 +102,17 @@ check_dependencies() {
     # Verify that iptables exists (with sudo), because it's commonly under /sbin or /usr/sbin
     # and may not be visible in a normal user's PATH.
     # If iptables is missing, later firewall steps will fail anyway.
-    if ! sudo command -v iptables &>/dev/null; then
-        if ! sudo test -x /usr/sbin/iptables && ! sudo test -x /sbin/iptables; then
-        echo -e "${RED}iptables could not be found (even with sudo). Please install iptables.${NC}"
-        exit 1
+
+    # Only require iptables if we intend to modify/persist firewall rules
+    if [ "${PERSIST_IPTABLES:-0}" == 1]; then
+        if ! sudo command -v iptables &>/dev/null; then
+            if ! sudo test -x /usr/sbin/iptables && ! sudo test -x /sbin/iptables; then
+            echo -e "${RED}iptables could not be found (even with sudo). Please install iptables.${NC}"
+            exit 1
+            fi
         fi
+    else
+        echo -e "${YELLOW}Skipping iptables presence/sudo checks (firewall steps disabled).${NC}"
     fi
 
     # Ensure docker daemon is reachable
