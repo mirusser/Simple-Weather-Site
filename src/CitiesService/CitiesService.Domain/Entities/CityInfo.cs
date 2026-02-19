@@ -14,11 +14,13 @@ public class CityInfo
     [Column(TypeName = "decimal(18,2)")]
     public decimal CityId { get; init; }
 
-    [Required] public string Name { get; set; } = null!;
+    [Required] 
+    public string Name { get; set; } = null!;
 
     public string? State { get; set; }
 
-    [Required] public string CountryCode { get; set; } = null!;
+    [Required] 
+    public string CountryCode { get; set; } = null!;
 
     [Column(TypeName = "decimal(9,6)")] 
     public decimal Lon { get; set; }

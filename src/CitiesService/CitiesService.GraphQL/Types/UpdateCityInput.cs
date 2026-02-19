@@ -1,6 +1,6 @@
 using CitiesService.Domain.Entities;
 
-namespace CitiesService.GraphQL;
+namespace CitiesService.GraphQL.Types;
 
 public record UpdateCityInput(
     int Id,
