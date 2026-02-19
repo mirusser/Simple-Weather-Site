@@ -45,6 +45,7 @@ BASE_DIR="${1:-$SRC_DIR}"
 FRAMEWORK="${FRAMEWORK:-net10.0}"
 
 PERSIST_IPTABLES="${PERSIST_IPTABLES:-1}"
+REGEN_CERT="${REGEN_CERT:-0}"
 
 check_dependencies() {
 
@@ -83,7 +84,7 @@ check_dependencies() {
     # - docker   : build images / run compose
     # - netstat  : optional legacy tool (net-tools). Script doesn't rely on it heavily, but it's checked.
     # - ss       : modern socket inspection tool (used in check_port_binding)
-    local dependencies=("docker" "netstat" "ss")
+    local dependencies=("docker" "netstat" "ss" "openssl")
     for dep in "${dependencies[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             echo "$dep could not be found. Please install $dep."
@@ -245,10 +246,61 @@ forward_ports() {
     # systemctl restart iptables # If your system uses systemd and iptables
 }
 
+generate_certificate() {
+    local cert_dir="$SRC_DIR" # where openssl.cnf lives
+    local cnf="$cert_dir/openssl.cnf"
+    local key="$cert_dir/localhost.key"
+    local crt="$cert_dir/localhost.crt"
+    local pfx="$cert_dir/localhost.pfx"
+
+    # Password must come from env var
+    local pfx_password="${PFX_PASSWORD:-}"
+
+    if [[ -z "$pfx_password" ]]; then
+        echo -e "${RED}PFX_PASSWORD is not set. Refusing to generate localhost.pfx.${NC}"
+        exit 1
+    fi
+
+    if [[ ! -f "$cnf" ]]; then
+        echo -e "${RED}Missing OpenSSL config: $cnf${NC}"
+        exit 1
+    fi
+
+    # Makes it idempotent by default: if pfx exists, reuse it
+    if [[ -f "$pfx" && "${REGEN_CERT:-0}" != "1" ]]; then
+        echo -e "${BLUE}Using existing certificate: $pfx (set REGEN_CERT=1 to regenerate).${NC}"
+    else
+        echo -e "${BLUE}Generating dev certificate (localhost.pfx)...${NC}"
+        (
+            cd "$cert_dir"
+            openssl req -x509 -nodes -days 365 \
+                -newkey rsa:2048 \
+                -keyout "$(basename "$key")" \
+                -out "$(basename "$crt")" \
+                -config "$(basename "$cnf")"
+
+            openssl pkcs12 -export \
+                -out "$(basename "$pfx")" \
+                -inkey "$(basename "$key")" \
+                -in "$(basename "$crt")" \
+                -password "pass:$pfx_password"
+        )
+    fi
+
+    # Copy into projects
+    cp -f "$pfx" "$SRC_DIR/Authorization/OAuthServer/localhost.pfx"
+    cp -f "$pfx" "$SRC_DIR/CitiesService/CitiesService.Api/cert/localhost.pfx"
+
+    echo -e "${GREEN}Certificate copied to OAuthServer and CitiesService.Api.${NC}"
+}
+
+
 # ---- Script entrypoint (runs in order) ----
 
 # Validate tools and environment
 check_dependencies
+
+generate_certificate
 
 # Ensure the shared external docker network exists
 create_network

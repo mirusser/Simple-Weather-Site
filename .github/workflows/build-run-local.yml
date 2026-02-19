@@ -17,6 +17,7 @@ jobs:
 
       - name: Build & run
         env:
+          PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
           PERSIST_IPTABLES: "0"
           # optionally also:
           # OPEN_PORTS: "0"
