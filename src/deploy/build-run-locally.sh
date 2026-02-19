@@ -105,7 +105,7 @@ check_dependencies() {
     # If iptables is missing, later firewall steps will fail anyway.
 
     # Only require iptables if we intend to modify/persist firewall rules
-    if [ "${PERSIST_IPTABLES:-0}" == 1]; then
+    if [ "${PERSIST_IPTABLES:-0}" == 1 ]; then
         if ! sudo command -v iptables &>/dev/null; then
             if ! sudo test -x /usr/sbin/iptables && ! sudo test -x /sbin/iptables; then
             echo -e "${RED}iptables could not be found (even with sudo). Please install iptables.${NC}"
@@ -287,7 +287,10 @@ generate_certificate() {
         )
     fi
 
-    # Copy into projects
+    # Copy into projects (create dirs if missing)
+    mkdir -p "$SRC_DIR/Authorization/OAuthServer"
+    mkdir -p "$SRC_DIR/CitiesService/CitiesService.Api/cert"
+
     cp -f "$pfx" "$SRC_DIR/Authorization/OAuthServer/localhost.pfx"
     cp -f "$pfx" "$SRC_DIR/CitiesService/CitiesService.Api/cert/localhost.pfx"
 
