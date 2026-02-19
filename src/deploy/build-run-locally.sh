@@ -24,7 +24,6 @@ set -Eeuo pipefail
 # Print a helpful message when something fails (line number + failing command)
 trap 'echo -e "${RED}Error on line $LINENO: $BASH_COMMAND${NC}"' ERR
 
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # script will be in: <repo>/src/deploy
 SRC_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"       # <repo>/src
@@ -44,6 +43,8 @@ BASE_DIR="${1:-$SRC_DIR}"
 # You can override this via env var:
 #   FRAMEWORK=net10.0 ./publish.sh
 FRAMEWORK="${FRAMEWORK:-net10.0}"
+
+PERSIST_IPTABLES="${PERSIST_IPTABLES:-1}"
 
 check_dependencies() {
 
@@ -223,7 +224,12 @@ forward_ports() {
     # Save iptables rules once after all updates (uncomment the line corresponding to your system)
     # NOTE:
     # This persists current rules across reboot when using iptables-persistent on Debian.
-    sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
+    if [[ "${PERSIST_IPTABLES:-0}" == "1" ]]; then
+        sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
+    else
+        echo -e "${YELLOW}Skipping iptables persistence (set PERSIST_IPTABLES=1 to enable).${NC}"
+    fi
+
     # service iptables save # CentOS/RHEL
 
     # NOTE: Do NOT restart iptables here.

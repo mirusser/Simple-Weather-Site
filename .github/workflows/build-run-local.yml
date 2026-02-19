@@ -16,6 +16,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build & run
+        env:
+          PERSIST_IPTABLES: "0"
+          # optionally also:
+          # OPEN_PORTS: "0"
         run: |
+          chmod +x src/deploy/build-run-locally.sh
           cd src/deploy
           ./build-run-locally.sh
