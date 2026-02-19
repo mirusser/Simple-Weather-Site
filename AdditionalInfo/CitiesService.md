@@ -72,7 +72,7 @@ mutation {
     countryCode: "GB"
     lon: 53.21402
     lat: -1.15091
-    rowVersion: "AAAAAAABt6k="  # optional base64 - must be included
+    rowVersion: "AAAAAAABt6k="  # base64 - must be included
   }) {
     city {
       id
