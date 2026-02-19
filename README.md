@@ -2,7 +2,11 @@
 
 ## Overview
 
-*Simple Weather Site* is a .NET 10 microservices-style application that provides a web UI for checking weather, browsing/searching cities, and viewing historical results. The system is designed to run locally via Docker Compose and can be deployed in a “single VM” dev setup on AWS (EC2 + Docker Compose), pulling images from AWS ECR.
+*Simple Weather Site* is a .NET 10 microservices-style application that provides a web UI for checking weather, browsing/searching cities, and viewing historical results (more features in the future). The system is designed to run locally via Docker Compose and can be deployed in a “single VM” dev setup on AWS (EC2 + Docker Compose), pulling images from AWS ECR.
+
+**Project goal:** This is primarily a learning project that aims to mimic a small but feature-rich production-style system (microservices, async messaging, background jobs, health checks, observability, containerized deployment etc.).
+
+---
 
 ### High-level architecture
 
@@ -10,47 +14,50 @@ The solution consists of:
 
 ### Edge/UI
 
-WeatherSite – Razor Pages web UI (end-user entry point). Calls internal APIs, consumes gRPC for city queries, and connects to SignalR for live updates.
+- **WeatherSite** – Razor Pages web UI (end-user entry point). Calls internal APIs, consumes gRPC for city queries, and connects to SignalR for live updates.
 
-Gateway (nginx) – reverse proxy used in EC2 deployment to expose a single HTTP entrypoint and route traffic to internal containers (WeatherSite + SignalR hub).
+- **Gateway (nginx)** – reverse proxy used in EC2 deployment to expose a single HTTP entrypoint and route traffic to internal containers (WeatherSite + SignalR hub).
 
 ### Core services
 
-- WeatherService – integrates with external weather provider (OpenWeatherMap) and exposes an HTTP API consumed by WeatherSite.
+- **WeatherService** – integrates with external weather provider (OpenWeatherMap) and exposes an HTTP API consumed by WeatherSite.
 
-- WeatherHistoryService – stores/retrieves historical weather results and exposes an HTTP API.
+- **WeatherHistoryService** – stores/retrieves historical weather results and exposes an HTTP API.
 
-- CitiesService – HTTP API for cities; uses SQL Server and runs EF Core migrations/seeding (optionally at startup).
+- **CitiesService** – HTTP API for cities; uses SQL Server and runs EF Core migrations/seeding (optionally at startup).
 
-- CitiesGrpcService – gRPC service for city-related queries/operations (consumed by WeatherSite).
+- **CitiesGrpcService** – gRPC service for city-related queries/operations (consumed by WeatherSite).
 
-- IconService – stores/serves icon metadata/files; uses MongoDB and may seed initial data.
+- **IconService** – stores/serves icon metadata/files; uses MongoDB and may seed initial data. (a bit overkill, consider hosting them on CDN)
 
-- SignalRServer – hosts SignalR hubs used by the UI for real-time events (e.g., refreshing history views).
+- **SignalRServer** – hosts SignalR hubs used by the UI for real-time events (e.g., refreshing history views).
 
-- EmailService – sends emails/notifications (internal service).
+- **EmailService** – sends emails/notifications (internal service).
 
-- HangfireService – background jobs/scheduling; uses RabbitMQ (via MassTransit) for messaging/event handling.
+- **HangfireService** – background jobs/scheduling; uses RabbitMQ (via MassTransit) for messaging/event handling.
 
-- BackupService – handles backup-related tasks (e.g., database backups).
+- **BackupService** – handles backup-related tasks (e.g., database backups).
+
+- **Commons** (shared libraries) - custom implementation of Mediator pattern, ExceptionHandlerMiddleware, BearerTokenHandler etc.
 
 ### Authorization
+(**NOTE:** it's a work in progress)
 
-- OAuthServer – identity/token authority used by internal clients/services.
+- **OAuthServer** – identity/token authority used by internal clients/services. (for now can work internally in docker)
 
-- JwtAuth – shared auth-related components/utilities.
+- **JwtAuth** – shared auth-related components/utilities. (possible removal)
 
 ### Infrastructure (containers)
 
-- SQL Server – used by CitiesService (+ healthchecks UI storage).
+- SQL Server – used by CitiesService, BackupService.
 
-- PostgreSQL – available for services that use it (optional depending on your config).
+- PostgreSQL – available for services that use it (optional depending on your config). (Future replacement of MS SQL)
 
-- MongoDB – used by IconService and SignalRServer.
+- MongoDB – used by WeatherHistoryService, IconService,Hangfire and SignalRServer.
 
-- Redis – caching/health checks.
+- Redis – caching.
 
-- RabbitMQ – messaging transport for MassTransit.
+- RabbitMQ – messaging transport (used with MassTransit).
 
 - Seq – centralized logging (Serilog sink).
 
@@ -58,35 +65,36 @@ Gateway (nginx) – reverse proxy used in EC2 deployment to expose a single HTTP
 
 - (Optional dev tooling: Portainer, Jenkins)
 
-## Communication patterns
+---
+
+### Communication patterns
 
 - HTTP REST between WeatherSite and most internal services.
 
 - gRPC between WeatherSite and CitiesGrpcService.
 
+- GraphQL endpoint for querying cities in CitiesService
+
 - SignalR for real-time updates from SignalRServer to the browser.
 
 - Message bus (MassTransit over RabbitMQ) for async/event-driven flows (e.g., background processing).
 
-## Deployment modes
+---
 
-- Local development: build and run everything with Docker Compose. Some services can use HTTPS certificates locally.
+### Deployment modes
+- **Local development:** build and run everything with Docker Compose (some services may use HTTPS locally).
+- **AWS dev deployment (single VM):**
+  - images built locally and pushed to AWS ECR
+  - EC2 pulls and runs containers using Docker Compose
+  - nginx provides a single HTTP entrypoint and routes `/` to WeatherSite and the SignalR hub route
 
-- AWS dev deployment (single VM):
+---
 
-images are built locally and pushed to AWS ECR
-
-EC2 pulls and runs containers using Docker Compose
-
-nginx provides a single HTTP entrypoint and routes / to WeatherSite and the SignalR hub route(s) to SignalRServer
-
-## Health & observability
-
-Each service exposes a /health endpoint.
-
-HealthChecks UI aggregates health endpoints for a quick status overview.
-
-Serilog outputs to console and can ship logs to Seq.
+### Health & observability
+- Each service expose a `/health` endpoint.
+- HealthChecks UI aggregates health endpoints for a quick status overview.
+- Serilog outputs to console and can ship logs to Seq.
+- Unit and integration tests with xUnit and Moq (in progress... (CitiesServer only so far))
 
 ---
 
@@ -99,14 +107,15 @@ Serilog outputs to console and can ship logs to Seq.
 - added health checks for each app and configured Watchdog
 - added OAuth identity server (using `duende` package for test purposes) // still needs work
 - multi-stage Dockerfiles for all services
-- backup service added
+- backup service added (with Hangfire integration)
 - dev deploy to AWS
+- started writing tests
 ---
 
 ## Setup Guide (Local + AWS EC2 Dev Deploy)
 
 This guide describes:
-- how to run the system locally (Docker Compose on debian based linux)
+- how to run the system locally (Docker Compose on Debian based Linux)
 - how to publish images to AWS ECR (using AWS CLI)
 - how to deploy and run on a single EC2 instance (Docker Compose on the VM)
 
@@ -126,7 +135,7 @@ This guide describes:
 - AWS CLI v2 (for pushing to ECR)
 - `libman` (WeatherSite static assets)
 - build/deploy scripts will guide you if some required packages are missing
-- verify that each project have configured `appsettings.json` file
+- ensure each service has config for its runtime environment (appsettings.json + appsettings.Development.json / appsettings.Production.json as needed)
 
 #### AWS account
 - IAM user or SSO credentials for AWS CLI usage
@@ -135,7 +144,7 @@ This guide describes:
 
 #### External Api key
 -  Api key from: [open weather map](https://home.openweathermap.org/api_keys)
-  and put it in `appsettings.json` of `WeatherService`
+   set OpenWeatherMap:ApiKey via environment variable (recommended) or in WeatherService/appsettings.json (dev only).
 
 ---
 
@@ -207,7 +216,7 @@ Reverse proxy (nginx) exposes port 80 on the instance
 
 ---
 
-#### Setup up AWS CLI on your local machine (debian-based linux) 
+#### Setup AWS CLI on your local machine (debian-based Linux) 
 
 ##### Installation
 
@@ -240,7 +249,7 @@ Verify:
 aws sts get-caller-identity --profile <profile_name>
 ```
 
-Get account Id:
+Get account ID:
 ```bash
 aws sts get-caller-identity --query Account --output text --profile <profile_name>
 ```
@@ -410,24 +419,39 @@ Stop and remove all docker containers:
 docker ps -aq | xargs -r docker rm -f
 ```
 
+Manually run docker compose:
+```bash
+docker compose \
+  --project-directory ./src \
+  --env-file ./src/deploy/.env.prod \
+  -f ./src/deploy/docker-compose.prod.yml \
+  up -d
+```
+
 ---
 
-## Features that I may add:
+## Roadmap ideas:
 
-- Setup build with jenkins (CI/CD pipeline (or with something else than jenkins))
-- Add tests for each project
+- CI/CD pipeline (Jenkins/Aspire (?)) or alternatives)
+- there is still some hardcoded stuff and some TODOs to be handled
+- Add tests for each project (xUnit)
 - MCP server for projects (demo: [My repo for MCP](https://github.com/mirusser/MCP))
-- Migrate fully to AWS (Use AWS services e.g. SQS, DynamoDB, automatic backup of databases etc.)
-- It would be nice to be able to download historic data in various file types (e.g. pdg, excel, csv, html, etc)
-- Configurable via page (something like mini admin panel, at least for urls to be configurable during runtime)
-- in weather prediction will be good if there would be an option to get user location (by ip I guess, microservice for that?)
+- continue with 'refactor', 'cleanup' and modernization
+- deeper AWS-native migration (Use AWS services e.g. SQS, DynamoDB, automatic backup of databases etc.)
+- It would be nice to be able to download historic data in various file types (e.g. PDF, excel, csv, Markdown, HTML etc.)
+- Configurable via page (something like mini admin panel, at least for URLs to be configurable during runtime)
+- in weather prediction will be good if there would be an option to get user location (by IP I guess, microservice for that?) - so there is no need for a user to manually search for city
 - feature: unod (dunno what I can undo yet, TODO: think about it)
-- handle more requests/endpoints from openweather api
-- least important but would be nice to redo frontend (tho I lack in that area, maybe use blazor)
-- switch from sql server to postgres
+- handle more requests/endpoints from openweather api (more features yay!)
+- switch from SQL server to postgres
 - switch from MassTransit to OpenTransit (when the package will be ready)
-- consider ditching `duende`
-- update frontend (Blazor maybe (?))
+- consider ditching `duende` (for alternative, what? do research)
+- update (!) UI/frontend (Blazor maybe (?))
+- elastic search for cities service searches (and weather site (?)) (and graphql endpoint (?))
+- update HealthChecks UI
+- overview and general upgrade of 'security'
+- GraphQL endpoint (for cities service (?))
+- add [semantic kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) integration (e.g. summary for weather forecast (?))
 
 ### Things to check out:
 

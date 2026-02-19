@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+// Client-only copy of CitiesGrpcService/Protos/cities.proto.
+// We keep the wire contract identical, but generate client types into a different
+// C# namespace to avoid type conflicts with the server project.
+option csharp_namespace = "CitiesService.IntegrationTests.GrpcClient";
+
+package cities;
+
+service Cities {
+  rpc GetCitiesPagination (CitiesPaginationRequest) returns (CitiesPaginationReply);
+  rpc GetCitiesPaginationInfo (CitiesPaginationInfoRequest) returns (CitiesPaginationInfoReply);
+  rpc GetCitiesStream (CitiesStreamRequest) returns (stream CityReply);
+}
+
+message CitiesPaginationRequest {
+  int32 number_of_cities = 1;
+  int32 page_number = 2;
+}
+
+message CitiesPaginationInfoRequest {
+
+}
+
+message CitiesStreamRequest {
+    int32 number_of_cities = 1;
+    int32 page_number = 2;
+}
+
+message Coord {
+    double Lon = 1;
+    double Lat = 2;
+}
+
+message CityReply {
+    double Id = 1;
+    string Name = 2;
+    string State = 3;
+    string Country = 4;
+    Coord Coord = 5;
+}
+
+message CitiesPaginationReply {
+    int32 number_of_all_cities = 1;
+    repeated CityReply cities = 2;
+}
+
+message CitiesPaginationInfoReply {
+    int32 number_of_all_cities = 1;
+}

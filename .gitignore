@@ -499,5 +499,16 @@ src/localhost.key
 /src/BackupService/BackupService.Api/deploy
 src/.env.infra
 src/.env.prod
+
+# local env files (do not commit)
+src/deploy/.env.*
+!.env.example
+
+# integration tests local settings (do not commit)
+src/CitiesService/CitiesService.IntegrationTests/appsettings.local.json
+
+# optional: local volumes if you ever keep them in-repo
+src/deploy/volumes/
+
 actions-runner/
 .github/

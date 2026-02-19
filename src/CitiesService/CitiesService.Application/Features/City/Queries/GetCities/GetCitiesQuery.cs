@@ -16,7 +16,7 @@ namespace CitiesService.Application.Features.City.Queries.GetCities;
 public class GetCitiesQuery : IRequest<Result<GetCitiesResult>>
 {
     public string CityName { get; set; } = null!;
-    public int Limit { get; set; }
+    public int Limit { get; init; }
 }
 
 public class GetCitiesHandler(

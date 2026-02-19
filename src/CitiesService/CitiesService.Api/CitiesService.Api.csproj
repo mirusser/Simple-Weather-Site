@@ -2,10 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
+        <ImplicitlyDeclaredProgramIsPublic>true</ImplicitlyDeclaredProgramIsPublic>
         <UserSecretsId>d1b3f66d-a292-41d2-ac26-bd205f451b84</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <DockerfileContext>.</DockerfileContext>
         <DockerComposeProjectPath>docker-compose.cdproj</DockerComposeProjectPath>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +21,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj"/>
         <ProjectReference Include="..\CitiesService.Application\CitiesService.Application.csproj"/>
+        <ProjectReference Include="..\CitiesService.GraphQL\CitiesService.GraphQL.csproj" />
         <ProjectReference Include="..\CitiesService.Infrastructure\CitiesService.Infrastructure.csproj"/>
     </ItemGroup>
 

@@ -8,12 +8,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<CityInfo> CityInfos { get; set; }
 
-    // protected override void OnModelCreating(ModelBuilder modelBuilder)
-    // {
-    //     base.OnModelCreating(modelBuilder);
-    //
-    //     modelBuilder.Entity<CityInfo>()
-    //         .HasIndex(c => c.CityId)
-    //         .IsUnique();
-    // }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<CityInfo>()
+            .HasIndex(c => c.Name);
+
+        modelBuilder.Entity<CityInfo>()
+            .HasIndex(c => c.CityId)
+            .IsUnique();
+    }
 }

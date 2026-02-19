@@ -9,7 +9,10 @@
     <Project Path="CitiesService/CitiesService.Application/CitiesService.Application.csproj" />
     <Project Path="CitiesService/CitiesService.Contracts/CitiesService.Contracts.csproj" />
     <Project Path="CitiesService/CitiesService.Domain/CitiesService.Domain.csproj" />
+    <Project Path="CitiesService/CitiesService.GraphQL/CitiesService.GraphQL.csproj" />
     <Project Path="CitiesService/CitiesService.Infrastructure/CitiesService.Infrastructure.csproj" />
+    <Project Path="CitiesService/CitiesService.IntegrationTests/CitiesService.IntegrationTests.csproj" />
+    <Project Path="CitiesService/CitiesService.Tests/CitiesService.Tests.csproj" />
   </Folder>
   <Folder Name="/Commons/">
     <Project Path="Common/Common.Application/Common.Application.csproj" />
@@ -20,6 +23,7 @@
     <Project Path="Common/Common.Mediator/Common.Mediator.csproj" />
     <Project Path="Common/Common.Presentation/Common.Presentation.csproj" />
     <Project Path="Common/Common.Shared/Common.Shared.csproj" />
+    <Project Path="Common/Common.Testing/Common.Testing.csproj" />
     <Project Path="Common/Common.TestConsole/Common.TestConsole.csproj" />
   </Folder>
   <Folder Name="/EmailService/">

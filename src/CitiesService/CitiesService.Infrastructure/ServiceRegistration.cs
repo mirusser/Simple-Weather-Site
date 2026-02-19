@@ -13,22 +13,30 @@ namespace CitiesService.Infrastructure;
 
 public static class ServiceRegistration
 {
-	public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
+	extension(IServiceCollection services)
 	{
-		services.Configure<FileUrlsAndPaths>(configuration.GetSection(nameof(FileUrlsAndPaths)));
-		services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));
+		public IServiceCollection AddInfrastructureLayer(IConfiguration configuration)
+		{
+			services.Configure<FileUrlsAndPaths>(configuration.GetSection(nameof(FileUrlsAndPaths)));
+			services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));
 
-		services.AddDbContext<ApplicationDbContext>(options =>
-			options.UseSqlServer(configuration.GetConnectionString(nameof(ConnectionStrings.DefaultConnection)),
-			b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+			// a factory for GraphQL resolvers
+			services.AddPooledDbContextFactory<ApplicationDbContext>(options =>
+				options.UseSqlServer(
+					configuration.GetConnectionString(nameof(ConnectionStrings.DefaultConnection)),
+					b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-		services.AddTransient<ApplicationDbContext>();
+			// Scoped DbContext for existing code, created via the factory
+			services.AddScoped<ApplicationDbContext>(sp =>
+				sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 
-		services.AddCommonInfrastructure(configuration);
+			services.AddCommonInfrastructure(configuration);
 
-		services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
-		services.AddHostedService<DbMigrateAndSeedHostedService>();
+			services.AddTransient<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
+			services.AddTransient<ICityRepository, CityRepository>();
+			services.AddHostedService<DbMigrateAndSeedHostedService>();
 
-		return services;
+			return services;
+		}
 	}
 }

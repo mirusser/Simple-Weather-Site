@@ -10,17 +10,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Infrastructure.Repositories;
 
-public class GenericRepository<T>(ApplicationDbContext context) : IGenericRepository<T> where T : class
+public class GenericRepository<T>(ApplicationDbContext context) : IGenericRepository<T>
+    where T : class
 {
+    protected readonly ApplicationDbContext Context = context;
     private readonly DbSet<T> db = context.Set<T>();
-    
+
     public async Task<bool> TryAcquireSeedLockAsync(CancellationToken ct)
     {
-        var conn = context.Database.GetDbConnection();
-        await context.Database.OpenConnectionAsync(ct);
+        var conn = Context.Database.GetDbConnection();
+        await Context.Database.OpenConnectionAsync(ct);
 
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = 
+        cmd.CommandText =
             """
                 DECLARE @result int;
                 EXEC @result = sp_getapplock
@@ -45,11 +47,11 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
     }
 
     public IQueryable<T> FindAll(
-        Expression<Func<T, bool>> searchExpression = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>> orderByExpression = null,
-        int skipNumberOfRows = default,
-        int takeNumberOfRows = default,
-        List<string> includes = null)
+        Expression<Func<T, bool>>? searchExpression = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,
+        int skipNumberOfRows = 0,
+        int takeNumberOfRows = 0,
+        List<string>? includes = null)
     {
         IQueryable<T> query = db;
 
@@ -84,9 +86,9 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
         return query;
     }
 
-    public async Task<T> FindAsync(
-        Expression<Func<T, bool>> searchExpression = null,
-        List<string> includes = null,
+    public async Task<T?> FindAsync(
+        Expression<Func<T, bool>> searchExpression,
+        List<string>? includes = null,
         CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = db;
@@ -103,7 +105,7 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
     }
 
     public async Task<bool> CheckIfExistsAsync(
-        Expression<Func<T, bool>> searchExpression = null,
+        Expression<Func<T, bool>> searchExpression,
         CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = db;
@@ -143,7 +145,7 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
 
     public async Task<bool> SaveAsync(CancellationToken cancellationToken = default)
     {
-        var numberOfRowsAffected = await context.SaveChangesAsync(cancellationToken);
+        var numberOfRowsAffected = await Context.SaveChangesAsync(cancellationToken);
 
         return numberOfRowsAffected > 0;
     }

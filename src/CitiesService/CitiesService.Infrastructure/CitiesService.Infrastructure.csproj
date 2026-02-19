@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.Infrastructure\Common.Infrastructure.csproj" />
+    <ProjectReference Include="..\CitiesService.Application\CitiesService.Application.csproj" />
     <ProjectReference Include="..\CitiesService.Application\CitiesService.Application.csproj" />
     <ProjectReference Include="..\CitiesService.Domain\CitiesService.Domain.csproj" />
   </ItemGroup>

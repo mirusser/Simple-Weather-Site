@@ -11,10 +11,11 @@ namespace CitiesService.Application.Common.Helpers;
 /// </summary>
 public static class GzipHelper
 {
-	private const string fileExtension = ".gz";
+	private const string FileExtension = ".gz";
 
 	/// <summary>
-	/// Compresses a specified file using GZip compression if the file is not hidden and does not already have a .gz extension.
+	/// Compresses a specified file using GZip compression if the file is not hidden
+	/// and does not already have a .gz extension (it's not compressed already).
 	/// </summary>
 	public static async Task CompressAsync(
 		FileInfo fileToCompress,
@@ -24,12 +25,12 @@ public static class GzipHelper
 		await using FileStream originalFileStream = fileToCompress.OpenRead();
 
 		if ((File.GetAttributes(fileToCompress.FullName) & FileAttributes.Hidden) == FileAttributes.Hidden
-			|| fileToCompress.Extension == fileExtension)
+			|| fileToCompress.Extension == FileExtension)
 		{
 			return;
 		}
 
-		await using FileStream compressedFileStream = File.Create($"fileToCompress.FullName{fileExtension}");
+		await using FileStream compressedFileStream = File.Create($"{fileToCompress.FullName}{FileExtension}");
 		await using GZipStream compressionStream = new(compressedFileStream, CompressionMode.Compress);
 		await originalFileStream.CopyToAsync(compressionStream, cancellationToken);
 
