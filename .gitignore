@@ -499,3 +499,5 @@ src/localhost.key
 /src/BackupService/BackupService.Api/deploy
 src/.env.infra
 src/.env.prod
+actions-runner/
+.github/
