@@ -1,4 +1,4 @@
-using Xunit;
+using System.Runtime.CompilerServices;
 
 namespace Common.Testing.SqlServer;
 
@@ -7,7 +7,10 @@ namespace Common.Testing.SqlServer;
 /// </summary>
 public sealed class SqlServerFactAttribute : FactAttribute
 {
-    public SqlServerFactAttribute()
+    public SqlServerFactAttribute(
+        [CallerFilePath] string? sourceFilePath = null,
+        [CallerLineNumber] int sourceLineNumber = -1) 
+        : base(sourceFilePath, sourceLineNumber)
     {
         if (string.IsNullOrWhiteSpace(SqlServerTestSettings.GetBaseConnectionString()))
         {
@@ -23,7 +26,10 @@ public sealed class SqlServerFactAttribute : FactAttribute
 /// </summary>
 public sealed class SqlServerTheoryAttribute : TheoryAttribute
 {
-    public SqlServerTheoryAttribute()
+    public SqlServerTheoryAttribute(
+        [CallerFilePath] string? sourceFilePath = null,
+        [CallerLineNumber] int sourceLineNumber = -1) 
+        : base(sourceFilePath, sourceLineNumber)
     {
         if (string.IsNullOrWhiteSpace(SqlServerTestSettings.GetBaseConnectionString()))
         {

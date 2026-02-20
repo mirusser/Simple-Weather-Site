@@ -29,7 +29,7 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
 
     public Uri Address { get; private set; } = null!;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
@@ -81,7 +81,7 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
         Address = new Uri(addresses.Single());
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (app is not null)
         {
