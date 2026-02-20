@@ -35,7 +35,7 @@ public class GetQueryHandler(
         }
 
         throw new ServiceException.NotFoundException(
-            code: Errors.Icon.IconNotFound.Code,
-            message: Errors.Icon.IconNotFound.Description);
+            message: Errors.Icon.IconNotFound.Description,
+            code: Errors.Icon.IconNotFound.Code);
     }
 }

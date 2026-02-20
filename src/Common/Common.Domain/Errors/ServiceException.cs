@@ -1,25 +1,20 @@
 ﻿namespace Common.Domain.Errors;
 
-public class ServiceException : Exception
+public class ServiceException(
+    string code,
+    string message,
+    params object[] args) : Exception(string.Format(message, args), null)
 {
-    public string Code { get; init; }
+    public string Code { get; init; } = code;
 
-    public ServiceException(
-        string code,
-        string message,
-        params object[] args) : base(string.Format(message, args), null)
-    {
-        Code = code;
-    }
-    
 
     public sealed class NotFoundException(string message, string code = ErrorCodes.NotFound)
-        : ServiceException(message, code);
+        : ServiceException(code, message);
 
     public sealed class ConflictException(string message, string code = ErrorCodes.Conflict)
-        : ServiceException(message, code);
+        : ServiceException(code, message);
 
     public sealed class ForbiddenException(string message, string code = ErrorCodes.Forbidden)
-        : ServiceException(message, code);
+        : ServiceException(code, message);
 
 }

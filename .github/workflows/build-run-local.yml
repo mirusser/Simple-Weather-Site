@@ -1,8 +1,10 @@
 name: Build and run on build machine
 
 on:
-  push:
-    branches: ["main"]
+  workflow_run:
+    workflows: ["Tests"]
+    types:
+      - completed
 
 concurrency:
   group: buildbox-main
@@ -10,6 +12,9 @@ concurrency:
 
 jobs:
   build_run:
+    # Only run if the Tests workflow concluded successfully
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     runs-on: self-hosted
 
     steps:
@@ -19,8 +24,6 @@ jobs:
         env:
           PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
           PERSIST_IPTABLES: "0"
-          # optionally also:
-          # OPEN_PORTS: "0"
         run: |
           chmod +x src/deploy/build-run-locally.sh
           cd src/deploy
