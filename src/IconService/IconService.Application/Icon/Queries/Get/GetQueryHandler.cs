@@ -11,14 +11,14 @@ namespace IconService.Application.Icon.Queries.Get;
 public record GetQuery
 (
     string? Icon
-) : IRequest<GetResult?>;
+) : IRequest<GetResult>;
 
 public class GetQueryHandler(
     IMongoRepository<IconDocument> iconRepository,
     IMapper mapper)
-    : IRequestHandler<GetQuery, GetResult?>
+    : IRequestHandler<GetQuery, GetResult>
 {
-    public async Task<GetResult?> Handle(
+    public async Task<GetResult> Handle(
         GetQuery request,
         CancellationToken cancellationToken)
     {
@@ -28,14 +28,15 @@ public class GetQueryHandler(
                 findOptions: null,
                 cancellation: cancellationToken);
 
-        if (iconDocument != null)
+        if (iconDocument is null)
         {
-            var iconDto = mapper.Map<GetResult?>(iconDocument);
-            return iconDto;
+            
+            throw new ServiceException.NotFoundException(
+                message: Errors.Icon.IconNotFound.Description,
+                code: Errors.Icon.IconNotFound.Code);
         }
-
-        throw new ServiceException.NotFoundException(
-            message: Errors.Icon.IconNotFound.Description,
-            code: Errors.Icon.IconNotFound.Code);
+        
+        var iconDto = mapper.Map<GetResult>(iconDocument);
+        return iconDto;
     }
 }
