@@ -6,18 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="8.5.7" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
-    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\..\Common\Common.Infrastructure\Common.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Common\Common.MassTransit\Common.MassTransit.csproj" />
     <ProjectReference Include="..\..\Common\Common.Mediator\Common.Mediator.csproj" />
     <ProjectReference Include="..\..\Common\Common.Presentation\Common.Presentation.csproj" />
     <ProjectReference Include="..\..\Common\Common.Shared\Common.Shared.csproj" />

@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
-  </ItemGroup>
+    <ItemGroup>
+        <!--    TODO: Get rid of this package (deprecated)-->
+        <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17"/>
+    </ItemGroup>
 </Project>
