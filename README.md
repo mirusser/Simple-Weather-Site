@@ -6,6 +6,8 @@
 
 **Project goal:** This is primarily a learning project that aims to mimic a small but feature-rich production-style system (microservices, async messaging, background jobs, health checks, observability, containerized deployment etc.).
 
+![Tests](https://github.com/mirusser/Simple-Weather-Site/actions/workflows/tests.yml/badge.svg?branch=main)
+![Build & Run](https://github.com/mirusser/Simple-Weather-Site/actions/workflows/build-run-local.yml/badge.svg?branch=main)
 ---
 
 ### High-level architecture
