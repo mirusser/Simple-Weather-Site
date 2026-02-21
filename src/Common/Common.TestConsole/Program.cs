@@ -6,7 +6,6 @@
 
 using Common.Mediator;
 using Common.Mediator.DependencyInjection;
-using Common.TestConsole;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

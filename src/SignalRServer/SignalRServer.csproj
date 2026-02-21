@@ -6,17 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="8.5.7" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
-    <PackageReference Include="MassTransit.AspNetCore" Version="7.3.1" />
-    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.1" />
-    <PackageReference Include="MongoDB.Bson" Version="3.5.2" />
-    <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
+    <PackageReference Include="MongoDB.Bson" Version="3.6.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.6.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.Application\Common.Application.csproj" />
+    <ProjectReference Include="..\Common\Common.MassTransit\Common.MassTransit.csproj" />
     <ProjectReference Include="..\Common\Common.Presentation\Common.Presentation.csproj" />
     <ProjectReference Include="..\MQModels\MQModels.csproj" />
   </ItemGroup>

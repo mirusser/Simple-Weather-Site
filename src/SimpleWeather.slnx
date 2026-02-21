@@ -20,6 +20,7 @@
     <Project Path="Common/Common.Domain/Common.Domain.csproj" />
     <Project Path="Common/Common.ExtensionMethods/Common.ExtensionMethods.csproj" />
     <Project Path="Common/Common.Infrastructure/Common.Infrastructure.csproj" />
+    <Project Path="Common/Common.MassTransit/Common.MassTransit.csproj" />
     <Project Path="Common/Common.Mediator/Common.Mediator.csproj" />
     <Project Path="Common/Common.Presentation/Common.Presentation.csproj" />
     <Project Path="Common/Common.Shared/Common.Shared.csproj" />
@@ -58,15 +59,6 @@
   <Folder Name="/WeatherSite/">
     <Project Path="WeatherSite/GrpcCitiesClient/GrpcCitiesClient.csproj" />
     <Project Path="WeatherSite/Site/WeatherSite.csproj" />
-  </Folder>
-  <Folder Name="/_additional/">
-    <File Path="../AdditionalInfo/healthchecks-appsettings.json" />
-  </Folder>
-  <Folder Name="/_additional/SolutionSettings/" />
-  <Folder Name="/_build/">
-    <File Path="docker-compose.yml" />
-    <File Path="publish.bat" />
-    <File Path="publish.sh" />
   </Folder>
   <Folder Name="/BackupService/">
     <Project Path="BackupService/BackupService.Api/BackupService.Api.csproj" />
