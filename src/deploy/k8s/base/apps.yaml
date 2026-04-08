@@ -1,0 +1,600 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauthserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauthserver
+  template:
+    metadata:
+      labels:
+        app: oauthserver
+    spec:
+      containers:
+        - name: oauthserver
+          image: oauthserver:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauthserver
+spec:
+  selector:
+    app: oauthserver
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: citiesservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: citiesservice
+  template:
+    metadata:
+      labels:
+        app: citiesservice
+    spec:
+      initContainers:
+        - name: wait-for-sqlserver
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              until nc -z sqlserver 1433; do
+                echo "Waiting for sqlserver:1433"
+                sleep 2
+              done
+      containers:
+        - name: citiesservice
+          image: citiesservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: citiesservice
+spec:
+  selector:
+    app: citiesservice
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: citiesgrpcservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: citiesgrpcservice
+  template:
+    metadata:
+      labels:
+        app: citiesgrpcservice
+    spec:
+      initContainers:
+        - name: wait-for-sqlserver
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              until nc -z sqlserver 1433; do
+                echo "Waiting for sqlserver:1433"
+                sleep 2
+              done
+      containers:
+        - name: citiesgrpcservice
+          image: citiesgrpcservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 5043
+              name: grpc
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: citiesgrpcservice
+spec:
+  selector:
+    app: citiesgrpcservice
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: grpc
+      port: 5043
+      targetPort: 5043
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weatherservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: weatherservice
+  template:
+    metadata:
+      labels:
+        app: weatherservice
+    spec:
+      containers:
+        - name: weatherservice
+          image: weatherservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: weatherservice
+spec:
+  selector:
+    app: weatherservice
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weatherhistoryservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: weatherhistoryservice
+  template:
+    metadata:
+      labels:
+        app: weatherhistoryservice
+    spec:
+      containers:
+        - name: weatherhistoryservice
+          image: weatherhistoryservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: weatherhistoryservice
+spec:
+  selector:
+    app: weatherhistoryservice
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iconservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iconservice
+  template:
+    metadata:
+      labels:
+        app: iconservice
+    spec:
+      containers:
+        - name: iconservice
+          image: iconservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iconservice
+spec:
+  selector:
+    app: iconservice
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signalrserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: signalrserver
+  template:
+    metadata:
+      labels:
+        app: signalrserver
+    spec:
+      containers:
+        - name: signalrserver
+          image: signalrserver:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: signalrserver
+spec:
+  selector:
+    app: signalrserver
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emailservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emailservice
+  template:
+    metadata:
+      labels:
+        app: emailservice
+    spec:
+      containers:
+        - name: emailservice
+          image: emailservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emailservice
+spec:
+  selector:
+    app: emailservice
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hangfireservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hangfireservice
+  template:
+    metadata:
+      labels:
+        app: hangfireservice
+    spec:
+      containers:
+        - name: hangfireservice
+          image: hangfireservice:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hangfireservice
+spec:
+  selector:
+    app: hangfireservice
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weathersite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: weathersite
+  template:
+    metadata:
+      labels:
+        app: weathersite
+    spec:
+      containers:
+        - name: weathersite
+          image: weathersite:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: sws-app-config
+            - secretRef:
+                name: sws-app-secrets
+          ports:
+            - containerPort: 80
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: weathersite
+spec:
+  selector:
+    app: weathersite
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

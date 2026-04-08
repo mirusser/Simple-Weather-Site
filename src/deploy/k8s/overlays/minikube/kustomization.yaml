@@ -1,0 +1,114 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: sws
+
+resources:
+  - ../../base
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: sws-app-config
+    envs:
+      - app-config.env
+
+secretGenerator:
+  - name: sws-app-secrets
+    envs:
+      - app-secrets.env
+
+images:
+  - name: oauthserver
+    newTag: minikube
+  - name: citiesservice
+    newTag: minikube
+  - name: citiesgrpcservice
+    newTag: minikube
+  - name: weatherservice
+    newTag: minikube
+  - name: weatherhistoryservice
+    newTag: minikube
+  - name: iconservice
+    newTag: minikube
+  - name: signalrserver
+    newTag: minikube
+  - name: emailservice
+    newTag: minikube
+  - name: hangfireservice
+    newTag: minikube
+  - name: weathersite
+    newTag: minikube
+
+patches:
+  - target:
+      kind: Deployment
+      name: oauthserver
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: citiesservice
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: citiesgrpcservice
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: weatherservice
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: weatherhistoryservice
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: iconservice
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: signalrserver
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: emailservice
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: hangfireservice
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: weathersite
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never

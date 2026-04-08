@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <Compile Remove="deploy\**" />
+    <Compile Remove="WeatherService.Tests\**" />
     <Content Remove="deploy\**" />
+    <Content Remove="WeatherService.Tests\**" />
     <EmbeddedResource Remove="deploy\**" />
+    <EmbeddedResource Remove="WeatherService.Tests\**" />
     <None Remove="deploy\**" />
+    <None Remove="WeatherService.Tests\**" />
   </ItemGroup>
 
   <ItemGroup>
