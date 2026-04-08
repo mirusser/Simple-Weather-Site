@@ -186,6 +186,8 @@ kind: Deployment
 metadata:
   name: sqlserver
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -382,6 +384,8 @@ kind: Deployment
 metadata:
   name: seq
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
