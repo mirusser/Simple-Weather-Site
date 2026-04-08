@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\Common\Common.MassTransit\Common.MassTransit.csproj" />
+    <ProjectReference Include="..\Common\Common.MassTransit\Common.MassTransit.csproj" />
     <ProjectReference Include="..\Common\Common.Presentation\Common.Presentation.csproj" />
     <ProjectReference Include="..\MQModels\MQModels.csproj" />
   </ItemGroup>
