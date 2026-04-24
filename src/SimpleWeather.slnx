@@ -55,6 +55,7 @@
   </Folder>
   <Folder Name="/WeatherService/">
     <Project Path="WeatherService/WeatherService.csproj" />
+    <Project Path="WeatherService/WeatherService.Tests/WeatherService.Tests.csproj" />
   </Folder>
   <Folder Name="/WeatherSite/">
     <Project Path="WeatherSite/GrpcCitiesClient/GrpcCitiesClient.csproj" />

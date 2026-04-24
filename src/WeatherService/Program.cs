@@ -18,6 +18,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using WeatherService.Clients;
+using WeatherService.HealthChecks;
 using WeatherService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,19 +76,11 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddControllers();
 
     builder.Services.AddCommonHealthChecks(builder.Configuration)
-        .AddExternalEndpointHealthCheck(
-            name: "OpenWeather",
-            options: new ExternalEndpointHealthCheckOptions
-            {
-                ClientName = "OpenWeather",
-                PipelineName = PipelineNames.Health,
-                Target = new Uri("/", UriKind.Relative),
-                Method = HttpMethod.Head,
-                AnyHttpStatusIsHealthy = true
-            },
+        .AddCheck<OpenWeatherHealthCheck>(
+            "OpenWeather",
             failureStatus: HealthStatus.Unhealthy,
             tags: [HealthChecksTags.Ready, HealthChecksTags.ExternalService],
-            timeout: TimeSpan.FromSeconds(3));
+            timeout: TimeSpan.FromSeconds(10));
 }
 
 var app = builder.Build();

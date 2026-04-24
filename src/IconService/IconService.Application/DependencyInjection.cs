@@ -1,11 +1,14 @@
 ﻿using System.Reflection;
 using Common.Application.HealthChecks;
+using Common.Contracts.HealthCheck;
 using Common.Application.Mapping;
 using Common.Mediator.DependencyInjection;
 using FluentValidation;
+using IconService.Application.Icon.HealthChecks;
 using IconService.Application.Icon.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace IconService.Application;
 
@@ -21,7 +24,11 @@ public static class DependencyInjection
             services.AddValidatorsFromAssembly(executingAssembly);
             services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
             services.AddHostedService<MongoSeedHostedService>();
-            services.AddCommonHealthChecks(configuration);
+            services.AddCommonHealthChecks(configuration)
+                .AddCheck<IconImageReturnedHealthCheck>(
+                    "Icon image returned health check",
+                    failureStatus: HealthStatus.Unhealthy,
+                    tags: [HealthChecksTags.Ready]);
 
             return services;
         }
