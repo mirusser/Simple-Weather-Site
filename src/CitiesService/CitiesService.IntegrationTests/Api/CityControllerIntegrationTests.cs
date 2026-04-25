@@ -5,7 +5,6 @@ using CitiesService.Domain.Entities;
 using CitiesService.IntegrationTests.Infrastructure.Collections;
 using Common.Testing.SqlServer;
 using CitiesService.IntegrationTests.Infrastructure.Db;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace CitiesService.IntegrationTests.Api;
@@ -25,7 +24,7 @@ public class CityControllerIntegrationTests(SqlServerFixture sql)
 
         await using (var db = DbTestHelpers.CreateDbContext(cs))
         {
-            await db.Database.MigrateAsync();
+            await DbTestHelpers.MigrateAsync(db);
             db.CityInfos.AddRange(
                 new CityInfo { CityId = 101m, Name = "London", CountryCode = "GB", Lat = 1, Lon = 2 },
                 new CityInfo { CityId = 102m, Name = "Londonderry", CountryCode = "GB", Lat = 3, Lon = 4 },
@@ -57,7 +56,7 @@ public class CityControllerIntegrationTests(SqlServerFixture sql)
 
         await using (var db = DbTestHelpers.CreateDbContext(cs))
         {
-            await db.Database.MigrateAsync();
+            await DbTestHelpers.MigrateAsync(db);
         }
 
         await using var factory = new CitiesApiFactory(cs);

@@ -1,7 +1,6 @@
 using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Application.Features.City.Queries.GetCities;
 using CitiesService.Domain.Entities;
-using CitiesService.Infrastructure.Repositories;
 using Common.Testing.TestDoubles;
 using CitiesService.Tests.TestInfrastructure;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -13,20 +12,18 @@ public class GetCitiesHandlerTests
     [Fact]
     public async Task Handle_TrimsCityName()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        db.CityInfos.Add(new CityInfo
-        {
-            Id = 1,
-            CityId = 100m,
-            Name = "London",
-            CountryCode = "GB",
-            Lat = 51.5074m,
-            Lon = -0.1278m,
-            State = null
-        });
-        await db.SaveChangesAsync();
-
-        var repo = new GenericRepository<CityInfo>(db);
+        var repo = new InMemoryCityRepository([
+            new CityInfo
+            {
+                Id = 1,
+                CityId = 100m,
+                Name = "London",
+                CountryCode = "GB",
+                Lat = 51.5074m,
+                Lon = -0.1278m,
+                State = null
+            }
+        ]);
         var cache = new FakeCacheManager();
         var sut = new GetCitiesHandler(repo, cache, NullLogger<GetCitiesHandler>.Instance);
 
@@ -43,8 +40,7 @@ public class GetCitiesHandlerTests
     [Fact]
     public async Task Handle_WhenLimitIsZero_ReturnsEmpty_AndDoesNotTouchCache()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        var repo = new GenericRepository<CityInfo>(db);
+        var repo = new InMemoryCityRepository();
         var cache = new FakeCacheManager();
         var sut = new GetCitiesHandler(repo, cache, NullLogger<GetCitiesHandler>.Instance);
 
@@ -62,8 +58,7 @@ public class GetCitiesHandlerTests
     [Fact]
     public async Task Handle_WhenCacheHit_ReturnsCachedValue_AndDoesNotSetCache()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        var repo = new GenericRepository<CityInfo>(db);
+        var repo = new InMemoryCityRepository();
         var cache = new FakeCacheManager();
 
         var cached = new List<GetCityResult>
@@ -94,20 +89,18 @@ public class GetCitiesHandlerTests
     [Fact]
     public async Task Handle_WhenNoCitiesExist_ReturnsEmpty_AndDoesNotSetCache()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        db.CityInfos.Add(new CityInfo
-        {
-            Id = 1,
-            CityId = 100m,
-            Name = "Paris",
-            CountryCode = "FR",
-            Lat = 48.8566m,
-            Lon = 2.3522m,
-            State = null
-        });
-        await db.SaveChangesAsync();
-
-        var repo = new GenericRepository<CityInfo>(db);
+        var repo = new InMemoryCityRepository([
+            new CityInfo
+            {
+                Id = 1,
+                CityId = 100m,
+                Name = "Paris",
+                CountryCode = "FR",
+                Lat = 48.8566m,
+                Lon = 2.3522m,
+                State = null
+            }
+        ]);
         var cache = new FakeCacheManager();
         var sut = new GetCitiesHandler(repo, cache, NullLogger<GetCitiesHandler>.Instance);
 
@@ -124,8 +117,7 @@ public class GetCitiesHandlerTests
     [Fact]
     public async Task Handle_WhenCacheMiss_DedupesByName_MapsFields_AndSetsCache()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        db.CityInfos.AddRange(
+        var repo = new InMemoryCityRepository([
             new CityInfo
             {
                 Id = 1,
@@ -155,10 +147,8 @@ public class GetCitiesHandlerTests
                 Lat = 54.9970m,
                 Lon = -7.3090m,
                 State = null
-            });
-        await db.SaveChangesAsync();
-
-        var repo = new GenericRepository<CityInfo>(db);
+            }
+        ]);
         var cache = new FakeCacheManager();
         var sut = new GetCitiesHandler(repo, cache, NullLogger<GetCitiesHandler>.Instance);
 

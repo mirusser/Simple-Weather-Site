@@ -70,7 +70,7 @@ spec:
         app: citiesservice
     spec:
       initContainers:
-        - name: wait-for-sqlserver
+        - name: wait-for-postgres
           image: busybox:1.36
           imagePullPolicy: IfNotPresent
           command:
@@ -78,8 +78,8 @@ spec:
             - -c
           args:
             - |
-              until nc -z sqlserver 1433; do
-                echo "Waiting for sqlserver:1433"
+              until nc -z postgres 5432; do
+                echo "Waiting for postgres:5432"
                 sleep 2
               done
       containers:
@@ -140,7 +140,7 @@ spec:
         app: citiesgrpcservice
     spec:
       initContainers:
-        - name: wait-for-sqlserver
+        - name: wait-for-postgres
           image: busybox:1.36
           imagePullPolicy: IfNotPresent
           command:
@@ -148,8 +148,8 @@ spec:
             - -c
           args:
             - |
-              until nc -z sqlserver 1433; do
-                echo "Waiting for sqlserver:1433"
+              until nc -z postgres 5432; do
+                echo "Waiting for postgres:5432"
                 sleep 2
               done
       containers:

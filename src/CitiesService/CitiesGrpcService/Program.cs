@@ -2,7 +2,7 @@
 using CitiesGrpcService.Services;
 using CitiesService.Application;
 using CitiesService.Infrastructure;
-using CitiesService.Infrastructure.Contexts;
+using CitiesService.Infrastructure.HealthChecks;
 using Common.Application.HealthChecks;
 using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
@@ -54,7 +54,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services
         .AddCommonHealthChecks(builder.Configuration)
-        .AddDbContextCheck<ApplicationDbContext>(
+        .AddCitiesServiceDbContextCheck(
             name: "DB health check",
             failureStatus: HealthStatus.Unhealthy,
             tags: [HealthChecksTags.Ready, HealthChecksTags.Database]);

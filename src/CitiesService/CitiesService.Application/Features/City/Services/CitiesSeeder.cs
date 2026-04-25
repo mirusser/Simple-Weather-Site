@@ -7,12 +7,12 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CitiesService.Application.Common.Helpers;
+using CitiesService.Application.Common.Exceptions;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
 using Common.Infrastructure.Settings;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly.Registry;
@@ -21,6 +21,7 @@ namespace CitiesService.Application.Features.City.Services;
 
 public sealed class CitiesSeeder(
     IGenericRepository<CityInfo> cityInfoRepo,
+    ISeedLockProvider seedLockProvider,
     IOptions<FileUrlsAndPaths> fileUrlsAndPathsOptions,
     IHttpClientFactory clientFactory,
     ResiliencePipelineProvider<string> pipelineProvider,
@@ -41,7 +42,8 @@ public sealed class CitiesSeeder(
         }
 
         // Acquire a cross-instance lock (only one replica seeds)
-        if (!await cityInfoRepo.TryAcquireSeedLockAsync(cancellationToken))
+        await using var seedLock = await seedLockProvider.TryAcquireAsync("CitiesSeed", cancellationToken);
+        if (seedLock is null)
         {
             logger.LogInformation("Another instance is seeding cities. Skipping seeding.");
             return result;
@@ -96,7 +98,7 @@ public sealed class CitiesSeeder(
         {
             return await cityInfoRepo.SaveAsync(cancellationToken);
         }
-        catch (DbUpdateException ex)
+        catch (PersistenceUpdateException ex)
         {
             // If you add unique index, a race/manual call can cause duplicates -> treat as "seeded enough"
             logger.LogWarning(ex, "City seeding encountered a DB update exception (possible duplicates).");

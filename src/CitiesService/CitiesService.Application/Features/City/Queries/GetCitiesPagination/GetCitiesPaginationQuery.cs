@@ -7,7 +7,6 @@ using CitiesService.Domain.Entities;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
 using Common.Presentation.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 
@@ -81,11 +80,7 @@ public class GetCitiesPaginationHandler(
 
         CityInfoPaginationDto? result = new()
         {
-            NumberOfAllCities = await cityInfoRepo
-                .FindAll(
-                    searchExpression: _ => true,
-                    orderByExpression: ci => ci.OrderBy(c => c.Name))
-                .CountAsync(cancellationToken)
+            NumberOfAllCities = await cityInfoRepo.CountAsync(_ => true, cancellationToken)
         };
 
         if (pageNumber >= 1 && numberOfCities >= 1)
@@ -94,13 +89,12 @@ public class GetCitiesPaginationHandler(
                 ? numberOfCities * (pageNumber - 1)
                 : 0;
 
-            result.CityInfos = await cityInfoRepo
-                .FindAll(
-                    searchExpression: _ => true,
-                    orderByExpression: x => x.OrderBy(c => c.Name),
-                    skipNumberOfRows: howManyToSkip,
-                    takeNumberOfRows: numberOfCities)
-                .ToListAsync(cancellationToken);
+            result.CityInfos = await cityInfoRepo.ListAsync(
+                searchExpression: _ => true,
+                orderByExpression: x => x.OrderBy(c => c.Name),
+                skipNumberOfRows: howManyToSkip,
+                takeNumberOfRows: numberOfCities,
+                cancellationToken: cancellationToken);
         }
 
         await cache.SetAsync(cacheKey, result, cancellationToken);

@@ -1,12 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using CitiesService.Application.Common.Exceptions;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Domain.Entities.Dtos;
 using Common.Mediator;
 using Common.Presentation.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Application.Features.City.Commands.UpdateCity;
 
@@ -52,7 +52,7 @@ public sealed class PatchCityHandler(ICityRepository repo)
                 ? Result<UpdateCityResult>.Fail(Problems.NotFound($"City with Id={req.Id} not found"))
                 : Result<UpdateCityResult>.Ok(new UpdateCityResult { City = city });
         }
-        catch (DbUpdateConcurrencyException)
+        catch (PersistenceConcurrencyException)
         {
             return Result<UpdateCityResult>.Fail(
                 Problems.Conflict(

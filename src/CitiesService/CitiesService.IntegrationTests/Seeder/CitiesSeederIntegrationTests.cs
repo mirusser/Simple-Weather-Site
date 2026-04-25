@@ -6,13 +6,13 @@ using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Services;
 using CitiesService.Domain.Entities;
 using CitiesService.Domain.Settings;
+using CitiesService.Infrastructure.Database;
 using CitiesService.Infrastructure.Repositories;
 using CitiesService.IntegrationTests.Infrastructure.Collections;
 using CitiesService.IntegrationTests.Infrastructure.Db;
 using Common.Testing.Http;
 using Common.Testing.IO;
 using Common.Testing.SqlServer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -43,7 +43,7 @@ public class CitiesSeederIntegrationTests(SqlServerFixture sql)
         {
             await using (var db = DbTestHelpers.CreateDbContext(cs))
             {
-                await db.Database.MigrateAsync();
+                await DbTestHelpers.MigrateAsync(db);
             }
 
             var services = new ServiceCollection();
@@ -81,6 +81,7 @@ public class CitiesSeederIntegrationTests(SqlServerFixture sql)
 
             services.AddScoped(_ => DbTestHelpers.CreateDbContext(cs));
             services.AddScoped<IGenericRepository<CityInfo>, GenericRepository<CityInfo>>();
+            services.AddScoped<ISeedLockProvider, SqlServerSeedLockProvider>();
             services.AddScoped<ICitiesSeeder, CitiesSeeder>();
 
             await using var provider = services.BuildServiceProvider();
@@ -91,7 +92,7 @@ public class CitiesSeederIntegrationTests(SqlServerFixture sql)
             Assert.True(result);
 
             var repo = scope.ServiceProvider.GetRequiredService<IGenericRepository<CityInfo>>();
-            var count = await repo.FindAll(_ => true).CountAsync();
+            var count = await repo.CountAsync(_ => true);
             Assert.Equal(2, count);
         }
     }

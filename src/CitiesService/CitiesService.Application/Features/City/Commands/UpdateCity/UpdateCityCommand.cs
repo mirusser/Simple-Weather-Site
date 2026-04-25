@@ -1,11 +1,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using CitiesService.Application.Common.Exceptions;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
 using Common.Mediator;
 using Common.Presentation.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.Application.Features.City.Commands.UpdateCity;
 
@@ -54,7 +54,7 @@ public sealed class UpdateCityHandler(ICityRepository repo)
                 ? Result<UpdateCityResult>.Ok(new UpdateCityResult { City = city })
                 : Result<UpdateCityResult>.Fail(Problems.Conflict("Update affected 0 rows"));
         }
-        catch (DbUpdateConcurrencyException)
+        catch (PersistenceConcurrencyException)
         {
             return Result<UpdateCityResult>.Fail(
                 Problems.Conflict(
@@ -62,4 +62,3 @@ public sealed class UpdateCityHandler(ICityRepository repo)
         }
     }
 }
-

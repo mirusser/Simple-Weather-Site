@@ -43,6 +43,7 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
 
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
+            ["Database:Provider"] = "SqlServer",
             [$"ConnectionStrings:{nameof(ConnectionStrings.DefaultConnection)}"] = connectionString,
             [$"ConnectionStrings:{nameof(ConnectionStrings.RedisConnection)}"] = "localhost:6379",
             ["RabbitMQSettings:Host"] = "localhost",

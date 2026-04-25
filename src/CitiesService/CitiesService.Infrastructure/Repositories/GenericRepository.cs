@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using CitiesService.Application.Common.Exceptions;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -16,37 +17,49 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
     protected readonly ApplicationDbContext Context = context;
     private readonly DbSet<T> db = context.Set<T>();
 
-    public async Task<bool> TryAcquireSeedLockAsync(CancellationToken ct)
+    public IQueryable<T> FindAll(
+        Expression<Func<T, bool>>? searchExpression = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,
+        int skipNumberOfRows = 0,
+        int takeNumberOfRows = 0,
+        List<string>? includes = null)
+        => ApplyQuery(
+            searchExpression,
+            orderByExpression,
+            skipNumberOfRows,
+            takeNumberOfRows,
+            includes);
+
+    public async Task<List<T>> ListAsync(
+        Expression<Func<T, bool>>? searchExpression,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,
+        int skipNumberOfRows = 0,
+        int takeNumberOfRows = 0,
+        List<string>? includes = null,
+        CancellationToken cancellationToken = default)
+        => await ApplyQuery(
+                searchExpression,
+                orderByExpression,
+                skipNumberOfRows,
+                takeNumberOfRows,
+                includes)
+            .ToListAsync(cancellationToken);
+
+    public async Task<int> CountAsync(
+        Expression<Func<T, bool>>? searchExpression = null,
+        CancellationToken cancellationToken = default)
     {
-        var conn = Context.Database.GetDbConnection();
-        await Context.Database.OpenConnectionAsync(ct);
+        IQueryable<T> query = db;
 
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText =
-            """
-                DECLARE @result int;
-                EXEC @result = sp_getapplock
-                    @Resource = @resource,
-                    @LockMode = 'Exclusive',
-                    @LockOwner = 'Session',
-                    @LockTimeout = 0;
-                SELECT @result;
-            """;
-        cmd.CommandType = System.Data.CommandType.Text;
+        if (searchExpression != null)
+        {
+            query = query.Where(searchExpression);
+        }
 
-        var p = cmd.CreateParameter();
-        p.ParameterName = "@resource";
-        p.Value = "CitiesSeed";
-        cmd.Parameters.Add(p);
-
-        var resultObj = await cmd.ExecuteScalarAsync(ct);
-        var result = Convert.ToInt32(resultObj);
-
-        // >= 0 means acquired (0 granted, 1 converted, etc.)
-        return result >= 0;
+        return await query.CountAsync(cancellationToken);
     }
 
-    public IQueryable<T> FindAll(
+    private IQueryable<T> ApplyQuery(
         Expression<Func<T, bool>>? searchExpression = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,
         int skipNumberOfRows = 0,
@@ -145,7 +158,24 @@ public class GenericRepository<T>(ApplicationDbContext context) : IGenericReposi
 
     public async Task<bool> SaveAsync(CancellationToken cancellationToken = default)
     {
-        var numberOfRowsAffected = await Context.SaveChangesAsync(cancellationToken);
+        int numberOfRowsAffected;
+
+        try
+        {
+            numberOfRowsAffected = await Context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new PersistenceConcurrencyException(
+                "A concurrency conflict occurred while saving persistence changes.",
+                ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new PersistenceUpdateException(
+                "A persistence update error occurred while saving changes.",
+                ex);
+        }
 
         return numberOfRowsAffected > 0;
     }

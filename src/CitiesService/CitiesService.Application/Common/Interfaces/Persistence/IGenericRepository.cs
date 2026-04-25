@@ -11,14 +11,24 @@ namespace CitiesService.Application.Common.Interfaces.Persistence;
 
 public interface IGenericRepository<T> where T : class
 {
-    Task<bool> TryAcquireSeedLockAsync(CancellationToken ct);
-
     IQueryable<T> FindAll(
         Expression<Func<T, bool>>? searchExpression,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,
         int skipNumberOfRows = 0,
         int takeNumberOfRows = 0,
         List<string>? includes = null);
+
+    Task<List<T>> ListAsync(
+        Expression<Func<T, bool>>? searchExpression,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderByExpression = null,
+        int skipNumberOfRows = 0,
+        int takeNumberOfRows = 0,
+        List<string>? includes = null,
+        CancellationToken cancellationToken = default);
+
+    Task<int> CountAsync(
+        Expression<Func<T, bool>>? searchExpression = null,
+        CancellationToken cancellationToken = default);
 
     Task<T?> FindAsync(
         Expression<Func<T, bool>> searchExpression,
