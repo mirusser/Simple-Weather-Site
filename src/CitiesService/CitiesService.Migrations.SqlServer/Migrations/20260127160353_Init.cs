@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace CitiesService.Infrastructure.Migrations
+namespace CitiesService.Migrations.SqlServer.Migrations
 {
     /// <inheritdoc />
     public partial class Init : Migration

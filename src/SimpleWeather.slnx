@@ -11,7 +11,10 @@
     <Project Path="CitiesService/CitiesService.Domain/CitiesService.Domain.csproj" />
     <Project Path="CitiesService/CitiesService.GraphQL/CitiesService.GraphQL.csproj" />
     <Project Path="CitiesService/CitiesService.Infrastructure/CitiesService.Infrastructure.csproj" />
+    <Project Path="CitiesService/CitiesService.Infrastructure.Persistence/CitiesService.Infrastructure.Persistence.csproj" />
     <Project Path="CitiesService/CitiesService.IntegrationTests/CitiesService.IntegrationTests.csproj" />
+    <Project Path="CitiesService/CitiesService.Migrations.PostgreSql/CitiesService.Migrations.PostgreSql.csproj" />
+    <Project Path="CitiesService/CitiesService.Migrations.SqlServer/CitiesService.Migrations.SqlServer.csproj" />
     <Project Path="CitiesService/CitiesService.Tests/CitiesService.Tests.csproj" />
   </Folder>
   <Folder Name="/Commons/">

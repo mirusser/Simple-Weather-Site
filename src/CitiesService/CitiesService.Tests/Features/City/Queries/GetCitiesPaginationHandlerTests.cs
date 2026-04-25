@@ -1,7 +1,6 @@
 using CitiesService.Application.Features.City.Models.Dto;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
 using CitiesService.Domain.Entities;
-using CitiesService.Infrastructure.Repositories;
 using Common.Testing.TestDoubles;
 using CitiesService.Tests.TestInfrastructure;
 
@@ -12,8 +11,7 @@ public class GetCitiesPaginationHandlerTests
     [Fact]
     public async Task Handle_WhenCacheHit_MapsFromCachedPaginationDto_AndDoesNotSetCache()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        var repo = new GenericRepository<CityInfo>(db);
+        var repo = new InMemoryCityRepository();
         var cache = new FakeCacheManager();
 
         var cached = new CityInfoPaginationDto
@@ -51,14 +49,11 @@ public class GetCitiesPaginationHandlerTests
     [Fact]
     public async Task Handle_WhenCacheMiss_ReturnsTotalCount_AndSetsCache()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        db.CityInfos.AddRange(
+        var repo = new InMemoryCityRepository([
             new CityInfo { Id = 1, CityId = 1m, Name = "A", CountryCode = "X", Lat = 0, Lon = 0 },
             new CityInfo { Id = 2, CityId = 2m, Name = "B", CountryCode = "X", Lat = 0, Lon = 0 },
-            new CityInfo { Id = 3, CityId = 3m, Name = "C", CountryCode = "X", Lat = 0, Lon = 0 });
-        await db.SaveChangesAsync();
-
-        var repo = new GenericRepository<CityInfo>(db);
+            new CityInfo { Id = 3, CityId = 3m, Name = "C", CountryCode = "X", Lat = 0, Lon = 0 }
+        ]);
         var cache = new FakeCacheManager();
         var sut = new GetCitiesPaginationHandler(repo, cache);
 
@@ -77,16 +72,13 @@ public class GetCitiesPaginationHandlerTests
     [Fact]
     public async Task Handle_PaginatesAndOrdersByName()
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        db.CityInfos.AddRange(
+        var repo = new InMemoryCityRepository([
             new CityInfo { Id = 1, CityId = 1m, Name = "Delta", CountryCode = "X", Lat = 0, Lon = 0 },
             new CityInfo { Id = 2, CityId = 2m, Name = "Bravo", CountryCode = "X", Lat = 0, Lon = 0 },
             new CityInfo { Id = 3, CityId = 3m, Name = "Echo", CountryCode = "X", Lat = 0, Lon = 0 },
             new CityInfo { Id = 4, CityId = 4m, Name = "Alpha", CountryCode = "X", Lat = 0, Lon = 0 },
-            new CityInfo { Id = 5, CityId = 5m, Name = "Charlie", CountryCode = "X", Lat = 0, Lon = 0 });
-        await db.SaveChangesAsync();
-
-        var repo = new GenericRepository<CityInfo>(db);
+            new CityInfo { Id = 5, CityId = 5m, Name = "Charlie", CountryCode = "X", Lat = 0, Lon = 0 }
+        ]);
         var cache = new FakeCacheManager();
         var sut = new GetCitiesPaginationHandler(repo, cache);
 
@@ -106,11 +98,9 @@ public class GetCitiesPaginationHandlerTests
     [InlineData(10, 0)]
     public async Task Handle_WhenInputsAreInvalid_ReturnsCountButNoCities(int numberOfCities, int pageNumber)
     {
-        await using var db = DbContextFactory.CreateInMemory();
-        db.CityInfos.Add(new CityInfo { Id = 1, CityId = 1m, Name = "A", CountryCode = "X", Lat = 0, Lon = 0 });
-        await db.SaveChangesAsync();
-
-        var repo = new GenericRepository<CityInfo>(db);
+        var repo = new InMemoryCityRepository([
+            new CityInfo { Id = 1, CityId = 1m, Name = "A", CountryCode = "X", Lat = 0, Lon = 0 }
+        ]);
         var cache = new FakeCacheManager();
         var sut = new GetCitiesPaginationHandler(repo, cache);
 

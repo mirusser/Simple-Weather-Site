@@ -8,7 +8,6 @@ using CitiesService.Domain.Entities;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
 using Common.Presentation.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace CitiesService.Application.Features.City.Queries.GetCities;
@@ -62,23 +61,21 @@ public class GetCitiesHandler(
             return citiesFromCache;
         }
 
-        var cityInfoQuery = cityInfoRepo.FindAll(
+        var cityInfoList = await cityInfoRepo.ListAsync(
             c => c.Name.Contains(cityName),
             orderByExpression: x => x.OrderBy(c => c.Id),
-            takeNumberOfRows: limit);
+            takeNumberOfRows: limit,
+            cancellationToken: cancellationToken);
 
-        var citiesExist = await cityInfoQuery
-            .AnyAsync(cancellationToken);
-
-        if (!citiesExist)
+        if (cityInfoList.Count == 0)
         {
             return [];
         }
 
-        var cityInfoList = await cityInfoQuery
+        cityInfoList = cityInfoList
             .GroupBy(x => x.Name)
             .Select(x => x.First())
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var cities = cityInfoList
             .Select(c => new GetCityResult()

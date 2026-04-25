@@ -1,4 +1,5 @@
 using CitiesService.Infrastructure.Repositories;
+using CitiesService.IntegrationTests.Infrastructure.Db;
 using Common.Testing.DI;
 using Common.Testing.TestDoubles;
 using Common.Infrastructure.Managers.Contracts;
@@ -16,11 +17,14 @@ public sealed class CitiesApiFactory(string connectionString) : WebApplicationFa
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(Environments.Development);
+        builder.UseSetting("Database:Provider", "SqlServer");
+        builder.UseSetting($"ConnectionStrings:{nameof(ConnectionStrings.DefaultConnection)}", connectionString);
 
         builder.ConfigureAppConfiguration((_, cfg) =>
         {
             cfg.AddInMemoryCollection(new Dictionary<string, string?>
             {
+                ["Database:Provider"] = "SqlServer",
                 [$"ConnectionStrings:{nameof(ConnectionStrings.DefaultConnection)}"] = connectionString,
                 [$"ConnectionStrings:{nameof(ConnectionStrings.RedisConnection)}"] = "localhost:6379",
                 ["RabbitMQSettings:Host"] = "localhost",
@@ -42,6 +46,8 @@ public sealed class CitiesApiFactory(string connectionString) : WebApplicationFa
             // Avoid Redis connectivity by replacing the cache manager.
             services.RemoveServiceByTypeFullName(typeof(ICacheManager).FullName!);
             services.AddSingleton<ICacheManager, FakeCacheManager>();
+
+            DbTestHelpers.ReplaceWithSqlServerApplicationDbContext(services, connectionString);
         });
     }
 }

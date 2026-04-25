@@ -7,7 +7,6 @@ using Common.Mediator;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 using MapsterMapper;
-using Microsoft.EntityFrameworkCore;
 
 namespace CitiesGrpcService.Services;
 
@@ -22,7 +21,7 @@ public class CitiesService(
         CitiesPaginationInfoRequest request,
         ServerCallContext context)
     {
-        var countOfAllCities = await cityInfoRepo.FindAll(searchExpression: _ => true).CountAsync();
+        var countOfAllCities = await cityInfoRepo.CountAsync(_ => true, context.CancellationToken);
         var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities, };
 
         return citiesPaginationInfoReply;

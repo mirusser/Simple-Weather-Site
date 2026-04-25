@@ -1,6 +1,5 @@
+using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Domain.Entities;
-using CitiesService.Infrastructure.Contexts;
-using Microsoft.EntityFrameworkCore;
 
 namespace CitiesService.GraphQL;
 
@@ -12,23 +11,21 @@ public class CityQueries
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<CityInfo> GetCities(ApplicationDbContext db)
-        => db.CityInfos
-            .AsNoTracking()
+    public IQueryable<CityInfo> GetCities([Service] ICityRepository repo)
+        => repo.FindAll(
+            searchExpression: _ => true,
             // stable deterministic order is important for cursor pagination
-            .OrderBy(c => c.Id);
+            orderByExpression: q => q.OrderBy(c => c.Id));
 
     public Task<CityInfo?> GetCityByDbIdAsync(
         int id,
-        ApplicationDbContext db,
+        [Service] ICityRepository repo,
         CancellationToken ct)
-        => db.CityInfos.AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id, ct);
+        => repo.FindAsync(c => c.Id == id, cancellationToken: ct);
 
     public Task<CityInfo?> GetCityByCityIdAsync(
         decimal cityId,
-        ApplicationDbContext db,
+        [Service] ICityRepository repo,
         CancellationToken ct)
-        => db.CityInfos.AsNoTracking()
-            .FirstOrDefaultAsync(c => c.CityId == cityId, ct);
+        => repo.FindAsync(c => c.CityId == cityId, cancellationToken: ct);
 }

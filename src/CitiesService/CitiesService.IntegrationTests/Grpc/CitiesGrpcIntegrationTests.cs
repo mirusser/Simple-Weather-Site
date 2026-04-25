@@ -3,7 +3,6 @@ using CitiesService.IntegrationTests.Infrastructure.Collections;
 using Common.Testing.SqlServer;
 using CitiesService.IntegrationTests.Infrastructure.Db;
 using Grpc.Net.Client;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace CitiesService.IntegrationTests.Grpc;
@@ -29,7 +28,7 @@ public class CitiesGrpcIntegrationTests(SqlServerFixture sql)
 
         await using (var db = DbTestHelpers.CreateDbContext(cs))
         {
-            await db.Database.MigrateAsync();
+            await DbTestHelpers.MigrateAsync(db);
             db.CityInfos.AddRange(
                 new CityInfo { CityId = 1m, Name = "A", CountryCode = "X", Lat = 0, Lon = 0 },
                 new CityInfo { CityId = 2m, Name = "B", CountryCode = "X", Lat = 0, Lon = 0 });
@@ -61,7 +60,7 @@ public class CitiesGrpcIntegrationTests(SqlServerFixture sql)
 
         await using (var db = DbTestHelpers.CreateDbContext(cs))
         {
-            await db.Database.MigrateAsync();
+            await DbTestHelpers.MigrateAsync(db);
             db.CityInfos.AddRange(
                 new CityInfo { CityId = 1m, Name = "Alpha", CountryCode = "X", Lat = 0, Lon = 0 },
                 new CityInfo { CityId = 2m, Name = "Bravo", CountryCode = "X", Lat = 0, Lon = 0 },

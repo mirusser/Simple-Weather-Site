@@ -2,7 +2,7 @@
 using System.Net;
 using CitiesService.Application.Features.HealthChecks;
 using CitiesService.GraphQL;
-using CitiesService.Infrastructure.Contexts;
+using CitiesService.Infrastructure.HealthChecks;
 using Common.Application.HealthChecks;
 using Common.Contracts.HealthCheck;
 using Common.Presentation.Settings;
@@ -67,8 +67,8 @@ public static class ServiceRegistration
 
             services
                 .AddCommonHealthChecks(configuration)
-                .AddDbContextCheck<ApplicationDbContext>(
-                    name: "SQL health check",
+                .AddCitiesServiceDbContextCheck(
+                    name: "DB health check",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: [HealthChecksTags.Ready, HealthChecksTags.Database])
                 .AddCheck<CitiesAvailableHealthCheck>(

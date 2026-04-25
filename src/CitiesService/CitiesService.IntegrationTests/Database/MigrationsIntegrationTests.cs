@@ -1,7 +1,11 @@
 using CitiesService.IntegrationTests.Infrastructure.Collections;
+using CitiesService.Infrastructure.Database;
+using Common.Infrastructure.Settings;
+using Common.Testing.PostgreSql;
 using Common.Testing.SqlServer;
 using CitiesService.IntegrationTests.Infrastructure.Db;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace CitiesService.IntegrationTests.Database;
@@ -21,12 +25,44 @@ public class MigrationsIntegrationTests(SqlServerFixture sql)
 
         await using var db = DbTestHelpers.CreateDbContext(cs);
 
-        await db.Database.MigrateAsync();
+        await DbTestHelpers.MigrateAsync(db);
 
-        var pending = await db.Database.GetPendingMigrationsAsync();
+        var pending = await DbTestHelpers.GetPendingMigrationsAsync(db);
         Assert.Empty(pending);
 
         // Smoke query: table exists and can be queried
-        _ = await db.CityInfos.CountAsync();
+        _ = await DbTestHelpers.CountCitiesAsync(db);
+    }
+}
+
+[Collection(PostgreSqlCollection.Name)]
+public class PostgreSqlMigrationsIntegrationTests(PostgreSqlFixture postgres)
+{
+    [PostgreSqlFact]
+    public async Task CanApplyAllMigrations()
+    {
+        var dbName = DbTestHelpers.CreateDatabaseName("cities_pg_migrations");
+        var cs = postgres.GetConnectionStringForDatabase(dbName);
+
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [$"ConnectionStrings:{nameof(ConnectionStrings.DefaultConnection)}"] = cs,
+            })
+            .Build();
+
+        var bootstrapper = new PostgreSqlDatabaseBootstrapper(
+            config,
+            NullLogger<PostgreSqlDatabaseBootstrapper>.Instance);
+        await bootstrapper.EnsureDatabaseExistsAsync(CancellationToken.None);
+
+        await using var db = DbTestHelpers.CreatePostgreSqlDbContext(cs);
+
+        await DbTestHelpers.MigrateAsync(db);
+
+        var pending = await DbTestHelpers.GetPendingMigrationsAsync(db);
+        Assert.Empty(pending);
+
+        _ = await DbTestHelpers.CountCitiesAsync(db);
     }
 }
