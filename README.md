@@ -2,9 +2,9 @@
 
 ## Overview
 
-*Simple Weather Site* is a .NET 10 microservices-style learning project. It provides a Razor Pages web UI for checking weather, browsing/searching cities, and viewing historical weather results.
+*Simple Weather Site* is a .NET 10 microservices-style application that demonstrates a containerized, service-oriented architecture around weather data. The system includes a Razor Pages UI, REST APIs, gRPC, GraphQL, SignalR, RabbitMQ messaging, background processing, and multiple persistence technologies.
 
-The project is intentionally broader than a small weather app: it is used to practice service boundaries, async messaging, background jobs, health checks, observability, containerized deployment, and database migration workflows.
+It is built as a practical engineering sandbox for deployment, observability, database migrations, health checks, and integration testing across local Docker, EC2 Docker Compose, and Minikube environments.
 
 ![Tests](https://github.com/mirusser/Simple-Weather-Site/actions/workflows/tests.yml/badge.svg?branch=main)
 ![Build & Run](https://github.com/mirusser/Simple-Weather-Site/actions/workflows/build-run-local.yml/badge.svg?branch=main)
@@ -77,6 +77,7 @@ Deployment docs:
 - Health responses use `HealthChecks.UI.Client` formatting.
 - Docker Compose deployment includes a separate HealthChecks UI container.
 - Serilog writes to console and can ship logs to Seq.
+- Docker Compose also includes Prometheus and Grafana for OpenTelemetry metrics.
 
 ---
 
@@ -95,8 +96,7 @@ Deployment docs:
 
 - CI/CD pipeline improvements.
 - Broader test coverage for services outside CitiesService.
-- Continue refactor, cleanup, and modernization work.
-- Deeper AWS-native migration, such as SQS, managed databases, and automated backups.
+- Deeper AWS-native migration, such as EventBridge, SQS, managed databases, and automated backups.
 - Export historical weather data as PDF, Excel, CSV, Markdown, or HTML.
 - Runtime configuration/admin UI for service URLs and settings.
 - User-location based weather lookup.
@@ -110,5 +110,5 @@ Deployment docs:
 
 ### Things to Check Out
 
-- **Prometheus and Grafana** for metrics and richer monitoring beyond health status.
+- Build useful dashboards and alerts on top of the Prometheus/Grafana metrics stack.
 - **Consul** for service discovery and health checking in more advanced microservice setups.
