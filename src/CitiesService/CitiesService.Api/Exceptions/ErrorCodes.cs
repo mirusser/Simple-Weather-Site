@@ -1,4 +1,4 @@
-﻿namespace Common.Presentation.Exceptions;
+﻿namespace CitiesService.Api.Exceptions;
 
 public static partial class ErrorCodes
 {
