@@ -8,6 +8,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     networks:
@@ -21,6 +24,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
       # gRPC internal port:
@@ -38,6 +44,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     networks:
@@ -51,6 +60,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     networks:
@@ -64,6 +76,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     volumes:
@@ -80,6 +95,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     networks:
@@ -93,6 +111,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     networks:
@@ -106,6 +127,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     networks:
@@ -119,6 +143,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     volumes:
@@ -136,6 +163,9 @@ services:
       - ASPNETCORE_URLS=http://+:80
       # Optional: if your app supports forwarded headers behind ALB
       - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
     expose:
       - "80"
     networks:
