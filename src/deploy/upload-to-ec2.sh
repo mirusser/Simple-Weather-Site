@@ -49,6 +49,11 @@ BASE_FILES=(
   "nginx.conf"
 )
 
+BASE_DIRS=(
+  "prometheus"
+  "grafana"
+)
+
 ENV_FILES=(
   ".env.prod"
   ".env.infra"
@@ -79,6 +84,12 @@ echo
 
 # Ensure local files exist (relative to SCRIPT_DIR)
 for f in "${BASE_FILES[@]}"; do need_file "$SCRIPT_DIR/$f"; done
+for d in "${BASE_DIRS[@]}"; do
+  if [[ ! -d "$SCRIPT_DIR/$d" ]]; then
+    echo "ERROR: Missing local directory: $SCRIPT_DIR/$d"
+    exit 1
+  fi
+done
 if [[ "$SKIP_ENV" -eq 0 ]]; then
   for f in "${ENV_FILES[@]}"; do need_file "$SCRIPT_DIR/$f"; done
 fi
@@ -91,6 +102,12 @@ run ssh -i "$KEY_PATH" "${SSH_USER}@${EC2_IP}" \
 for f in "${BASE_FILES[@]}"; do
   echo "-> scp $f"
   run scp -i "$KEY_PATH" "$SCRIPT_DIR/$f" "${SSH_USER}@${EC2_IP}:${REMOTE_DIR}/"
+done
+
+# Upload config directories
+for d in "${BASE_DIRS[@]}"; do
+  echo "-> scp -r $d"
+  run scp -i "$KEY_PATH" -r "$SCRIPT_DIR/$d" "${SSH_USER}@${EC2_IP}:${REMOTE_DIR}/"
 done
 
 # Upload env files unless skipped

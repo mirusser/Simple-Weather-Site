@@ -73,7 +73,20 @@ chmod +x push-ecr.sh
 chmod +x upload-to-ec2.sh
 ```
 
-Build images and start the local compose stack:
+Start or update the infra stack for local databases, queues, logs, and metrics:
+
+```bash
+cd <YOUR_REPO>/src/deploy
+[ -f .env.infra ] || cp .env.example.infra .env.infra
+# Edit .env.infra before using real secrets.
+docker compose \
+  --project-name sws-infra \
+  --env-file .env.infra \
+  -f docker-compose.infra.prod.yml \
+  up -d
+```
+
+Build images and start the local app compose stack:
 
 ```bash
 cd <YOUR_REPO>/src/deploy
@@ -87,6 +100,14 @@ docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 ```
 
 Then open the site in a browser and check service health endpoints.
+
+Prometheus and Grafana are bound to localhost by default:
+
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000`
+
+Grafana uses `admin` with the password from `GRAFANA_ADMIN_PASSWORD` in `.env.infra`.
+Application containers export OpenTelemetry metrics to Prometheus through OTLP HTTP.
 
 ---
 
@@ -251,6 +272,7 @@ Options:
 - `--skip-env` does not overwrite `.env.*` files on EC2
 
 Make sure both `.env.prod` and `.env.infra` exist on EC2 before running the deploy script. Example templates are available as `.env.example.prod` and `.env.example.infra`.
+Set `GRAFANA_ADMIN_PASSWORD` in `.env.infra` before starting Grafana.
 
 ### Run Deployment on EC2
 
@@ -279,6 +301,27 @@ Check from your local machine:
 
 ```bash
 curl -i http://<EC2_PUBLIC_IP>/health
+```
+
+Prometheus and Grafana bind to localhost on the EC2 host. Use an SSH tunnel from your local machine when you need the UIs:
+
+```bash
+ssh -i sws-ec2-key-pair.pem \
+  -L 9090:localhost:9090 \
+  -L 3000:localhost:3000 \
+  admin@<EC2_PUBLIC_IP>
+```
+
+Then open:
+
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000`
+
+Example Prometheus checks after app traffic:
+
+```promql
+target_info{job=~"sws/CitiesService.Api|CitiesService.Api"}
+http_server_request_duration_seconds_count{job=~"sws/CitiesService.Api|CitiesService.Api"}
 ```
 
 ---
