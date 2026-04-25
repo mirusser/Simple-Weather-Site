@@ -27,18 +27,17 @@ public sealed class PostgreSqlSeedLockProvider(ApplicationDbContext context) : I
             cmd.Parameters.Add(p);
 
             var resultObj = await cmd.ExecuteScalarAsync(cancellationToken);
-            if (resultObj is bool acquired && acquired)
+            if (resultObj is true)
             {
                 return new PostgreSqlSeedLockLease(context, resource);
             }
 
-            context.Database.CloseConnection();
+            await context.Database.CloseConnectionAsync();
             return null;
         }
-        catch
+        finally
         {
-            context.Database.CloseConnection();
-            throw;
+            await context.Database.CloseConnectionAsync();
         }
     }
 
@@ -73,7 +72,7 @@ public sealed class PostgreSqlSeedLockProvider(ApplicationDbContext context) : I
             }
             finally
             {
-                context.Database.CloseConnection();
+                await context.Database.CloseConnectionAsync();
             }
         }
     }
