@@ -98,7 +98,17 @@ Check running containers:
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 ```
 
-Then open the site in a browser and check service health endpoints.
+Then open the site through the local nginx gateway:
+
+```text
+http://localhost:8080
+```
+
+This is the preferred full-site test URL. It routes through nginx the same way as the EC2 deployment, proxying `/` to WeatherSite and `/signalr/` to SignalRServer.
+
+Direct service ports like `http://localhost:8084` (WeatherSite) and `http://localhost:8897` (SignalRServer) remain available for debugging individual services.
+
+Check service health endpoints:
 
 Observability UIs are bound to localhost by default:
 

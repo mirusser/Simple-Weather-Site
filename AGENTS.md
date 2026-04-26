@@ -53,3 +53,7 @@ For multi-step tasks, state a brief plan:
 ```
 
 ## 5. Project-Specific Guidelines
+
+### Environment (Antigravity in Docker)
+
+This repo is set up to be worked on by the Antigravity AI agent running in a Docker container with Docker Outside Docker (DooD) enabled. The .NET 10 SDK is installed to `~/.dotnet` (not system-wide). See [`.agents/Plans/environment-setup.md`](.agents/Plans/environment-setup.md) for full details on installed tools and how to reproduce the setup.

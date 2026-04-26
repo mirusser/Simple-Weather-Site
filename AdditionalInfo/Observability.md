@@ -103,6 +103,7 @@ Useful local service URLs:
 
 | Service | Base URL |
 | --- | --- |
+| **Gateway (nginx)** | `http://localhost:8080` |
 | OAuthServer | `http://localhost:8078` |
 | CitiesService | `http://localhost:8081` |
 | CitiesGrpcService | `http://localhost:8681` |
@@ -114,6 +115,8 @@ Useful local service URLs:
 | EmailService | `http://localhost:8087` |
 | HangfireService | `http://localhost:8089` |
 | BackupService | `http://localhost:8090` |
+
+The gateway URL is the preferred way to access the site locally. Direct service ports are available for debugging individual services.
 
 Example:
 
