@@ -1,11 +1,11 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: postgres
+    container_name: postgres_infra
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.infra}"
       POSTGRES_DB: postgres
     volumes:
       - /opt/sws/volumes/postgresql:/var/lib/postgresql
@@ -16,7 +16,7 @@ services:
 
   mongo:
     image: mongo:latest
-    container_name: mongo
+    container_name: mongo_infra
     restart: unless-stopped
     volumes:
       - /opt/sws/volumes/mongo/data/db:/data/db
@@ -28,12 +28,12 @@ services:
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
+    container_name: sqlserver_infra
     restart: unless-stopped
     user: root
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-change-me}
+      - "MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env.infra}"
     volumes:
       - /opt/sws/volumes/mssql/data:/var/opt/mssql
     expose:
@@ -43,7 +43,7 @@ services:
 
   redis:
     image: redis:latest
-    container_name: redis
+    container_name: redis_infra
     restart: unless-stopped
     user: "0:0"
     volumes:
@@ -56,7 +56,7 @@ services:
 
   seq:
     image: datalust/seq:latest
-    container_name: seq
+    container_name: seq_infra
     restart: unless-stopped
     environment:
       - ACCEPT_EULA=Y
@@ -70,8 +70,9 @@ services:
 
   prometheus:
     image: prom/prometheus:v3.11.2
-    container_name: prometheus
+    container_name: prometheus_infra
     restart: unless-stopped
+    user: "0:0"
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -80,7 +81,7 @@ services:
       - "--web.enable-otlp-receiver"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
+      - /opt/sws/volumes/prometheus/data:/prometheus
     ports:
       - "127.0.0.1:9090:9090"
     expose:
@@ -90,15 +91,16 @@ services:
 
   grafana:
     image: grafana/grafana:13.0.1
-    container_name: grafana
+    container_name: grafana_infra
     restart: unless-stopped
+    user: "0:0"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-change-me}
+      - "GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env.infra}"
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - grafana-data:/var/lib/grafana
+      - /opt/sws/volumes/grafana/data:/var/lib/grafana
     ports:
       - "127.0.0.1:3000:3000"
     expose:
@@ -112,7 +114,7 @@ services:
 
   jaeger:
     image: cr.jaegertracing.io/jaegertracing/jaeger:2.17.0
-    container_name: jaeger
+    container_name: jaeger_infra
     restart: unless-stopped
     environment:
       - COLLECTOR_OTLP_ENABLED=true
@@ -126,13 +128,14 @@ services:
 
   loki:
     image: grafana/loki:3.7.0
-    container_name: loki
+    container_name: loki_infra
     restart: unless-stopped
+    user: "0:0"
     command:
       - "-config.file=/etc/loki/local-config.yaml"
     volumes:
       - ./loki/local-config.yaml:/etc/loki/local-config.yaml:ro
-      - loki-data:/loki
+      - /opt/sws/volumes/loki/data:/loki
     ports:
       - "127.0.0.1:3100:3100"
     expose:
@@ -142,7 +145,7 @@ services:
 
   alloy:
     image: grafana/alloy:v1.15.0
-    container_name: alloy
+    container_name: alloy_infra
     restart: unless-stopped
     command:
       - "run"
@@ -162,7 +165,7 @@ services:
 
   rabbitmq:
     image: heidiks/rabbitmq-delayed-message-exchange:latest
-    container_name: rabbitmq
+    container_name: rabbitmq_infra
     restart: unless-stopped
     volumes:
       - /opt/sws/volumes/rabbitmq/data:/var/lib/rabbitmq
@@ -174,14 +177,14 @@ services:
 
   healthchecks:
     image: xabarilcoding/healthchecksui:latest
-    container_name: healthchecks
+    container_name: healthchecks_infra
     restart: unless-stopped
     depends_on:
       - sqlserver
     environment:
       - ui_path=/
       - storage_provider=SqlServer
-      - storage_connection=Server=sqlserver;User Id=sa;Password=${MSSQL_SA_PASSWORD:-change-me};Initial Catalog=DockerUI
+      - "storage_connection=Server=sqlserver;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env.infra};Initial Catalog=DockerUI"
       - 'HealthChecksUI:HealthChecks:0:Name=OAuthServer'
       - 'HealthChecksUI:HealthChecks:0:Uri=http://oauthserver:80/health'
       - 'HealthChecksUI:HealthChecks:1:Name=CitiesService'
@@ -211,11 +214,3 @@ networks:
   default:
     name: sws-containers-bridge-network
     external: true
-
-volumes:
-  prometheus-data:
-    driver: local
-  grafana-data:
-    driver: local
-  loki-data:
-    driver: local

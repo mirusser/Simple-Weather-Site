@@ -78,13 +78,20 @@ Start or update the infra stack for local databases, queues, logs, metrics, and 
 ```bash
 cd <YOUR_REPO>/src/deploy
 [ -f .env.infra ] || cp .env.example.infra .env.infra
-# Edit .env.infra before using real secrets.
+# Fill every value in .env.infra before starting infra.
+docker compose \
+  --project-name sws-infra \
+  --env-file .env.infra \
+  -f docker-compose.infra.prod.yml \
+  config --environment
 docker compose \
   --project-name sws-infra \
   --env-file .env.infra \
   -f docker-compose.infra.prod.yml \
   up -d
 ```
+
+The `config --environment` output can print secrets. Do not paste it publicly if you put real passwords in `.env.infra`.
 
 Build images and start the local app compose stack:
 
@@ -110,6 +117,11 @@ Observability UIs are bound to localhost by default:
 - Alloy UI: `http://localhost:12345`
 
 Grafana uses `admin` with the password from `GRAFANA_ADMIN_PASSWORD` in `.env.infra`.
+
+The infra compose file fails fast if `POSTGRES_PASSWORD`, `MSSQL_SA_PASSWORD`, or `GRAFANA_ADMIN_PASSWORD` is missing or empty. Exported shell variables override `.env.infra`, so check the `config --environment` output if Compose renders a different value than expected.
+
+If Compose renders the expected values but Grafana, PostgreSQL, or SQL Server still use old credentials, existing host-mounted data or service-specific password state may already have been initialized.
+
 Application containers export OpenTelemetry metrics to Prometheus through OTLP HTTP.
 CitiesService also exports traces to Jaeger, and Alloy scrapes CitiesService container logs into Loki.
 
@@ -276,7 +288,7 @@ Options:
 - `--skip-env` does not overwrite `.env.*` files on EC2
 
 Make sure both `.env.prod` and `.env.infra` exist on EC2 before running the deploy script. Example templates are available as `.env.example.prod` and `.env.example.infra`.
-Set `GRAFANA_ADMIN_PASSWORD` in `.env.infra` before starting Grafana.
+Set `POSTGRES_PASSWORD`, `MSSQL_SA_PASSWORD`, and `GRAFANA_ADMIN_PASSWORD` in `.env.infra` before starting infra.
 
 ### Run Deployment on EC2
 

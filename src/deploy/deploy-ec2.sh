@@ -27,6 +27,20 @@ if ! docker network ls --format '{{.Name}}' | grep -Fxq "$NETWORK_NAME"; then
     docker network create -d bridge "$NETWORK_NAME"
 fi
 
+echo "==> Ensuring infra volume directories exist"
+INFRA_VOLUME_DIRS=(
+    /opt/sws/volumes/postgresql
+    /opt/sws/volumes/mongo/data/db
+    /opt/sws/volumes/mssql/data
+    /opt/sws/volumes/redis/data
+    /opt/sws/volumes/seq/data
+    /opt/sws/volumes/prometheus/data
+    /opt/sws/volumes/grafana/data
+    /opt/sws/volumes/loki/data
+    /opt/sws/volumes/rabbitmq/data
+)
+mkdir -p "${INFRA_VOLUME_DIRS[@]}"
+
 echo "==> Logging into ECR: $ECR_REGISTRY"
 aws ecr get-login-password --region "$AWS_REGION" \
         | docker login --username AWS --password-stdin "$ECR_REGISTRY" >/dev/null
@@ -39,13 +53,13 @@ docker compose \
     up -d
 
 echo "Waiting for mongo..."
-until docker exec mongo mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok" | grep -qE '^(1|true)$'; do
+until docker exec mongo_infra mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok" | grep -qE '^(1|true)$'; do
     sleep 2
 done
 echo "Mongo is up."
 
 echo "Ensuring mongo replica set is initialized..."
-docker exec mongo mongosh --quiet --eval '
+docker exec mongo_infra mongosh --quiet --eval '
 try {
   const st = rs.status();
   if (st.ok === 1) { print("Replica set already initialized"); }
