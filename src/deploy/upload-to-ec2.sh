@@ -52,6 +52,8 @@ BASE_FILES=(
 BASE_DIRS=(
   "prometheus"
   "grafana"
+  "loki"
+  "alloy"
 )
 
 ENV_FILES=(

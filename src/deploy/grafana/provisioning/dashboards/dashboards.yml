@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Simple Weather Site
+    orgId: 1
+    folder: Simple Weather Site
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json

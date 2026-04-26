@@ -77,7 +77,8 @@ Deployment docs:
 - Health responses use `HealthChecks.UI.Client` formatting.
 - Docker Compose deployment includes a separate HealthChecks UI container.
 - Serilog writes to console and can ship logs to Seq.
-- Docker Compose also includes Prometheus and Grafana for OpenTelemetry metrics.
+- Docker Compose includes Prometheus and Grafana for OpenTelemetry metrics, Jaeger for CitiesService traces, and Loki/Alloy for CitiesService container logs.
+- [Observability run and check guide](AdditionalInfo/Observability.md)
 
 ---
 

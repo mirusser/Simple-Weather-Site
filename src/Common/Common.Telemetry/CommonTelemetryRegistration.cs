@@ -1,10 +1,10 @@
 using System.Reflection;
-using Common.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace Common.Telemetry;
 
@@ -18,12 +18,15 @@ public static class CommonTelemetryRegistration
         string applicationName,
         string environmentName)
     {
-        if (!HasOtlpEndpoint(configuration))
+        var hasMetricsEndpoint = HasMetricsEndpoint(configuration);
+        var hasTracesEndpoint = HasTracesEndpoint(configuration);
+
+        if (!hasMetricsEndpoint && !hasTracesEndpoint)
         {
             return services;
         }
 
-        services
+        var telemetry = services
             .AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(
                     serviceName: applicationName,
@@ -32,19 +35,35 @@ public static class CommonTelemetryRegistration
                     serviceInstanceId: GetServiceInstanceId())
                 .AddAttributes([
                     new KeyValuePair<string, object>("deployment.environment.name", environmentName)
-                ]))
-            .WithMetrics(metrics => metrics
+                ]));
+
+        if (hasMetricsEndpoint)
+        {
+            telemetry.WithMetrics(metrics => metrics
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation())
-            .UseOtlpExporter();
+                .AddRuntimeInstrumentation()
+                .AddOtlpExporter());
+        }
+
+        if (hasTracesEndpoint)
+        {
+            telemetry.WithTracing(tracing => tracing
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation()
+                .AddOtlpExporter());
+        }
 
         return services;
     }
 
-    private static bool HasOtlpEndpoint(IConfiguration configuration)
+    private static bool HasMetricsEndpoint(IConfiguration configuration)
         => !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_ENDPOINT"])
            || !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"]);
+
+    private static bool HasTracesEndpoint(IConfiguration configuration)
+        => !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"]);
 
     private static string GetServiceVersion()
         => Assembly.GetEntryAssembly()?.GetName().Version?.ToString()

@@ -73,7 +73,7 @@ chmod +x push-ecr.sh
 chmod +x upload-to-ec2.sh
 ```
 
-Start or update the infra stack for local databases, queues, logs, and metrics:
+Start or update the infra stack for local databases, queues, logs, metrics, and traces:
 
 ```bash
 cd <YOUR_REPO>/src/deploy
@@ -101,13 +101,17 @@ docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 
 Then open the site in a browser and check service health endpoints.
 
-Prometheus and Grafana are bound to localhost by default:
+Observability UIs are bound to localhost by default:
 
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000`
+- Jaeger: `http://localhost:16686`
+- Loki readiness: `http://localhost:3100/ready`
+- Alloy UI: `http://localhost:12345`
 
 Grafana uses `admin` with the password from `GRAFANA_ADMIN_PASSWORD` in `.env.infra`.
 Application containers export OpenTelemetry metrics to Prometheus through OTLP HTTP.
+CitiesService also exports traces to Jaeger, and Alloy scrapes CitiesService container logs into Loki.
 
 ---
 
@@ -303,12 +307,13 @@ Check from your local machine:
 curl -i http://<EC2_PUBLIC_IP>/health
 ```
 
-Prometheus and Grafana bind to localhost on the EC2 host. Use an SSH tunnel from your local machine when you need the UIs:
+Prometheus, Grafana, and Jaeger bind to localhost on the EC2 host. Use an SSH tunnel from your local machine when you need the UIs:
 
 ```bash
 ssh -i sws-ec2-key-pair.pem \
   -L 9090:localhost:9090 \
   -L 3000:localhost:3000 \
+  -L 16686:localhost:16686 \
   admin@<EC2_PUBLIC_IP>
 ```
 
@@ -316,12 +321,31 @@ Then open:
 
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000`
+- Jaeger: `http://localhost:16686`
+
+Optional debugging tunnels:
+
+```bash
+ssh -i sws-ec2-key-pair.pem \
+  -L 3100:localhost:3100 \
+  -L 12345:localhost:12345 \
+  admin@<EC2_PUBLIC_IP>
+```
+
+- Loki readiness: `http://localhost:3100/ready`
+- Alloy UI: `http://localhost:12345`
 
 Example Prometheus checks after app traffic:
 
 ```promql
 target_info{job=~"sws/CitiesService.Api|CitiesService.Api"}
 http_server_request_duration_seconds_count{job=~"sws/CitiesService.Api|CitiesService.Api"}
+```
+
+Example Loki check after CitiesService logs are emitted:
+
+```logql
+{service_name="citiesservice"}
 ```
 
 ---

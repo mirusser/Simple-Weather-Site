@@ -106,7 +106,59 @@ services:
     networks:
       - default
     depends_on:
+      - jaeger
+      - loki
       - prometheus
+
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.17.0
+    container_name: jaeger
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "127.0.0.1:16686:16686"
+    expose:
+      - "4318"
+      - "16686"
+    networks:
+      - default
+
+  loki:
+    image: grafana/loki:3.7.0
+    container_name: loki
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/loki/local-config.yaml"
+    volumes:
+      - ./loki/local-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    expose:
+      - "3100"
+    networks:
+      - default
+
+  alloy:
+    image: grafana/alloy:v1.15.0
+    container_name: alloy
+    restart: unless-stopped
+    command:
+      - "run"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "/etc/alloy/config.alloy"
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "127.0.0.1:12345:12345"
+    expose:
+      - "12345"
+    networks:
+      - default
+    depends_on:
+      - loki
 
   rabbitmq:
     image: heidiks/rabbitmq-delayed-message-exchange:latest
@@ -164,4 +216,6 @@ volumes:
   prometheus-data:
     driver: local
   grafana-data:
+    driver: local
+  loki-data:
     driver: local
