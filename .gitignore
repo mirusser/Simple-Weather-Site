@@ -504,7 +504,8 @@ src/.env.prod
 
 # local env files (do not commit)
 src/deploy/.env.*
-!.env.example
+!src/deploy/.env.example.infra
+!src/deploy/.env.example.prod
 
 # integration tests local settings (do not commit)
 src/CitiesService/CitiesService.IntegrationTests/appsettings.local.json
