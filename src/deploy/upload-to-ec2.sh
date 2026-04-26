@@ -10,7 +10,7 @@ set -Eeuo pipefail
 #
 # Notes:
 # - This script will create /opt/sws on the EC2 host (via sudo) and chown it to SSH_USER.
-# - It will also run: chmod +x /opt/sws/deploy-ec2.sh remotely after upload.
+# - It will also run chmod +x for uploaded deployment scripts after upload.
 # - If you want to avoid overwriting environment files (.env.*), use --skip-env.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -46,6 +46,7 @@ BASE_FILES=(
   "docker-compose.prod.yml"
   "docker-compose.infra.prod.yml"
   "deploy-ec2.sh"
+  "ensure-mongo-replica-set.sh"
   "nginx.conf"
 )
 
@@ -122,9 +123,9 @@ else
   echo "-> skipping .env.prod and .env.infra"
 fi
 
-# Remote chmod +x deploy-ec2.sh
+# Remote chmod +x deployment scripts
 run ssh -i "$KEY_PATH" "${SSH_USER}@${EC2_IP}" \
-  "chmod +x '${REMOTE_DIR}/deploy-ec2.sh'"
+  "chmod +x '${REMOTE_DIR}/deploy-ec2.sh' '${REMOTE_DIR}/ensure-mongo-replica-set.sh'"
 
 echo
 echo "Done."
