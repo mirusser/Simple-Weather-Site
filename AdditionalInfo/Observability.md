@@ -19,13 +19,51 @@ Start the infrastructure stack first:
 ```bash
 cd <YOUR_REPO>/src/deploy
 [ -f .env.infra ] || cp .env.example.infra .env.infra
-# Edit .env.infra if you want a real Grafana password.
+# Fill every value in .env.infra before starting infra.
 docker compose \
   --project-name sws-infra \
   --env-file .env.infra \
   -f docker-compose.infra.prod.yml \
   up -d
 ```
+
+`--env-file .env.infra` is resolved relative to the current directory, so run the command from `src/deploy` or pass an absolute path to the env file.
+
+The `.env.infra` file is used for Compose variable substitution. The variables are passed into containers only where `docker-compose.infra.prod.yml` references them. For example, `GRAFANA_ADMIN_PASSWORD` becomes the Grafana container variable `GF_SECURITY_ADMIN_PASSWORD`.
+
+To verify Compose is reading the file, check the interpolation environment before starting containers:
+
+```bash
+cd <YOUR_REPO>/src/deploy
+docker compose \
+  --project-name sws-infra \
+  --env-file .env.infra \
+  -f docker-compose.infra.prod.yml \
+  config --environment
+```
+
+Then render the resolved Compose config:
+
+```bash
+cd <YOUR_REPO>/src/deploy
+docker compose \
+  --project-name sws-infra \
+  --env-file .env.infra \
+  -f docker-compose.infra.prod.yml \
+  config
+```
+
+Both commands can print secrets. Do not paste their output publicly if you put real passwords in `.env.infra`.
+
+If Compose reports `Set POSTGRES_PASSWORD in .env.infra`, `Set MSSQL_SA_PASSWORD in .env.infra`, or `Set GRAFANA_ADMIN_PASSWORD in .env.infra`, the variable is missing or empty. Exported shell variables override `.env.infra`, so check your shell environment too if the rendered value is not what you expect.
+
+If the rendered config is correct but services still use old credentials, password state may already be persisted:
+
+- Grafana stores the admin user under `/opt/sws/volumes/grafana/data` after first startup.
+- PostgreSQL and SQL Server store initialized database state under `/opt/sws/volumes/`.
+- HealthChecks UI reads the SQL Server password from Compose each time, but the SQL Server password itself is controlled by the existing SQL Server data.
+
+For a clean local reset, stop the infra stack and remove only the local observability/database data you are willing to lose before starting it again.
 
 Build and start the application containers:
 
@@ -212,11 +250,11 @@ Then open:
 Check container logs:
 
 ```bash
-docker logs --tail 200 prometheus
-docker logs --tail 200 grafana
-docker logs --tail 200 jaeger
-docker logs --tail 200 loki
-docker logs --tail 200 alloy
+docker logs --tail 200 prometheus_infra
+docker logs --tail 200 grafana_infra
+docker logs --tail 200 jaeger_infra
+docker logs --tail 200 loki_infra
+docker logs --tail 200 alloy_infra
 docker logs --tail 200 citiesservice
 ```
 
