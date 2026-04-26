@@ -18,20 +18,16 @@ Start the infrastructure stack first:
 
 ```bash
 cd <YOUR_REPO>/src/deploy
-[ -f .env.infra ] || cp .env.example.infra .env.infra
-# Fill every value in .env.infra before starting infra.
-docker compose \
-  --project-name sws-infra \
-  --env-file .env.infra \
-  -f docker-compose.infra.prod.yml \
-  up -d
+./run-infra-locally.sh
 ```
 
-`--env-file .env.infra` is resolved relative to the current directory, so run the command from `src/deploy` or pass an absolute path to the env file.
+If `.env.infra` does not exist, the script creates it from `.env.example.infra` and stops. Fill every value in `.env.infra`, then rerun the script.
+
+The script starts `docker-compose.infra.prod.yml`, ensures the shared Docker network and `/opt/sws/volumes/` bind-mount directories exist, and initializes the Mongo replica set required by services that use `mongodb://mongo:27017/?replicaSet=rs0`.
 
 The `.env.infra` file is used for Compose variable substitution. The variables are passed into containers only where `docker-compose.infra.prod.yml` references them. For example, `GRAFANA_ADMIN_PASSWORD` becomes the Grafana container variable `GF_SECURITY_ADMIN_PASSWORD`.
 
-To verify Compose is reading the file, check the interpolation environment before starting containers:
+To inspect the Compose interpolation environment:
 
 ```bash
 cd <YOUR_REPO>/src/deploy

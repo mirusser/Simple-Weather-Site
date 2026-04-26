@@ -52,30 +52,7 @@ docker compose \
     -f docker-compose.infra.prod.yml \
     up -d
 
-echo "Waiting for mongo..."
-until docker exec mongo_infra mongosh --quiet --eval "db.runCommand({ ping: 1 }).ok" | grep -qE '^(1|true)$'; do
-    sleep 2
-done
-echo "Mongo is up."
-
-echo "Ensuring mongo replica set is initialized..."
-docker exec mongo_infra mongosh --quiet --eval '
-try {
-  const st = rs.status();
-  if (st.ok === 1) { print("Replica set already initialized"); }
-} catch (e) {
-  print("Initializing replica set...");
-  rs.initiate({_id:"rs0", members:[{_id:0, host:"mongo:27017"}]});
-  // wait until primary
-  while (true) {
-    try {
-      const s = rs.status();
-      if (s.myState === 1) { print("Replica set PRIMARY ready"); break; }
-    } catch (e2) {}
-    sleep(1000);
-  }
-}
-'
+./ensure-mongo-replica-set.sh
 
 echo "==> Pulling app images"
 docker compose \

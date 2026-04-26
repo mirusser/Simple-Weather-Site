@@ -68,6 +68,7 @@ Make scripts executable:
 
 ```bash
 cd <YOUR_REPO>/src/deploy
+chmod +x run-infra-locally.sh
 chmod +x build-run-locally.sh
 chmod +x push-ecr.sh
 chmod +x upload-to-ec2.sh
@@ -77,21 +78,12 @@ Start or update the infra stack for local databases, queues, logs, metrics, and 
 
 ```bash
 cd <YOUR_REPO>/src/deploy
-[ -f .env.infra ] || cp .env.example.infra .env.infra
-# Fill every value in .env.infra before starting infra.
-docker compose \
-  --project-name sws-infra \
-  --env-file .env.infra \
-  -f docker-compose.infra.prod.yml \
-  config --environment
-docker compose \
-  --project-name sws-infra \
-  --env-file .env.infra \
-  -f docker-compose.infra.prod.yml \
-  up -d
+./run-infra-locally.sh
 ```
 
-The `config --environment` output can print secrets. Do not paste it publicly if you put real passwords in `.env.infra`.
+If `.env.infra` does not exist, the script creates it from `.env.example.infra` and stops. Fill every value in `.env.infra`, then rerun the script.
+
+The script validates the Compose environment, starts infra with project name `sws-infra`, prepares `/opt/sws/volumes/` bind mounts, and initializes the Mongo replica set used by `mongodb://mongo:27017/?replicaSet=rs0`.
 
 Build images and start the local app compose stack:
 
@@ -379,11 +371,8 @@ docker ps -aq | xargs -r docker rm -f
 Manually start the infra stack first:
 
 ```bash
-docker compose \
-  --project-name sws-infra \
-  --env-file .env.infra \
-  -f docker-compose.infra.prod.yml \
-  up -d
+cd <YOUR_REPO>/src/deploy
+./run-infra-locally.sh
 ```
 
 Then start the app stack:
