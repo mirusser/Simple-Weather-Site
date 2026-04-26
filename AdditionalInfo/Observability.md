@@ -116,7 +116,15 @@ Useful local service URLs:
 | HangfireService | `http://localhost:8089` |
 | BackupService | `http://localhost:8090` |
 
-The gateway URL is the preferred way to access the site locally. Direct service ports are available for debugging individual services.
+Use the gateway URL to open WeatherSite in local Docker:
+
+```text
+http://localhost:8080
+```
+
+This exercises the same nginx shape as EC2: `/` is proxied to WeatherSite and `/signalr/` is proxied to SignalRServer. SignalR browser connections depend on that route.
+
+Direct service ports are available for debugging individual services. `http://localhost:8084` opens WeatherSite directly and bypasses nginx, so browser requests to `/signalr/...` stay on the WeatherSite container and return `404`.
 
 Example:
 

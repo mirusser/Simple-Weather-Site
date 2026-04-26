@@ -104,9 +104,9 @@ Then open the site through the local nginx gateway:
 http://localhost:8080
 ```
 
-This is the preferred full-site test URL. It routes through nginx the same way as the EC2 deployment, proxying `/` to WeatherSite and `/signalr/` to SignalRServer.
+Use this URL when testing WeatherSite in local Docker. It routes through nginx the same way as the EC2 deployment, proxying `/` to WeatherSite and `/signalr/` to SignalRServer. SignalR browser connections depend on this gateway route.
 
-Direct service ports like `http://localhost:8084` (WeatherSite) and `http://localhost:8897` (SignalRServer) remain available for debugging individual services.
+Direct service ports like `http://localhost:8084` (WeatherSite) and `http://localhost:8897` (SignalRServer) remain available for debugging individual services. Do not use `http://localhost:8084` for full WeatherSite testing: it bypasses nginx, so browser requests to `/signalr/...` stay on the WeatherSite container and return `404`.
 
 Check service health endpoints:
 

@@ -172,6 +172,14 @@ run_docker_compose(){
         -p "sws-containers" up -d && \
     echo -e "${GREEN}=> The containers started in the background.${NC}" || \
     { echo -e "${RED}=> Docker compose failed.${NC}"; exit 1; }
+
+    # nginx does not auto-reload when the bind-mounted config file changes.
+    docker compose \
+        --project-directory "$BASE_DIR" \
+        -f "$DEPLOY_DIR/docker-compose.local.yml" \
+        -p "sws-containers" up -d --no-deps --force-recreate gateway && \
+    echo -e "${GREEN}=> The local nginx gateway was recreated with the latest config.${NC}" || \
+    { echo -e "${RED}=> Docker compose failed to recreate the local nginx gateway.${NC}"; exit 1; }
 }
 
 update_iptables() {
