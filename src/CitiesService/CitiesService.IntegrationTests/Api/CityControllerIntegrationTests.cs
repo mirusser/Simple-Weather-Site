@@ -83,7 +83,7 @@ public class CityControllerIntegrationTests(SqlServerFixture sql)
             await db.SaveChangesAsync();
         }
 
-        await using var factory = new CitiesApiFactory(cs);
+        await using var factory = new CitiesApiFactory(cs, enablePrometheusMetrics: true);
         var client = factory.CreateClient();
 
         var traffic = await client.PostAsJsonAsync(

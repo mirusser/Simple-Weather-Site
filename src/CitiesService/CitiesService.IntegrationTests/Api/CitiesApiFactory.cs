@@ -12,17 +12,23 @@ using Microsoft.Extensions.Hosting;
 
 namespace CitiesService.IntegrationTests.Api;
 
-public sealed class CitiesApiFactory(string connectionString) : WebApplicationFactory<CitiesService.Api.Controllers.CityController>
+public sealed class CitiesApiFactory(
+    string connectionString,
+    bool enablePrometheusMetrics = false) : WebApplicationFactory<CitiesService.Api.Controllers.CityController>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(Environments.Development);
         builder.UseSetting("Database:Provider", "SqlServer");
         builder.UseSetting($"ConnectionStrings:{nameof(ConnectionStrings.DefaultConnection)}", connectionString);
+        if (enablePrometheusMetrics)
+        {
+            builder.UseSetting("SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED", "true");
+        }
 
         builder.ConfigureAppConfiguration((_, cfg) =>
         {
-            cfg.AddInMemoryCollection(new Dictionary<string, string?>
+            var settings = new Dictionary<string, string?>
             {
                 ["Database:Provider"] = "SqlServer",
                 [$"ConnectionStrings:{nameof(ConnectionStrings.DefaultConnection)}"] = connectionString,
@@ -33,8 +39,14 @@ public sealed class CitiesApiFactory(string connectionString) : WebApplicationFa
                 ["FileUrlsAndPaths:DecompressedCityListFilePath"] = "./ignored.json",
                 ["ResiliencePipelines:Default:Name"] = "default",
                 ["ResiliencePipelines:Health:Name"] = "health",
-                ["SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED"] = "true",
-            });
+            };
+
+            if (enablePrometheusMetrics)
+            {
+                settings["SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED"] = "true";
+            }
+
+            cfg.AddInMemoryCollection(settings);
         });
 
         builder.ConfigureServices(services =>

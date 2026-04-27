@@ -35,9 +35,10 @@ public sealed class PostgreSqlSeedLockProvider(ApplicationDbContext context) : I
             await context.Database.CloseConnectionAsync();
             return null;
         }
-        finally
+        catch
         {
             await context.Database.CloseConnectionAsync();
+            throw;
         }
     }
 

@@ -1,6 +1,6 @@
 {
   "IntegrationTests": {
-    "SqlServerBaseConnection": "Server=localhost,1433;User ID=sa;Password=Your_password123;Encrypt=False;TrustServerCertificate=True;",
-    "PostgreSqlBaseConnection": "Host=localhost;Port=5432;Username=postgres;Password=Your_password123;Database=postgres"
+    "SqlServerBaseConnection": "Server=localhost,1435;User ID=sa;Password=Your_password123;Encrypt=False;TrustServerCertificate=True;",
+    "PostgreSqlBaseConnection": "Host=localhost;Port=5432;Username=postgres;Password=Your_password123;Database=postgres;GSS Encryption Mode=Disable"
   }
 }
