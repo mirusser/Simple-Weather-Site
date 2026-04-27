@@ -227,7 +227,7 @@ check_port_binding() {
 
 forward_ports() {
     # Ports that should be reachable from outside the host (LAN/other machines)
-    local ports=(5672 27017 6379 5432 5341 1435 1433 9200 9300 8079 8078 8181 8081 8090 8897)
+    local ports=(5672 27017 6379 5432 5341 1433 9200 9300 8079 8078 8181 8081 8090 8897 8080)
     for port in "${ports[@]}"; do
         echo "Checking port: $port"
         # Ensure firewall allows it (adds rule if missing)
