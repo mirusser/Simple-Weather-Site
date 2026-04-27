@@ -1,5 +1,7 @@
 using System.Net;
+using CitiesGrpcService.Telemetry;
 using CitiesService.Application;
+using CitiesService.Application.Telemetry;
 using CitiesService.Infrastructure;
 using CitiesService.Infrastructure.Repositories;
 using Common.Testing.DI;
@@ -8,6 +10,7 @@ using Common.Application.Mapping;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Infrastructure.Settings;
 using Common.Presentation;
+using Common.Telemetry;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Builder;
@@ -28,6 +31,7 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
     private WebApplication? app;
 
     public Uri Address { get; private set; } = null!;
+    public Uri MetricsAddress { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -39,6 +43,7 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
         builder.WebHost.ConfigureKestrel(options =>
         {
             options.Listen(IPAddress.Loopback, 0, lo => lo.Protocols = HttpProtocols.Http2);
+            options.Listen(IPAddress.Loopback, 0, lo => lo.Protocols = HttpProtocols.Http1);
         });
 
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
@@ -49,10 +54,23 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
             ["RabbitMQSettings:Host"] = "localhost",
             ["ResiliencePipelines:Default:Name"] = "default",
             ["ResiliencePipelines:Health:Name"] = "health",
+            ["SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED"] = "true",
         });
 
         // Matches CitiesGrpcService.Program: required for JSON options, common services, etc.
-        builder.AddCommonPresentationLayer();
+        builder.AddCommonPresentationLayer(new CommonTelemetryOptions
+        {
+            MeterNames =
+            [
+                CitiesTelemetry.ApplicationMeterName,
+                CitiesGrpcTelemetry.MeterName
+            ],
+            ActivitySourceNames =
+            [
+                CitiesTelemetry.ApplicationActivitySourceName,
+                CitiesGrpcTelemetry.ActivitySourceName
+            ]
+        });
 
         builder.Services.AddGrpc(o =>
         {
@@ -75,11 +93,14 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
         builder.Services.AddSingleton<ICacheManager, FakeCacheManager>();
 
         app = builder.Build();
+        app.UseCommonPrometheusMetrics(builder.Configuration);
         app.MapGrpcService<CitiesGrpcService.Services.CitiesService>();
         await app.StartAsync();
 
         var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses;
-        Address = new Uri(addresses.Single());
+        var addressList = addresses.Select(address => new Uri(address)).ToArray();
+        Address = addressList[0];
+        MetricsAddress = addressList[1];
     }
 
     public async ValueTask DisposeAsync()

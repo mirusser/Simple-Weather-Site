@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
+using CitiesGrpcService.Telemetry;
 using CitiesGrpcService.Services;
 using CitiesService.Application;
+using CitiesService.Application.Telemetry;
 using CitiesService.Infrastructure;
 using CitiesService.Infrastructure.HealthChecks;
 using Common.Application.HealthChecks;
@@ -8,6 +10,7 @@ using Common.Application.Mapping;
 using Common.Contracts.HealthCheck;
 using Common.Presentation;
 using Common.Shared;
+using Common.Telemetry;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -30,7 +33,19 @@ var builder = WebApplication.CreateBuilder(args);
         });
     }
 
-    builder.AddCommonPresentationLayer();
+    builder.AddCommonPresentationLayer(new CommonTelemetryOptions
+    {
+        MeterNames =
+        [
+            CitiesTelemetry.ApplicationMeterName,
+            CitiesGrpcTelemetry.MeterName
+        ],
+        ActivitySourceNames =
+        [
+            CitiesTelemetry.ApplicationActivitySourceName,
+            CitiesGrpcTelemetry.ActivitySourceName
+        ]
+    });
 
     builder.Services.AddGrpc();
 
@@ -68,6 +83,7 @@ var app = builder.Build();
     }
 
     app.UseRouting();
+    app.UseCommonPrometheusMetrics(builder.Configuration);
 
     //Configure to user cors, needs: Grpc.AspNetCore.Web package
     //app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true }); // Must be added between UseRouting and UseEndpoints

@@ -33,6 +33,7 @@ public sealed class CitiesApiFactory(string connectionString) : WebApplicationFa
                 ["FileUrlsAndPaths:DecompressedCityListFilePath"] = "./ignored.json",
                 ["ResiliencePipelines:Default:Name"] = "default",
                 ["ResiliencePipelines:Health:Name"] = "health",
+                ["SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED"] = "true",
             });
         });
 

@@ -20,3 +20,15 @@ scrape_configs:
     static_configs:
       - targets:
           - localhost:9090
+
+  - job_name: citiesservice
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - citiesservice:80
+
+  - job_name: citiesgrpcservice
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - citiesgrpcservice:80

@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Reflection;
 using CitiesService.Application.Features.City.Services;
+using CitiesService.Application.Telemetry;
 using CitiesService.Domain.Settings;
 using Common.Application.Mapping;
+using Common.Mediator;
 using Common.Mediator.DependencyInjection;
 using FluentValidation;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CitiesService.Application;
 
@@ -23,6 +26,8 @@ public static class ServiceRegistration
         
             // TODO: do we really need all assemblies here?
             services.AddMediator(AppDomain.CurrentDomain.GetAssemblies());
+            services.TryAddEnumerable(
+                ServiceDescriptor.Transient(typeof(IPipelineBehavior<,>), typeof(CitiesTelemetryBehavior<,>)));
 
             services.AddMassTransit(config =>
             {

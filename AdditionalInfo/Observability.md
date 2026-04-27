@@ -7,10 +7,12 @@ The current stack includes:
 - health endpoints on application services
 - HealthChecks UI container for internal health polling
 - Serilog console logs and Seq as the existing structured log target
-- OpenTelemetry metrics exported to Prometheus
+- OpenTelemetry metrics exported to Prometheus in two ways:
+  - `citiesservice` and `citiesgrpcservice` expose `/metrics` for Prometheus scraping
+  - the remaining app services push metrics to Prometheus through its OTLP receiver
 - Grafana with provisioned Prometheus, Loki, and Jaeger datasources
-- Jaeger traces for CitiesService
-- Loki logs for the CitiesService container, collected by Grafana Alloy
+- Jaeger traces for `CitiesService.Api` and `CitiesGrpcService`
+- Loki logs for the CitiesService containers, collected by Grafana Alloy
 
 ## Run the stack locally
 
@@ -77,7 +79,7 @@ docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' \
 
 ## Generate sample telemetry
 
-Use CitiesService to create request metrics, traces, and logs:
+Use CitiesService to create REST request metrics, traces, and logs:
 
 ```bash
 curl -i http://localhost:8081/health
@@ -89,7 +91,28 @@ curl -i \
   http://localhost:8081/api/City/GetCitiesPagination
 ```
 
-Wait at least 15 seconds after sending traffic. Metrics are exported on a 15 second interval.
+Generate GraphQL traffic:
+
+```bash
+curl -i \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"{ cities(first: 5) { totalCount nodes { id name countryCode } } }"}' \
+  http://localhost:8081/graphql
+```
+
+From the repository root, generate gRPC traffic:
+
+```bash
+grpcurl \
+  -plaintext \
+  -import-path src/CitiesService/CitiesGrpcService/Protos \
+  -proto cities.proto \
+  -d '{"numberOfCities":5,"pageNumber":1}' \
+  localhost:8682 \
+  cities.Cities/GetCitiesPagination
+```
+
+Wait for the next Prometheus scrape after sending traffic. The default scrape interval is 15 seconds.
 
 ## Health checks
 
@@ -146,16 +169,26 @@ http://localhost:9090
 Use the Prometheus expression page and run:
 
 ```promql
-target_info{job=~"sws/CitiesService.Api|CitiesService.Api"}
+up{job=~"citiesservice|citiesgrpcservice"}
 ```
 
-Then check HTTP request metrics:
+Then check API and gRPC HTTP request metrics:
 
 ```promql
-http_server_request_duration_seconds_count{job=~"sws/CitiesService.Api|CitiesService.Api"}
+sum by (job) (rate(http_server_request_duration_seconds_count{job=~"citiesservice|citiesgrpcservice"}[5m]))
 ```
 
-Prometheus receives application metrics through OTLP HTTP. It does not scrape each application directly, so normal per-app scrape `up` metrics are not expected.
+Check custom CitiesService metrics:
+
+```promql
+sum by (operation, result) (rate(sws_cities_mediator_requests_total[5m]))
+sum by (operation, cache_result) (rate(sws_cities_cache_requests_total[5m]))
+histogram_quantile(0.95, sum by (le, operation) (rate(sws_cities_mediator_request_duration_seconds_bucket[5m])))
+sum by (grpc_method, result) (rate(sws_cities_grpc_calls_total[5m]))
+sum by (grpc_method) (rate(sws_cities_grpc_stream_messages_total[5m]))
+```
+
+Prometheus still starts with `--web.enable-otlp-receiver` because the remaining app services push metrics through OTLP HTTP. `citiesservice` and `citiesgrpcservice` intentionally do not set `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT`; Prometheus scrapes their `http://citiesservice:80/metrics` and `http://citiesgrpcservice:80/metrics` endpoints instead. This avoids duplicate API/gRPC metrics.
 
 ## Grafana
 
@@ -188,9 +221,11 @@ After generating CitiesService traffic:
 
 1. Select service `CitiesService.Api`.
 2. Click `Find Traces`.
-3. Open a trace and check for HTTP server spans. EF Core or outbound HTTP spans appear when the request path uses those dependencies.
+3. Open a trace and check for HTTP server spans plus `CitiesService.Application` and `CitiesService.GraphQL` spans when those flows run.
+4. Select service `CitiesGrpcService`.
+5. Open a trace and check for HTTP/gRPC server spans plus custom `CitiesGrpcService` spans.
 
-Only CitiesService exports traces for now. Other services currently export metrics only.
+REST, GraphQL, and gRPC traces are exported to Jaeger through OTLP HTTP at `http://jaeger:4318/v1/traces`. Other app services currently export metrics only unless their Compose service sets `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`.
 
 ## Loki and Alloy
 
@@ -200,7 +235,7 @@ Loki stores the logs that Grafana reads. Check Loki readiness:
 curl -i http://localhost:3100/ready
 ```
 
-Alloy scrapes Docker logs from the `citiesservice` container and pushes them to Loki. Open Alloy:
+Alloy scrapes Docker logs from the application containers and pushes them to Loki. Open Alloy:
 
 ```text
 http://localhost:12345
@@ -209,16 +244,27 @@ http://localhost:12345
 In Grafana Explore, choose the Loki datasource and run:
 
 ```logql
-{service_name="citiesservice"}
+{service_name=~"citiesservice|citiesgrpcservice"}
 ```
 
 If no logs appear, generate CitiesService traffic again and wait a few seconds:
 
 ```bash
 curl -i http://localhost:8081/health
+curl -i http://localhost:8681/health
 ```
 
 Seq is still present as the existing Serilog structured logging target. Grafana-visible logs currently come from Loki and Alloy, not from Seq.
+
+## gRPC counters
+
+The dashboard uses custom stable gRPC metrics from `CitiesGrpcService` (`sws_cities_grpc_*`) plus ASP.NET Core HTTP server metrics. Native gRPC counters such as `Grpc.AspNetCore.Server` are EventCounters, so they are useful with `dotnet-counters` for ad-hoc diagnostics but are not exported through OpenTelemetry in this pass:
+
+```bash
+dotnet-counters monitor --process-id <PID> --counters Grpc.AspNetCore.Server
+```
+
+The alpha OpenTelemetry EventCounters package is intentionally not part of this setup.
 
 ## EC2 access
 
@@ -251,6 +297,16 @@ Then open:
 
 - Loki readiness: `http://localhost:3100/ready`
 - Alloy UI: `http://localhost:12345`
+
+## Reference docs
+
+- Microsoft .NET OpenTelemetry with Prometheus, Grafana, and Jaeger: <https://learn.microsoft.com/en-us/dotnet/core/diagnostics/observability-prgrja-example>
+- .NET custom metrics guidance: <https://learn.microsoft.com/en-us/dotnet/core/diagnostics/metrics-instrumentation>
+- .NET custom ActivitySource guidance: <https://learn.microsoft.com/en-us/dotnet/core/diagnostics/distributed-tracing-instrumentation-walkthroughs>
+- .NET built-in metrics: <https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics>
+- EF Core metrics: <https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/metrics>
+- gRPC diagnostics and counters: <https://learn.microsoft.com/en-us/aspnet/core/grpc/diagnostics>
+- OpenTelemetry .NET exporters: <https://opentelemetry.io/docs/languages/dotnet/exporters/>
 
 ## Troubleshooting
 

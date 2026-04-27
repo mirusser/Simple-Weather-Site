@@ -56,4 +56,15 @@ For multi-step tasks, state a brief plan:
 
 ### Environment (Antigravity in Docker)
 
-This repo is set up to be worked on by the Antigravity AI agent running in a Docker container with Docker Outside Docker (DooD) enabled. The .NET 10 SDK is installed to `~/.dotnet` (not system-wide). See [`.agents/Plans/environment-setup.md`](.agents/Plans/environment-setup.md) for full details on installed tools and how to reproduce the setup.
+This repo may be worked on by the Antigravity AI agent running in a Docker container with Docker Outside Docker (DooD) enabled. The .NET 10 SDK is installed to `~/.dotnet` (not system-wide). See [`.agents/Plans/environment-setup.md`](.agents/Plans/environment-setup.md) for full details on installed tools and how to reproduce the setup.
+
+### .NET Build Quirks
+
+If `dotnet build` fails silently, reports `NETSDK1064`, or shows Roslyn shared compiler pipe errors, run an explicit restore first and verify with:
+
+```bash
+dotnet restore <project>
+dotnet msbuild <project> /t:Build /p:Restore=false /p:UseSharedCompilation=false /m:1 /v:minimal
+```
+
+Avoid overlapping restore/build operations on the same project. A local Codex skill, `dotnet-build-quirks`, records the fuller recovery checklist.

@@ -124,8 +124,9 @@ The infra compose file fails fast if `POSTGRES_PASSWORD`, `MSSQL_SA_PASSWORD`, o
 
 If Compose renders the expected values but Grafana, PostgreSQL, or SQL Server still use old credentials, existing host-mounted data or service-specific password state may already have been initialized.
 
-Application containers export OpenTelemetry metrics to Prometheus through OTLP HTTP.
-CitiesService also exports traces to Jaeger, and Alloy scrapes CitiesService container logs into Loki.
+Most application containers export OpenTelemetry metrics to Prometheus through OTLP HTTP.
+`citiesservice` and `citiesgrpcservice` expose `/metrics` for Prometheus scraping, export traces to Jaeger, and are covered by the provisioned Grafana dashboard.
+Alloy scrapes application container logs into Loki.
 
 ---
 
@@ -352,14 +353,16 @@ ssh -i sws-ec2-key-pair.pem \
 Example Prometheus checks after app traffic:
 
 ```promql
-target_info{job=~"sws/CitiesService.Api|CitiesService.Api"}
-http_server_request_duration_seconds_count{job=~"sws/CitiesService.Api|CitiesService.Api"}
+up{job=~"citiesservice|citiesgrpcservice"}
+sum by (job) (rate(http_server_request_duration_seconds_count{job=~"citiesservice|citiesgrpcservice"}[5m]))
+sum by (operation, result) (rate(sws_cities_mediator_requests_total[5m]))
+sum by (grpc_method, result) (rate(sws_cities_grpc_calls_total[5m]))
 ```
 
 Example Loki check after CitiesService logs are emitted:
 
 ```logql
-{service_name="citiesservice"}
+{service_name=~"citiesservice|citiesgrpcservice"}
 ```
 
 ---

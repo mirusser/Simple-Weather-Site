@@ -11,7 +11,7 @@ public static class CommonPresentationRegistration
 {
     extension(WebApplicationBuilder builder)
     {
-        public WebApplicationBuilder AddCommonPresentationLayer()
+        public WebApplicationBuilder AddCommonPresentationLayer(CommonTelemetryOptions? telemetryOptions = null)
         {
             builder.Host.UseSerilog((ctx, services, cfg) =>
                 cfg.ReadFrom.Configuration(ctx.Configuration)
@@ -21,7 +21,8 @@ public static class CommonPresentationRegistration
             builder.Services.AddCommonTelemetry(
                 builder.Configuration,
                 builder.Environment.ApplicationName,
-                builder.Environment.EnvironmentName);
+                builder.Environment.EnvironmentName,
+                telemetryOptions);
 
             return builder;
         }
