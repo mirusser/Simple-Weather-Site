@@ -238,6 +238,46 @@ After generating CitiesService traffic:
 
 REST, GraphQL, and gRPC traces are exported to Jaeger through OTLP HTTP at `http://jaeger:4318/v1/traces`. Other app services currently export metrics only unless their Compose service sets `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`.
 
+`Common.Telemetry` maps the signal-specific OTLP endpoint/protocol environment variables into `AddOtlpExporter(...)` options explicitly. Keep that mapping in place: the OpenTelemetry .NET signal-specific `AddOtlpExporter()` calls do not read `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` or `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` by themselves.
+
+If Prometheus/Grafana metrics and Loki logs update but Jaeger shows no traces, verify the trace path directly:
+
+```bash
+docker inspect citiesservice \
+  --format '{{range .Config.Env}}{{println .}}{{end}}' \
+  | grep -E 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT|OTEL_EXPORTER_OTLP_PROTOCOL|SWS_TELEMETRY'
+
+docker inspect citiesgrpcservice \
+  --format '{{range .Config.Env}}{{println .}}{{end}}' \
+  | grep -E 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT|OTEL_EXPORTER_OTLP_PROTOCOL|SWS_TELEMETRY'
+```
+
+Both services should include `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4318/v1/traces`. Then check that Jaeger is reachable from the shared Docker network:
+
+```bash
+docker run --rm --network sws-containers-bridge-network curlimages/curl:8.11.1 \
+  -sS -o /dev/null -w '%{http_code}\n' \
+  http://jaeger:4318/v1/traces
+```
+
+Any HTTP status means the endpoint is reachable; `405` is expected for this GET-based check because OTLP trace ingestion uses POST. `000` means the app containers cannot connect to Jaeger's OTLP HTTP receiver. Check exporter/receiver logs if connectivity looks good:
+
+```bash
+docker logs --tail 200 citiesservice | grep -Ei 'otel|opentelemetry|export|trace|jaeger' || true
+docker logs --tail 200 citiesgrpcservice | grep -Ei 'otel|opentelemetry|export|trace|jaeger' || true
+docker logs --tail 200 jaeger_infra | grep -Ei 'otlp|trace|span|error|warn' || true
+```
+
+You can also query Jaeger's HTTP API instead of the UI:
+
+```bash
+curl -s 'http://localhost:16686/api/services'
+curl -s 'http://localhost:16686/api/traces?service=CitiesService.Api&lookback=1h&limit=20'
+curl -s 'http://localhost:16686/api/traces?service=CitiesGrpcService&lookback=1h&limit=20'
+```
+
+For a UI sanity check, try `Last 2 Days` after generating fresh traffic. Jaeger uses transient in-memory storage in this local stack, so traces disappear when `jaeger_infra` restarts even though Prometheus/Loki data may still be present.
+
 ## Loki and Alloy
 
 Loki stores the logs that Grafana reads. Check Loki readiness:
@@ -318,6 +358,8 @@ Then open:
 - EF Core metrics: <https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/metrics>
 - gRPC diagnostics and counters: <https://learn.microsoft.com/en-us/aspnet/core/grpc/diagnostics>
 - OpenTelemetry .NET exporters: <https://opentelemetry.io/docs/languages/dotnet/exporters/>
+- Jaeger 2.17 getting started: <https://www.jaegertracing.io/docs/2.17/getting-started/>
+- Jaeger 2.17 configuration: <https://www.jaegertracing.io/docs/2.17/deployment/configuration/>
 
 ## Troubleshooting
 

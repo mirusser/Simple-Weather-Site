@@ -1,4 +1,5 @@
 using CitiesService.Application.Common.Interfaces.Persistence;
+using CitiesService.Application.Telemetry;
 using CitiesService.Domain.Entities;
 
 namespace CitiesService.GraphQL;
@@ -13,8 +14,8 @@ public class CityQueries
     [UseSorting]
     public IQueryable<CityInfo> GetCities([Service] ICityRepository repo)
     {
-        using var activity = GraphQlTelemetry.StartActivity("GraphQL.GetCities");
-        GraphQlTelemetry.SetResult(activity, "deferred");
+        using var activity = GraphQlTelemetry.StartActivity(CitiesTelemetryConventions.Operations.GraphQl.GetCities);
+        GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Deferred);
 
         return repo.FindAll(
             searchExpression: _ => true,
@@ -27,12 +28,16 @@ public class CityQueries
         [Service] ICityRepository repo,
         CancellationToken ct)
     {
-        using var activity = GraphQlTelemetry.StartActivity("GraphQL.GetCityByDbId");
+        using var activity = GraphQlTelemetry.StartActivity(CitiesTelemetryConventions.Operations.GraphQl.GetCityByDbId);
 
         try
         {
             var city = await repo.FindAsync(c => c.Id == id, cancellationToken: ct);
-            GraphQlTelemetry.SetResult(activity, city is null ? "not_found" : "success");
+            GraphQlTelemetry.SetResult(
+                activity,
+                city is null
+                    ? CitiesTelemetryConventions.ResultValues.NotFound
+                    : CitiesTelemetryConventions.ResultValues.Success);
 
             return city;
         }
@@ -48,12 +53,16 @@ public class CityQueries
         [Service] ICityRepository repo,
         CancellationToken ct)
     {
-        using var activity = GraphQlTelemetry.StartActivity("GraphQL.GetCityByCityId");
+        using var activity = GraphQlTelemetry.StartActivity(CitiesTelemetryConventions.Operations.GraphQl.GetCityByCityId);
 
         try
         {
             var city = await repo.FindAsync(c => c.CityId == cityId, cancellationToken: ct);
-            GraphQlTelemetry.SetResult(activity, city is null ? "not_found" : "success");
+            GraphQlTelemetry.SetResult(
+                activity,
+                city is null
+                    ? CitiesTelemetryConventions.ResultValues.NotFound
+                    : CitiesTelemetryConventions.ResultValues.Success);
 
             return city;
         }

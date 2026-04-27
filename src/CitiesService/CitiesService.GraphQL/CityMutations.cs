@@ -1,4 +1,5 @@
 using CitiesService.Application.Features.City.Commands.UpdateCity;
+using CitiesService.Application.Telemetry;
 using CitiesService.GraphQL.Types;
 using Common.Mediator;
 using Common.Presentation.Http;
@@ -12,7 +13,7 @@ public class CityMutations
         [Service] IMediator mediator,
         CancellationToken ct)
     {
-        using var activity = GraphQlTelemetry.StartActivity("GraphQL.UpdateCity");
+        using var activity = GraphQlTelemetry.StartActivity(CitiesTelemetryConventions.Operations.GraphQl.UpdateCity);
 
         try
         {
@@ -32,11 +33,11 @@ public class CityMutations
 
             if (!result.IsSuccess)
             {
-                GraphQlTelemetry.SetResult(activity, "failure");
+                GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Failure);
                 throw ToGraphQlException(result.Problem!);
             }
 
-            GraphQlTelemetry.SetResult(activity, "success");
+            GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
             return new UpdateCityPayload(result.Value!.City);
             //return new UpdateCityPayload(result);
         }
@@ -52,7 +53,7 @@ public class CityMutations
         [Service] IMediator mediator,
         CancellationToken ct)
     {
-        using var activity = GraphQlTelemetry.StartActivity("GraphQL.PatchCity");
+        using var activity = GraphQlTelemetry.StartActivity(CitiesTelemetryConventions.Operations.GraphQl.PatchCity);
 
         try
         {
@@ -72,11 +73,11 @@ public class CityMutations
 
             if (!result.IsSuccess)
             {
-                GraphQlTelemetry.SetResult(activity, "failure");
+                GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Failure);
                 throw ToGraphQlException(result.Problem!);
             }
 
-            GraphQlTelemetry.SetResult(activity, "success");
+            GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
             return new UpdateCityPayload(result.Value!.City);
             //return new UpdateCityPayload(result);
         }

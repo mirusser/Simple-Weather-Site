@@ -23,11 +23,11 @@ var builder = WebApplication.CreateBuilder(args);
     builder
         .AddCommonPresentationLayer(new CommonTelemetryOptions
         {
-            MeterNames = [CitiesTelemetry.ApplicationMeterName],
+            MeterNames = [CitiesTelemetryConventions.Meters.Application],
             ActivitySourceNames =
             [
-                CitiesTelemetry.ApplicationActivitySourceName,
-                GraphQlTelemetry.ActivitySourceName
+                CitiesTelemetryConventions.ActivitySources.Application,
+                CitiesTelemetryConventions.ActivitySources.GraphQl
             ]
         });
 }

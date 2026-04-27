@@ -25,8 +25,10 @@ public sealed class CitiesTelemetryBehavior<TRequest, TResponse>
             var response = await next();
             var result = GetResult(response);
 
-            activity?.SetStatus(result == "success" ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
-            activity?.SetTag("result", result);
+            activity?.SetStatus(result == CitiesTelemetryConventions.ResultValues.Success
+                ? ActivityStatusCode.Ok
+                : ActivityStatusCode.Error);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, result);
             CitiesTelemetry.RecordMediatorRequest(operation, Stopwatch.GetElapsedTime(startedAt), result);
 
             return response;
@@ -36,12 +38,12 @@ public sealed class CitiesTelemetryBehavior<TRequest, TResponse>
             var errorType = ex.GetType().Name;
 
             activity?.SetStatus(ActivityStatusCode.Error, errorType);
-            activity?.SetTag("result", "exception");
-            activity?.SetTag("error_type", errorType);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, CitiesTelemetryConventions.ResultValues.Exception);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.ErrorType, errorType);
             CitiesTelemetry.RecordMediatorRequest(
                 operation,
                 Stopwatch.GetElapsedTime(startedAt),
-                "exception",
+                CitiesTelemetryConventions.ResultValues.Exception,
                 errorType);
 
             throw;
@@ -55,9 +57,11 @@ public sealed class CitiesTelemetryBehavior<TRequest, TResponse>
             && isSuccessProperty?.PropertyType == typeof(bool)
             && isSuccessProperty.GetValue(response) is bool isSuccess)
         {
-            return isSuccess ? "success" : "failure";
+            return isSuccess
+                ? CitiesTelemetryConventions.ResultValues.Success
+                : CitiesTelemetryConventions.ResultValues.Failure;
         }
 
-        return "success";
+        return CitiesTelemetryConventions.ResultValues.Success;
     }
 }

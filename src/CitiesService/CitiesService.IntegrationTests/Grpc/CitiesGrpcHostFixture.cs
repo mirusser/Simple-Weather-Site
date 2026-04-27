@@ -1,5 +1,4 @@
 using System.Net;
-using CitiesGrpcService.Telemetry;
 using CitiesService.Application;
 using CitiesService.Application.Telemetry;
 using CitiesService.Infrastructure;
@@ -62,13 +61,13 @@ public sealed class CitiesGrpcHostFixture(string connectionString) : IAsyncLifet
         {
             MeterNames =
             [
-                CitiesTelemetry.ApplicationMeterName,
-                CitiesGrpcTelemetry.MeterName
+                CitiesTelemetryConventions.Meters.Application,
+                CitiesTelemetryConventions.Meters.Grpc
             ],
             ActivitySourceNames =
             [
-                CitiesTelemetry.ApplicationActivitySourceName,
-                CitiesGrpcTelemetry.ActivitySourceName
+                CitiesTelemetryConventions.ActivitySources.Application,
+                CitiesTelemetryConventions.ActivitySources.Grpc
             ]
         });
 

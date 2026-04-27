@@ -6,15 +6,15 @@ namespace CitiesService.Application.Telemetry;
 
 public static class CitiesTelemetry
 {
-    public const string ApplicationActivitySourceName = "CitiesService.Application";
-    public const string ApplicationMeterName = "CitiesService.Application";
+    public const string ApplicationActivitySourceName = CitiesTelemetryConventions.ActivitySources.Application;
+    public const string ApplicationMeterName = CitiesTelemetryConventions.Meters.Application;
 
-    public const string MediatorRequestDurationMetricName = "sws.cities.mediator.request.duration";
-    public const string MediatorRequestsMetricName = "sws.cities.mediator.requests";
-    public const string CacheRequestsMetricName = "sws.cities.cache.requests";
-    public const string ReturnedCitiesMetricName = "sws.cities.returned";
-    public const string SeedingRunsMetricName = "sws.cities.seeding.runs";
-    public const string SeedingDurationMetricName = "sws.cities.seeding.duration";
+    public const string MediatorRequestDurationMetricName = CitiesTelemetryConventions.MetricNames.MediatorRequestDuration;
+    public const string MediatorRequestsMetricName = CitiesTelemetryConventions.MetricNames.MediatorRequests;
+    public const string CacheRequestsMetricName = CitiesTelemetryConventions.MetricNames.CacheRequests;
+    public const string ReturnedCitiesMetricName = CitiesTelemetryConventions.MetricNames.ReturnedCities;
+    public const string SeedingRunsMetricName = CitiesTelemetryConventions.MetricNames.SeedingRuns;
+    public const string SeedingDurationMetricName = CitiesTelemetryConventions.MetricNames.SeedingDuration;
 
     public static readonly ActivitySource ApplicationActivitySource = new(ApplicationActivitySourceName);
 
@@ -23,43 +23,43 @@ public static class CitiesTelemetry
     private static readonly Histogram<double> MediatorRequestDuration =
         ApplicationMeter.CreateHistogram<double>(
             MediatorRequestDurationMetricName,
-            unit: "s",
-            description: "Duration of CitiesService mediator requests.");
+            unit: CitiesTelemetryConventions.MetricUnits.Seconds,
+            description: CitiesTelemetryConventions.MetricDescriptions.MediatorRequestDuration);
 
     private static readonly Counter<long> MediatorRequests =
         ApplicationMeter.CreateCounter<long>(
             MediatorRequestsMetricName,
-            unit: "{request}",
-            description: "Number of CitiesService mediator requests.");
+            unit: CitiesTelemetryConventions.MetricUnits.Request,
+            description: CitiesTelemetryConventions.MetricDescriptions.MediatorRequests);
 
     private static readonly Counter<long> CacheRequests =
         ApplicationMeter.CreateCounter<long>(
             CacheRequestsMetricName,
-            unit: "{request}",
-            description: "Number of CitiesService cache lookups.");
+            unit: CitiesTelemetryConventions.MetricUnits.Request,
+            description: CitiesTelemetryConventions.MetricDescriptions.CacheRequests);
 
     private static readonly Histogram<long> ReturnedCities =
         ApplicationMeter.CreateHistogram<long>(
             ReturnedCitiesMetricName,
-            unit: "{city}",
-            description: "Number of cities returned by CitiesService operations.");
+            unit: CitiesTelemetryConventions.MetricUnits.City,
+            description: CitiesTelemetryConventions.MetricDescriptions.ReturnedCities);
 
     private static readonly Counter<long> SeedingRuns =
         ApplicationMeter.CreateCounter<long>(
             SeedingRunsMetricName,
-            unit: "{run}",
-            description: "Number of CitiesService seeding attempts.");
+            unit: CitiesTelemetryConventions.MetricUnits.Run,
+            description: CitiesTelemetryConventions.MetricDescriptions.SeedingRuns);
 
     private static readonly Histogram<double> SeedingDuration =
         ApplicationMeter.CreateHistogram<double>(
             SeedingDurationMetricName,
-            unit: "s",
-            description: "Duration of CitiesService seeding attempts.");
+            unit: CitiesTelemetryConventions.MetricUnits.Seconds,
+            description: CitiesTelemetryConventions.MetricDescriptions.SeedingDuration);
 
     public static Activity? StartApplicationActivity(string operation)
     {
         var activity = ApplicationActivitySource.StartActivity(operation);
-        activity?.SetTag("operation", operation);
+        activity?.SetTag(CitiesTelemetryConventions.TagNames.Operation, operation);
 
         return activity;
     }
@@ -80,8 +80,8 @@ public static class CitiesTelemetry
     {
         var tags = new TagList
         {
-            { "operation", operation },
-            { "cache_result", cacheResult }
+            { CitiesTelemetryConventions.TagNames.Operation, operation },
+            { CitiesTelemetryConventions.TagNames.CacheResult, cacheResult }
         };
 
         CacheRequests.Add(1, tags);
@@ -112,13 +112,13 @@ public static class CitiesTelemetry
     {
         var tags = new TagList
         {
-            { "operation", operation },
-            { "result", result }
+            { CitiesTelemetryConventions.TagNames.Operation, operation },
+            { CitiesTelemetryConventions.TagNames.Result, result }
         };
 
         if (!string.IsNullOrWhiteSpace(errorType))
         {
-            tags.Add("error_type", errorType);
+            tags.Add(CitiesTelemetryConventions.TagNames.ErrorType, errorType);
         }
 
         return tags;

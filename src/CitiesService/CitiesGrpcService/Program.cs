@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using CitiesGrpcService.Telemetry;
 using CitiesGrpcService.Services;
 using CitiesService.Application;
 using CitiesService.Application.Telemetry;
@@ -37,13 +36,13 @@ var builder = WebApplication.CreateBuilder(args);
     {
         MeterNames =
         [
-            CitiesTelemetry.ApplicationMeterName,
-            CitiesGrpcTelemetry.MeterName
+            CitiesTelemetryConventions.Meters.Application,
+            CitiesTelemetryConventions.Meters.Grpc
         ],
         ActivitySourceNames =
         [
-            CitiesTelemetry.ApplicationActivitySourceName,
-            CitiesGrpcTelemetry.ActivitySourceName
+            CitiesTelemetryConventions.ActivitySources.Application,
+            CitiesTelemetryConventions.ActivitySources.Grpc
         ]
     });
 

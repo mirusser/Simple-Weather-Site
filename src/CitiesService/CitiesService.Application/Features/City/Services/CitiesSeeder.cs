@@ -34,7 +34,7 @@ public sealed class CitiesSeeder(
 
     public async Task<bool> SeedIfEmptyAsync(CancellationToken cancellationToken)
     {
-        const string operation = "CitiesSeedIfEmpty";
+        const string operation = CitiesTelemetryConventions.Operations.CitiesSeedIfEmpty;
         using var activity = CitiesTelemetry.StartApplicationActivity(operation);
         var startedAt = Stopwatch.GetTimestamp();
         var result = true;
@@ -45,7 +45,7 @@ public sealed class CitiesSeeder(
             if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, cancellationToken))
             {
                 logger.LogInformation("Cities already exist. Skipping seeding.");
-                RecordSeedingResult("already_exists");
+                RecordSeedingResult(CitiesTelemetryConventions.SeedingResults.AlreadyExists);
                 return result;
             }
 
@@ -54,7 +54,7 @@ public sealed class CitiesSeeder(
             if (seedLock is null)
             {
                 logger.LogInformation("Another instance is seeding cities. Skipping seeding.");
-                RecordSeedingResult("lock_not_acquired");
+                RecordSeedingResult(CitiesTelemetryConventions.SeedingResults.LockNotAcquired);
                 return result;
             }
 
@@ -62,14 +62,16 @@ public sealed class CitiesSeeder(
             if (await cityInfoRepo.CheckIfExistsAsync(c => c.Id != 0, cancellationToken))
             {
                 logger.LogInformation("Cities already exist (after lock). Skipping seeding.");
-                RecordSeedingResult("already_exists");
+                RecordSeedingResult(CitiesTelemetryConventions.SeedingResults.AlreadyExists);
                 return result;
             }
 
             logger.LogInformation("Seeding cities...");
 
             result = await SaveCitiesFromFileToDatabase(cancellationToken);
-            RecordSeedingResult(result ? "seeded" : "failed");
+            RecordSeedingResult(result
+                ? CitiesTelemetryConventions.SeedingResults.Seeded
+                : CitiesTelemetryConventions.SeedingResults.Failed);
 
             logger.LogInformation("Seeding cities finished. Success={Success}", result);
 
@@ -79,12 +81,12 @@ public sealed class CitiesSeeder(
         {
             var errorType = ex.GetType().Name;
             activity?.SetStatus(ActivityStatusCode.Error, errorType);
-            activity?.SetTag("result", "exception");
-            activity?.SetTag("error_type", errorType);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, CitiesTelemetryConventions.ResultValues.Exception);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.ErrorType, errorType);
             CitiesTelemetry.RecordSeedingRun(
                 operation,
                 Stopwatch.GetElapsedTime(startedAt),
-                "exception",
+                CitiesTelemetryConventions.ResultValues.Exception,
                 errorType);
 
             throw;
@@ -92,22 +94,27 @@ public sealed class CitiesSeeder(
 
         void RecordSeedingResult(string outcome)
         {
-            activity?.SetStatus(outcome is "seeded" or "already_exists" or "lock_not_acquired"
+            activity?.SetStatus(outcome is CitiesTelemetryConventions.SeedingResults.Seeded
+                    or CitiesTelemetryConventions.SeedingResults.AlreadyExists
+                    or CitiesTelemetryConventions.SeedingResults.LockNotAcquired
                 ? ActivityStatusCode.Ok
                 : ActivityStatusCode.Error);
-            activity?.SetTag("result", outcome);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, outcome);
             CitiesTelemetry.RecordSeedingRun(operation, Stopwatch.GetElapsedTime(startedAt), outcome);
         }
     }
 
     private async Task<bool> SaveCitiesFromFileToDatabase(CancellationToken cancellationToken)
     {
-        using var activity = CitiesTelemetry.StartApplicationActivity("CitiesSeedDatabaseWrite");
+        using var activity = CitiesTelemetry.StartApplicationActivity(
+            CitiesTelemetryConventions.Operations.CitiesSeedDatabaseWrite);
         var downloadResult = await SaveCitiesToFileAsync(cancellationToken);
         if (!downloadResult)
         {
             activity?.SetStatus(ActivityStatusCode.Error);
-            activity?.SetTag("result", "download_failed");
+            activity?.SetTag(
+                CitiesTelemetryConventions.TagNames.Result,
+                CitiesTelemetryConventions.SeedingResults.DownloadFailed);
             return false;
         }
 
@@ -136,7 +143,11 @@ public sealed class CitiesSeeder(
         {
             var result = await cityInfoRepo.SaveAsync(cancellationToken);
             activity?.SetStatus(ActivityStatusCode.Ok);
-            activity?.SetTag("result", result ? "success" : "failed");
+            activity?.SetTag(
+                CitiesTelemetryConventions.TagNames.Result,
+                result
+                    ? CitiesTelemetryConventions.ResultValues.Success
+                    : CitiesTelemetryConventions.SeedingResults.Failed);
             return result;
         }
         catch (PersistenceUpdateException ex)
@@ -144,7 +155,9 @@ public sealed class CitiesSeeder(
             // If you add unique index, a race/manual call can cause duplicates -> treat as "seeded enough"
             logger.LogWarning(ex, "City seeding encountered a DB update exception (possible duplicates).");
             activity?.SetStatus(ActivityStatusCode.Ok);
-            activity?.SetTag("result", "concurrency_accepted");
+            activity?.SetTag(
+                CitiesTelemetryConventions.TagNames.Result,
+                CitiesTelemetryConventions.SeedingResults.ConcurrencyAccepted);
             return true;
         }
     }
@@ -185,7 +198,8 @@ public sealed class CitiesSeeder(
         string filename,
         CancellationToken cancellationToken)
     {
-        using var activity = CitiesTelemetry.StartApplicationActivity("CitiesDownloadCityList");
+        using var activity = CitiesTelemetry.StartApplicationActivity(
+            CitiesTelemetryConventions.Operations.CitiesDownloadCityList);
         var client = clientFactory.CreateClient();
         var pipeline = pipelineProvider.GetPipeline(PipelineNames.Default);
         HttpResponseMessage? response = null;
@@ -200,8 +214,8 @@ public sealed class CitiesSeeder(
             {
                 var body = await response.Content.ReadAsStringAsync(cancellationToken);
                 activity?.SetStatus(ActivityStatusCode.Error);
-                activity?.SetTag("result", "failed");
-                activity?.SetTag("http.status_code", (int)response.StatusCode);
+                activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, CitiesTelemetryConventions.ResultValues.Failed);
+                activity?.SetTag(CitiesTelemetryConventions.TagNames.HttpStatusCode, (int)response.StatusCode);
 
                 logger.LogError(
                     "Failed to download file from {RequestUri}. Status: {StatusCode} ({ReasonPhrase}). Body: {Body}",
@@ -216,14 +230,14 @@ public sealed class CitiesSeeder(
             await using FileStream fileStream = new(filename, FileMode.Create, FileAccess.Write, FileShare.None);
             await stream.CopyToAsync(fileStream, cancellationToken);
             activity?.SetStatus(ActivityStatusCode.Ok);
-            activity?.SetTag("result", "success");
-            activity?.SetTag("http.status_code", (int)response.StatusCode);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, CitiesTelemetryConventions.ResultValues.Success);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.HttpStatusCode, (int)response.StatusCode);
         }
         catch (Exception ex)
         {
             activity?.SetStatus(ActivityStatusCode.Error, ex.GetType().Name);
-            activity?.SetTag("result", "exception");
-            activity?.SetTag("error_type", ex.GetType().Name);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, CitiesTelemetryConventions.ResultValues.Exception);
+            activity?.SetTag(CitiesTelemetryConventions.TagNames.ErrorType, ex.GetType().Name);
             logger.LogError(ex, "Unexpected error downloading file from {RequestUri}", requestUri);
             throw;
         }

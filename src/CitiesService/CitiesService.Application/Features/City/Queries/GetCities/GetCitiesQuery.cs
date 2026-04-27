@@ -35,7 +35,10 @@ public class GetCitiesHandler(
             request.CityName,
             request.Limit,
             cancellationToken);
-        CitiesTelemetry.RecordReturnedCities("GetCitiesByName", cities?.Count ?? 0, "success");
+        CitiesTelemetry.RecordReturnedCities(
+            CitiesTelemetryConventions.Operations.GetCitiesByName,
+            cities?.Count ?? 0,
+            CitiesTelemetryConventions.ResultValues.Success);
 
         return Result<GetCitiesResult>.Ok(new GetCitiesResult
         {
@@ -60,11 +63,15 @@ public class GetCitiesHandler(
 
         if (isSuccess && citiesFromCache is not null)
         {
-            CitiesTelemetry.RecordCacheRequest("GetCitiesByName", "hit");
+            CitiesTelemetry.RecordCacheRequest(
+                CitiesTelemetryConventions.Operations.GetCitiesByName,
+                CitiesTelemetryConventions.CacheResults.Hit);
             return citiesFromCache;
         }
 
-        CitiesTelemetry.RecordCacheRequest("GetCitiesByName", "miss");
+        CitiesTelemetry.RecordCacheRequest(
+            CitiesTelemetryConventions.Operations.GetCitiesByName,
+            CitiesTelemetryConventions.CacheResults.Miss);
 
         var cityInfoList = await cityInfoRepo.ListAsync(
             c => c.Name.Contains(cityName),

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -76,7 +77,12 @@ public static class CommonTelemetryRegistration
 
                 if (hasOtlpMetricsEndpoint)
                 {
-                    metrics.AddOtlpExporter();
+                    metrics.AddOtlpExporter(exporter =>
+                        ConfigureOtlpExporter(
+                            exporter,
+                            configuration,
+                            "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT",
+                            "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL"));
                 }
 
                 if (hasPrometheusEndpoint)
@@ -100,7 +106,12 @@ public static class CommonTelemetryRegistration
                     tracing.AddSource(options.ActivitySourceNames.ToArray());
                 }
 
-                tracing.AddOtlpExporter();
+                tracing.AddOtlpExporter(exporter =>
+                    ConfigureOtlpExporter(
+                        exporter,
+                        configuration,
+                        "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+                        "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"));
             });
         }
 
@@ -128,6 +139,33 @@ public static class CommonTelemetryRegistration
 
     private static bool HasTracesEndpoint(IConfiguration configuration)
         => !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"]);
+
+    private static void ConfigureOtlpExporter(
+        OtlpExporterOptions options,
+        IConfiguration configuration,
+        string signalEndpointKey,
+        string signalProtocolKey)
+    {
+        var endpoint =
+            configuration[signalEndpointKey]
+            ?? configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+        if (!string.IsNullOrWhiteSpace(endpoint))
+        {
+            options.Endpoint = new Uri(endpoint);
+        }
+
+        var protocol =
+            configuration[signalProtocolKey]
+            ?? configuration["OTEL_EXPORTER_OTLP_PROTOCOL"];
+        if (string.Equals(protocol, "http/protobuf", StringComparison.OrdinalIgnoreCase))
+        {
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+        }
+        else if (string.Equals(protocol, "grpc", StringComparison.OrdinalIgnoreCase))
+        {
+            options.Protocol = OtlpExportProtocol.Grpc;
+        }
+    }
 
     private static string GetServiceVersion()
         => Assembly.GetEntryAssembly()?.GetName().Version?.ToString()

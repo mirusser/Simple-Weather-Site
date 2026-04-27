@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CitiesGrpcService.Telemetry;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
+using CitiesService.Application.Telemetry;
 using CitiesService.Domain.Entities;
 using Common.Mediator;
 using Google.Protobuf.Collections;
@@ -24,8 +25,8 @@ public class CitiesService(
         CitiesPaginationInfoRequest request,
         ServerCallContext context)
     {
-        const string method = "cities.Cities/GetCitiesPaginationInfo";
-        const string grpcType = "unary";
+        const string method = CitiesTelemetryConventions.Operations.Grpc.GetCitiesPaginationInfo;
+        const string grpcType = CitiesTelemetryConventions.GrpcTypes.Unary;
         using var activity = CitiesGrpcTelemetry.StartActivity(method, grpcType);
         var startedAt = Stopwatch.GetTimestamp();
 
@@ -34,8 +35,12 @@ public class CitiesService(
             var countOfAllCities = await cityInfoRepo.CountAsync(_ => true, context.CancellationToken);
             var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities, };
 
-            CitiesGrpcTelemetry.SetResult(activity, "success");
-            CitiesGrpcTelemetry.RecordCall(method, grpcType, Stopwatch.GetElapsedTime(startedAt), "success");
+            CitiesGrpcTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Success);
 
             return citiesPaginationInfoReply;
         }
@@ -46,7 +51,7 @@ public class CitiesService(
                 method,
                 grpcType,
                 Stopwatch.GetElapsedTime(startedAt),
-                "exception",
+                CitiesTelemetryConventions.ResultValues.Exception,
                 ex.GetType().Name);
 
             throw;
@@ -57,8 +62,8 @@ public class CitiesService(
         CitiesPaginationRequest request,
         ServerCallContext context)
     {
-        const string method = "cities.Cities/GetCitiesPagination";
-        const string grpcType = "unary";
+        const string method = CitiesTelemetryConventions.Operations.Grpc.GetCitiesPagination;
+        const string grpcType = CitiesTelemetryConventions.GrpcTypes.Unary;
         using var activity = CitiesGrpcTelemetry.StartActivity(method, grpcType);
         var startedAt = Stopwatch.GetTimestamp();
 
@@ -77,8 +82,12 @@ public class CitiesService(
             };
             citiesPaginationReply.Cities.AddRange(mapper.Map<RepeatedField<CityReply>>(result.Value.Cities));
 
-            CitiesGrpcTelemetry.SetResult(activity, "success");
-            CitiesGrpcTelemetry.RecordCall(method, grpcType, Stopwatch.GetElapsedTime(startedAt), "success");
+            CitiesGrpcTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Success);
 
             return citiesPaginationReply;
         }
@@ -89,7 +98,7 @@ public class CitiesService(
                 method,
                 grpcType,
                 Stopwatch.GetElapsedTime(startedAt),
-                "exception",
+                CitiesTelemetryConventions.ResultValues.Exception,
                 ex.GetType().Name);
 
             throw;
@@ -101,8 +110,8 @@ public class CitiesService(
         IServerStreamWriter<CityReply> responseStream,
         ServerCallContext context)
     {
-        const string method = "cities.Cities/GetCitiesStream";
-        const string grpcType = "server_streaming";
+        const string method = CitiesTelemetryConventions.Operations.Grpc.GetCitiesStream;
+        const string grpcType = CitiesTelemetryConventions.GrpcTypes.ServerStreaming;
         using var activity = CitiesGrpcTelemetry.StartActivity(method, grpcType);
         var startedAt = Stopwatch.GetTimestamp();
 
@@ -123,8 +132,12 @@ public class CitiesService(
                 CitiesGrpcTelemetry.RecordStreamMessage(method);
             }
 
-            CitiesGrpcTelemetry.SetResult(activity, "success");
-            CitiesGrpcTelemetry.RecordCall(method, grpcType, Stopwatch.GetElapsedTime(startedAt), "success");
+            CitiesGrpcTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Success);
         }
         catch (Exception ex)
         {
@@ -133,7 +146,7 @@ public class CitiesService(
                 method,
                 grpcType,
                 Stopwatch.GetElapsedTime(startedAt),
-                "exception",
+                CitiesTelemetryConventions.ResultValues.Exception,
                 ex.GetType().Name);
 
             throw;

@@ -30,9 +30,9 @@ public class GetCitiesPaginationHandler(
             request.PageNumber,
             cancellationToken);
         CitiesTelemetry.RecordReturnedCities(
-            "GetCitiesPagination",
+            CitiesTelemetryConventions.Operations.GetCitiesPagination,
             citiesPaginationDto.Cities.Count,
-            "success");
+            CitiesTelemetryConventions.ResultValues.Success);
 
         return Result<GetCitiesPaginationResult>.Ok(citiesPaginationDto);
     }
@@ -80,11 +80,15 @@ public class GetCitiesPaginationHandler(
 
         if (isSuccess && resultFromCache is not null)
         {
-            CitiesTelemetry.RecordCacheRequest("GetCitiesPagination", "hit");
+            CitiesTelemetry.RecordCacheRequest(
+                CitiesTelemetryConventions.Operations.GetCitiesPagination,
+                CitiesTelemetryConventions.CacheResults.Hit);
             return resultFromCache;
         }
 
-        CitiesTelemetry.RecordCacheRequest("GetCitiesPagination", "miss");
+        CitiesTelemetry.RecordCacheRequest(
+            CitiesTelemetryConventions.Operations.GetCitiesPagination,
+            CitiesTelemetryConventions.CacheResults.Miss);
 
         CityInfoPaginationDto? result = new()
         {

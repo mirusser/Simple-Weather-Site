@@ -1,17 +1,18 @@
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using CitiesService.Application.Telemetry;
 
 namespace CitiesGrpcService.Telemetry;
 
 public static class CitiesGrpcTelemetry
 {
-    public const string ActivitySourceName = "CitiesGrpcService";
-    public const string MeterName = "CitiesGrpcService";
+    public const string ActivitySourceName = CitiesTelemetryConventions.ActivitySources.Grpc;
+    public const string MeterName = CitiesTelemetryConventions.Meters.Grpc;
 
-    public const string CallsMetricName = "sws.cities.grpc.calls";
-    public const string CallDurationMetricName = "sws.cities.grpc.call.duration";
-    public const string StreamMessagesMetricName = "sws.cities.grpc.stream.messages";
+    public const string CallsMetricName = CitiesTelemetryConventions.MetricNames.GrpcCalls;
+    public const string CallDurationMetricName = CitiesTelemetryConventions.MetricNames.GrpcCallDuration;
+    public const string StreamMessagesMetricName = CitiesTelemetryConventions.MetricNames.GrpcStreamMessages;
 
     public static readonly ActivitySource ActivitySource = new(ActivitySourceName);
 
@@ -20,26 +21,26 @@ public static class CitiesGrpcTelemetry
     private static readonly Counter<long> Calls =
         Meter.CreateCounter<long>(
             CallsMetricName,
-            unit: "{call}",
-            description: "Number of Cities gRPC calls.");
+            unit: CitiesTelemetryConventions.MetricUnits.Call,
+            description: CitiesTelemetryConventions.MetricDescriptions.GrpcCalls);
 
     private static readonly Histogram<double> CallDuration =
         Meter.CreateHistogram<double>(
             CallDurationMetricName,
-            unit: "s",
-            description: "Duration of Cities gRPC calls.");
+            unit: CitiesTelemetryConventions.MetricUnits.Seconds,
+            description: CitiesTelemetryConventions.MetricDescriptions.GrpcCallDuration);
 
     private static readonly Counter<long> StreamMessages =
         Meter.CreateCounter<long>(
             StreamMessagesMetricName,
-            unit: "{message}",
-            description: "Number of Cities gRPC stream messages sent.");
+            unit: CitiesTelemetryConventions.MetricUnits.Message,
+            description: CitiesTelemetryConventions.MetricDescriptions.GrpcStreamMessages);
 
     public static Activity? StartActivity(string method, string grpcType)
     {
         var activity = ActivitySource.StartActivity(method);
-        activity?.SetTag("grpc_method", method);
-        activity?.SetTag("grpc_type", grpcType);
+        activity?.SetTag(CitiesTelemetryConventions.TagNames.GrpcMethod, method);
+        activity?.SetTag(CitiesTelemetryConventions.TagNames.GrpcType, grpcType);
 
         return activity;
     }
@@ -61,7 +62,7 @@ public static class CitiesGrpcTelemetry
     {
         var tags = new TagList
         {
-            { "grpc_method", method }
+            { CitiesTelemetryConventions.TagNames.GrpcMethod, method }
         };
 
         StreamMessages.Add(1, tags);
@@ -69,15 +70,17 @@ public static class CitiesGrpcTelemetry
 
     public static void SetResult(Activity? activity, string result)
     {
-        activity?.SetStatus(result == "success" ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
-        activity?.SetTag("result", result);
+        activity?.SetStatus(result == CitiesTelemetryConventions.ResultValues.Success
+            ? ActivityStatusCode.Ok
+            : ActivityStatusCode.Error);
+        activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, result);
     }
 
     public static void SetException(Activity? activity, Exception exception)
     {
         activity?.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
-        activity?.SetTag("result", "exception");
-        activity?.SetTag("error_type", exception.GetType().Name);
+        activity?.SetTag(CitiesTelemetryConventions.TagNames.Result, CitiesTelemetryConventions.ResultValues.Exception);
+        activity?.SetTag(CitiesTelemetryConventions.TagNames.ErrorType, exception.GetType().Name);
     }
 
     private static TagList CreateTags(
@@ -88,14 +91,14 @@ public static class CitiesGrpcTelemetry
     {
         var tags = new TagList
         {
-            { "grpc_method", method },
-            { "grpc_type", grpcType },
-            { "result", result }
+            { CitiesTelemetryConventions.TagNames.GrpcMethod, method },
+            { CitiesTelemetryConventions.TagNames.GrpcType, grpcType },
+            { CitiesTelemetryConventions.TagNames.Result, result }
         };
 
         if (!string.IsNullOrWhiteSpace(errorType))
         {
-            tags.Add("error_type", errorType);
+            tags.Add(CitiesTelemetryConventions.TagNames.ErrorType, errorType);
         }
 
         return tags;
