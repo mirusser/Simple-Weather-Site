@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
+using CitiesService.Application.Telemetry;
 using CitiesService.Domain.Entities;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
@@ -34,6 +35,10 @@ public class GetCitiesHandler(
             request.CityName,
             request.Limit,
             cancellationToken);
+        CitiesTelemetry.RecordReturnedCities(
+            CitiesTelemetryConventions.Operations.GetCitiesByName,
+            cities?.Count ?? 0,
+            CitiesTelemetryConventions.ResultValues.Success);
 
         return Result<GetCitiesResult>.Ok(new GetCitiesResult
         {
@@ -58,8 +63,15 @@ public class GetCitiesHandler(
 
         if (isSuccess && citiesFromCache is not null)
         {
+            CitiesTelemetry.RecordCacheRequest(
+                CitiesTelemetryConventions.Operations.GetCitiesByName,
+                CitiesTelemetryConventions.CacheResults.Hit);
             return citiesFromCache;
         }
+
+        CitiesTelemetry.RecordCacheRequest(
+            CitiesTelemetryConventions.Operations.GetCitiesByName,
+            CitiesTelemetryConventions.CacheResults.Miss);
 
         var cityInfoList = await cityInfoRepo.ListAsync(
             c => c.Name.Contains(cityName),

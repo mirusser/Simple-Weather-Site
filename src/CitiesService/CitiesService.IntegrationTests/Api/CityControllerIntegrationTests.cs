@@ -69,4 +69,32 @@ public class CityControllerIntegrationTests(SqlServerFixture sql)
 
         Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
     }
+
+    [SqlServerFact]
+    public async Task Metrics_AfterSampleTraffic_ReturnsPrometheusText()
+    {
+        var dbName = DbTestHelpers.CreateDatabaseName();
+        var cs = sql.GetConnectionStringForDatabase(dbName);
+
+        await using (var db = DbTestHelpers.CreateDbContext(cs))
+        {
+            await DbTestHelpers.MigrateAsync(db);
+            db.CityInfos.Add(new CityInfo { CityId = 101m, Name = "London", CountryCode = "GB", Lat = 1, Lon = 2 });
+            await db.SaveChangesAsync();
+        }
+
+        await using var factory = new CitiesApiFactory(cs, enablePrometheusMetrics: true);
+        var client = factory.CreateClient();
+
+        var traffic = await client.PostAsJsonAsync(
+            "/api/City/GetCitiesByName",
+            new GetCitiesRequest(CityName: "Lon", Limit: 10));
+        Assert.Equal(HttpStatusCode.OK, traffic.StatusCode);
+
+        var metrics = await client.GetStringAsync("/metrics");
+
+        Assert.Contains("# TYPE", metrics);
+        Assert.Contains("sws_cities_mediator_requests_total", metrics);
+        Assert.Contains("sws_cities_cache_requests_total", metrics);
+    }
 }

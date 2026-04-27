@@ -76,8 +76,8 @@ Deployment docs:
 - App services expose `/health`, `/health/live`, and `/health/ready`.
 - Health responses use `HealthChecks.UI.Client` formatting.
 - Docker Compose deployment includes a separate HealthChecks UI container.
-- Serilog writes to console and can ship logs to Seq.
-- Docker Compose includes Prometheus and Grafana for OpenTelemetry metrics, Jaeger for CitiesService traces, and Loki/Alloy for CitiesService container logs.
+- Serilog writes to console; Seq remains as the current legacy structured-log target.
+- Docker Compose includes Prometheus/Grafana for metrics, Jaeger for CitiesService traces, and Loki/Grafana logs collected by Alloy for CitiesService containers.
 - [Observability run and check guide](AdditionalInfo/Observability.md)
 
 ---
@@ -87,9 +87,12 @@ Deployment docs:
 - Migrated from .NET 5 to .NET 10.
 - Service structure reorganized to mimic a microservices system.
 - Dockerfiles and Docker Compose deployment exist for the main services.
+- Local Docker has an nginx gateway on `http://localhost:8080` so full-site testing can use the same WeatherSite/SignalR routing shape as EC2.
 - AWS EC2 dev deployment scripts exist under `src/deploy`.
 - Minikube deployment manifests/scripts exist under `src/deploy/k8s`.
+- CitiesService database support is provider-selectable, with infrastructure-owned PostgreSQL and SQL Server migration assemblies.
 - CitiesService has focused unit and integration test coverage, including PostgreSQL and SQL Server migration/startup workflows.
+- CitiesService API and gRPC have the most complete observability path today: Prometheus metrics, Grafana dashboarding, Jaeger traces, Loki logs, trace/log correlation, and local Prometheus rules.
 
 ---
 

@@ -28,7 +28,8 @@
             1,
             25);
 
-        var connectionUrl = "/signalr/WeatherHistoryHub"; //TODO: get it from settings
+        var signalRBaseUrl = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SignalRServerUrl));
+        var connectionUrl = signalRBaseUrl.replace(/\/?$/, '/') + "WeatherHistoryHub";
         var hubConnection = new signalR.HubConnectionBuilder()
             .withUrl(connectionUrl)
             .withAutomaticReconnect()

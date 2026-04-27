@@ -50,6 +50,12 @@ public class CitiesGrpcIntegrationTests(SqlServerFixture sql)
         var reply = await client.GetCitiesPaginationInfoAsync(new GrpcClient.CitiesPaginationInfoRequest());
 
         Assert.Equal(2, reply.NumberOfAllCities);
+
+        using var metricsClient = new HttpClient { BaseAddress = host.MetricsAddress };
+        var metrics = await metricsClient.GetStringAsync("/metrics");
+
+        Assert.Contains("# TYPE", metrics);
+        Assert.Contains("sws_cities_grpc_calls_total", metrics);
     }
 
     [SqlServerFact]

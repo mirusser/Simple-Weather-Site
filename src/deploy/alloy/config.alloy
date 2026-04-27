@@ -7,18 +7,20 @@ discovery.docker "containers" {
   host = "unix:///var/run/docker.sock"
 }
 
-discovery.relabel "citiesservice" {
+discovery.relabel "cities" {
   targets = discovery.docker.containers.targets
 
   rule {
     source_labels = ["__meta_docker_container_name"]
-    regex         = "/citiesservice"
+    regex         = "/(citiesservice|citiesgrpcservice)"
     action        = "keep"
   }
 
   rule {
-    target_label = "service_name"
-    replacement  = "citiesservice"
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "service_name"
+    replacement   = "$1"
   }
 
   rule {
@@ -29,10 +31,39 @@ discovery.relabel "citiesservice" {
   }
 }
 
-loki.source.docker "citiesservice" {
+loki.source.docker "cities" {
   host       = "unix:///var/run/docker.sock"
-  targets    = discovery.relabel.citiesservice.output
+  targets    = discovery.relabel.cities.output
+  forward_to = [loki.process.cities.receiver]
+}
+
+loki.process "cities" {
   forward_to = [loki.write.default.receiver]
+
+  stage.json {
+    expressions = {
+      level            = "Level",
+      message_template = "MessageTemplate",
+      rendered_message = "RenderedMessage",
+      trace_id         = "Properties.trace_id",
+      span_id          = "Properties.span_id",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+
+  stage.structured_metadata {
+    values = {
+      message_template = "",
+      rendered_message = "",
+      trace_id         = "",
+      span_id          = "",
+    }
+  }
 }
 
 loki.write "default" {

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Models.Dto;
+using CitiesService.Application.Telemetry;
 using CitiesService.Domain.Entities;
 using Common.Infrastructure.Managers.Contracts;
 using Common.Mediator;
@@ -28,6 +29,10 @@ public class GetCitiesPaginationHandler(
             request.NumberOfCities,
             request.PageNumber,
             cancellationToken);
+        CitiesTelemetry.RecordReturnedCities(
+            CitiesTelemetryConventions.Operations.GetCitiesPagination,
+            citiesPaginationDto.Cities.Count,
+            CitiesTelemetryConventions.ResultValues.Success);
 
         return Result<GetCitiesPaginationResult>.Ok(citiesPaginationDto);
     }
@@ -75,8 +80,15 @@ public class GetCitiesPaginationHandler(
 
         if (isSuccess && resultFromCache is not null)
         {
+            CitiesTelemetry.RecordCacheRequest(
+                CitiesTelemetryConventions.Operations.GetCitiesPagination,
+                CitiesTelemetryConventions.CacheResults.Hit);
             return resultFromCache;
         }
+
+        CitiesTelemetry.RecordCacheRequest(
+            CitiesTelemetryConventions.Operations.GetCitiesPagination,
+            CitiesTelemetryConventions.CacheResults.Miss);
 
         CityInfoPaginationDto? result = new()
         {

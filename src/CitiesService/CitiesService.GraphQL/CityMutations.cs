@@ -1,4 +1,5 @@
 using CitiesService.Application.Features.City.Commands.UpdateCity;
+using CitiesService.Application.Telemetry;
 using CitiesService.GraphQL.Types;
 using Common.Mediator;
 using Common.Presentation.Http;
@@ -12,27 +13,39 @@ public class CityMutations
         [Service] IMediator mediator,
         CancellationToken ct)
     {
-        var cmd = new UpdateCityCommand
-        {
-            Id = input.Id,
-            CityId = input.CityId,
-            Name = input.Name,
-            State = input.State,
-            CountryCode = input.CountryCode,
-            Lon = input.Lon,
-            Lat = input.Lat,
-            RowVersion = input.RowVersion
-        };
+        using var activity = GraphQlTelemetry.StartActivity(CitiesTelemetryConventions.Operations.GraphQl.UpdateCity);
 
-        var result = await mediator.SendAsync(cmd, ct);
-
-        if (!result.IsSuccess)
+        try
         {
-            throw ToGraphQlException(result.Problem!);
+            var cmd = new UpdateCityCommand
+            {
+                Id = input.Id,
+                CityId = input.CityId,
+                Name = input.Name,
+                State = input.State,
+                CountryCode = input.CountryCode,
+                Lon = input.Lon,
+                Lat = input.Lat,
+                RowVersion = input.RowVersion
+            };
+
+            var result = await mediator.SendAsync(cmd, ct);
+
+            if (!result.IsSuccess)
+            {
+                GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Failure);
+                throw ToGraphQlException(result.Problem!);
+            }
+
+            GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            return new UpdateCityPayload(result.Value!.City);
+            //return new UpdateCityPayload(result);
         }
-
-        return new UpdateCityPayload(result.Value!.City);
-        //return new UpdateCityPayload(result);
+        catch (Exception ex)
+        {
+            GraphQlTelemetry.SetException(activity, ex);
+            throw;
+        }
     }
 
     public async Task<UpdateCityPayload> PatchCityAsync(
@@ -40,27 +53,39 @@ public class CityMutations
         [Service] IMediator mediator,
         CancellationToken ct)
     {
-        var cmd = new PatchCityCommand
-        {
-            Id = input.Id,
-            CityId = input.CityId,
-            Name = input.Name,
-            State = input.State,
-            CountryCode = input.CountryCode,
-            Lon = input.Lon,
-            Lat = input.Lat,
-            RowVersion = input.RowVersion
-        };
+        using var activity = GraphQlTelemetry.StartActivity(CitiesTelemetryConventions.Operations.GraphQl.PatchCity);
 
-        var result = await mediator.SendAsync(cmd, ct);
-
-        if (!result.IsSuccess)
+        try
         {
-            throw ToGraphQlException(result.Problem!);
+            var cmd = new PatchCityCommand
+            {
+                Id = input.Id,
+                CityId = input.CityId,
+                Name = input.Name,
+                State = input.State,
+                CountryCode = input.CountryCode,
+                Lon = input.Lon,
+                Lat = input.Lat,
+                RowVersion = input.RowVersion
+            };
+
+            var result = await mediator.SendAsync(cmd, ct);
+
+            if (!result.IsSuccess)
+            {
+                GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Failure);
+                throw ToGraphQlException(result.Problem!);
+            }
+
+            GraphQlTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            return new UpdateCityPayload(result.Value!.City);
+            //return new UpdateCityPayload(result);
         }
-
-        return new UpdateCityPayload(result.Value!.City);
-        //return new UpdateCityPayload(result);
+        catch (Exception ex)
+        {
+            GraphQlTelemetry.SetException(activity, ex);
+            throw;
+        }
     }
 
     private static GraphQLException ToGraphQlException(Problem p) =>

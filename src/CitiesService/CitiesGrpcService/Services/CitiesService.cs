@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
+using CitiesGrpcService.Telemetry;
 using CitiesService.Application.Common.Interfaces.Persistence;
 using CitiesService.Application.Features.City.Queries.GetCitiesPagination;
+using CitiesService.Application.Telemetry;
 using CitiesService.Domain.Entities;
 using Common.Mediator;
 using Google.Protobuf.Collections;
@@ -21,26 +25,84 @@ public class CitiesService(
         CitiesPaginationInfoRequest request,
         ServerCallContext context)
     {
-        var countOfAllCities = await cityInfoRepo.CountAsync(_ => true, context.CancellationToken);
-        var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities, };
+        const string method = CitiesTelemetryConventions.Operations.Grpc.GetCitiesPaginationInfo;
+        const string grpcType = CitiesTelemetryConventions.GrpcTypes.Unary;
+        using var activity = CitiesGrpcTelemetry.StartActivity(method, grpcType);
+        var startedAt = Stopwatch.GetTimestamp();
 
-        return citiesPaginationInfoReply;
+        try
+        {
+            var countOfAllCities = await cityInfoRepo.CountAsync(_ => true, context.CancellationToken);
+            var citiesPaginationInfoReply = new CitiesPaginationInfoReply() { NumberOfAllCities = countOfAllCities, };
+
+            CitiesGrpcTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Success);
+
+            return citiesPaginationInfoReply;
+        }
+        catch (Exception ex)
+        {
+            CitiesGrpcTelemetry.SetException(activity, ex);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Exception,
+                ex.GetType().Name);
+
+            throw;
+        }
     }
 
     public override async Task<CitiesPaginationReply> GetCitiesPagination(
         CitiesPaginationRequest request,
         ServerCallContext context)
     {
-        var query = new GetCitiesPaginationQuery { NumberOfCities = request.NumberOfCities, PageNumber = request.PageNumber };
-        var result = await mediator.SendAsync(query);
+        const string method = CitiesTelemetryConventions.Operations.Grpc.GetCitiesPagination;
+        const string grpcType = CitiesTelemetryConventions.GrpcTypes.Unary;
+        using var activity = CitiesGrpcTelemetry.StartActivity(method, grpcType);
+        var startedAt = Stopwatch.GetTimestamp();
 
-        var citiesPaginationReply = new CitiesPaginationReply()
+        try
         {
-            NumberOfAllCities = result.Value.NumberOfAllCities,
-        };
-        citiesPaginationReply.Cities.AddRange(mapper.Map<RepeatedField<CityReply>>(result.Value.Cities));
+            var query = new GetCitiesPaginationQuery
+            {
+                NumberOfCities = request.NumberOfCities,
+                PageNumber = request.PageNumber
+            };
+            var result = await mediator.SendAsync(query, context.CancellationToken);
 
-        return citiesPaginationReply;
+            var citiesPaginationReply = new CitiesPaginationReply()
+            {
+                NumberOfAllCities = result.Value.NumberOfAllCities,
+            };
+            citiesPaginationReply.Cities.AddRange(mapper.Map<RepeatedField<CityReply>>(result.Value.Cities));
+
+            CitiesGrpcTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Success);
+
+            return citiesPaginationReply;
+        }
+        catch (Exception ex)
+        {
+            CitiesGrpcTelemetry.SetException(activity, ex);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Exception,
+                ex.GetType().Name);
+
+            throw;
+        }
     }
 
     public override async Task GetCitiesStream(
@@ -48,14 +110,46 @@ public class CitiesService(
         IServerStreamWriter<CityReply> responseStream,
         ServerCallContext context)
     {
-        var query = new GetCitiesPaginationQuery { NumberOfCities = request.NumberOfCities, PageNumber = request.PageNumber };
-        var result = await mediator.SendAsync(query);
+        const string method = CitiesTelemetryConventions.Operations.Grpc.GetCitiesStream;
+        const string grpcType = CitiesTelemetryConventions.GrpcTypes.ServerStreaming;
+        using var activity = CitiesGrpcTelemetry.StartActivity(method, grpcType);
+        var startedAt = Stopwatch.GetTimestamp();
 
-        var cities = mapper.Map<List<CityReply>>(result.Value.Cities);
-
-        foreach (var city in cities)
+        try
         {
-            await responseStream.WriteAsync(city);
+            var query = new GetCitiesPaginationQuery
+            {
+                NumberOfCities = request.NumberOfCities,
+                PageNumber = request.PageNumber
+            };
+            var result = await mediator.SendAsync(query, context.CancellationToken);
+
+            var cities = mapper.Map<List<CityReply>>(result.Value.Cities);
+
+            foreach (var city in cities)
+            {
+                await responseStream.WriteAsync(city);
+                CitiesGrpcTelemetry.RecordStreamMessage(method);
+            }
+
+            CitiesGrpcTelemetry.SetResult(activity, CitiesTelemetryConventions.ResultValues.Success);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Success);
+        }
+        catch (Exception ex)
+        {
+            CitiesGrpcTelemetry.SetException(activity, ex);
+            CitiesGrpcTelemetry.RecordCall(
+                method,
+                grpcType,
+                Stopwatch.GetElapsedTime(startedAt),
+                CitiesTelemetryConventions.ResultValues.Exception,
+                ex.GetType().Name);
+
+            throw;
         }
     }
 }

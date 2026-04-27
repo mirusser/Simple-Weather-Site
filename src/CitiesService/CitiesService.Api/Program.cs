@@ -1,10 +1,12 @@
 using CitiesService.Api;
 using CitiesService.Application;
+using CitiesService.Application.Telemetry;
 using CitiesService.GraphQL;
 using CitiesService.Infrastructure;
 using Common.Application.HealthChecks;
 using Common.Presentation;
 using Common.Shared;
+using Common.Telemetry;
 using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +21,15 @@ var builder = WebApplication.CreateBuilder(args);
         .AddGraphQlLayer(builder.Configuration);
     
     builder
-        .AddCommonPresentationLayer();
+        .AddCommonPresentationLayer(new CommonTelemetryOptions
+        {
+            MeterNames = [CitiesTelemetryConventions.Meters.Application],
+            ActivitySourceNames =
+            [
+                CitiesTelemetryConventions.ActivitySources.Application,
+                CitiesTelemetryConventions.ActivitySources.GraphQl
+            ]
+        });
 }
 
 var app = builder.Build();
@@ -31,6 +41,7 @@ var app = builder.Build();
         .UseDefaultExceptionHandler()
         //.UseHttpsRedirection() // TODO: Redirect deletes authorization header - figure out/apply the solution https://stackoverflow.com/questions/28564961/authorization-header-is-lost-on-redirect
         .UseRouting()
+        .UseCommonPrometheusMetrics(builder.Configuration)
         // .UseAuthentication()
         // .UseAuthorization()
         .UseCors("AllowAll");

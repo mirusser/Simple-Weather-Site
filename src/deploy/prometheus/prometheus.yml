@@ -15,8 +15,47 @@ storage:
   tsdb:
     out_of_order_time_window: 30m
 
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
 scrape_configs:
   - job_name: prometheus
     static_configs:
       - targets:
           - localhost:9090
+
+  - job_name: citiesservice
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - citiesservice:80
+
+  - job_name: citiesgrpcservice
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - citiesgrpcservice:80
+
+  - job_name: jaeger
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - jaeger:8888
+
+  - job_name: loki
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - loki:3100
+
+  - job_name: alloy
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - alloy:12345
+
+  - job_name: grafana
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - grafana:3000
