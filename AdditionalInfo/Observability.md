@@ -6,13 +6,13 @@ The current stack includes:
 
 - health endpoints on application services
 - HealthChecks UI container for internal health polling
-- Serilog console logs and Seq as the existing structured log target
+- Serilog console logs, with Seq still present as the current legacy structured-log target until the separate removal plan is implemented
 - OpenTelemetry metrics exported to Prometheus in two ways:
   - `citiesservice` and `citiesgrpcservice` expose `/metrics` for Prometheus scraping
   - the remaining app services push metrics to Prometheus through its OTLP receiver
 - Grafana with provisioned Prometheus, Loki, and Jaeger datasources
 - Jaeger traces for `CitiesService.Api` and `CitiesGrpcService`, persisted locally with Badger storage
-- Loki logs for the CitiesService containers, collected by Grafana Alloy and linked to Jaeger by `trace_id`
+- Loki/Grafana logs for the CitiesService containers, collected by Grafana Alloy and linked to Jaeger by `trace_id`
 - Prometheus recording and alerting rules for the CitiesService observability milestone
 
 ## Run the stack locally
@@ -80,6 +80,20 @@ Check that the main observability containers are running:
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' \
   | grep -E 'prometheus|grafana|jaeger|loki|alloy|seq|healthchecks|citiesservice'
 ```
+
+## Browser entry points
+
+Open the main UIs from the machine running Docker, or through SSH tunnels if the stack is running on another host:
+
+| Component | URL | Purpose |
+| --- | --- | --- |
+| Grafana | `http://localhost:3000` | Dashboards and Grafana Explore. Use this to browse Loki logs. |
+| Prometheus | `http://localhost:9090` | Metrics queries, targets, and local alert rule state. |
+| Jaeger | `http://localhost:16686` | Trace search and trace details. |
+| Loki | `http://localhost:3100/ready` | API/readiness checks. Loki does not have a full browser UI. |
+| Alloy | `http://localhost:12345` | Collector diagnostics and component status. |
+
+For logs, use Grafana Explore with the Loki datasource. Loki itself is the log API and storage engine; Grafana is the browser UI.
 
 ## Generate sample telemetry
 
@@ -303,13 +317,27 @@ For a UI sanity check, try `Last 2 Days` after generating fresh traffic. With Ba
 
 ## Loki and Alloy
 
-Loki stores the logs that Grafana reads. Check Loki readiness:
+Loki stores the logs that Grafana reads. Alloy is the collector in front of Loki:
 
-```bash
-curl -i http://localhost:3100/ready
+```text
+Cities app stdout JSON logs
+  -> Grafana Alloy
+  -> Loki
+  -> Grafana Explore/dashboard
+  -> optional trace_id link to Jaeger
 ```
 
-Alloy scrapes Docker logs from the application containers and pushes them to Loki. Open Alloy:
+Alloy reads Docker logs from the currently configured Cities containers, parses Serilog JSON, adds low-cardinality labels such as `service_name`, `container`, and `level`, and pushes the entries to Loki. It keeps `trace_id` and `span_id` as log fields/structured metadata instead of Loki labels, which avoids high-cardinality label growth.
+
+Check Loki directly with API calls:
+
+```bash
+curl http://localhost:3100/ready
+curl http://localhost:3100/loki/api/v1/labels
+curl http://localhost:3100/loki/api/v1/label/service_name/values
+```
+
+Open Alloy diagnostics:
 
 ```text
 http://localhost:12345
@@ -321,7 +349,7 @@ In Grafana Explore, choose the Loki datasource and run:
 {service_name=~"citiesservice|citiesgrpcservice"}
 ```
 
-Cities Docker logs are JSON formatted. When `SWS_TELEMETRY_LOG_TRACE_CORRELATION_ENABLED=true`, log events written while an `Activity` is current include `trace_id` and `span_id`. These values are kept as log fields/structured metadata, not Loki labels, to avoid high-cardinality label growth.
+Cities Docker logs are JSON formatted. When `SWS_TELEMETRY_LOG_TRACE_CORRELATION_ENABLED=true`, log events written while an `Activity` is current include `trace_id` and `span_id`.
 
 Useful LogQL checks:
 
@@ -340,7 +368,7 @@ curl -i http://localhost:8081/health
 curl -i http://localhost:8681/health
 ```
 
-Seq is still present as the existing Serilog structured logging target. Grafana-visible logs currently come from Loki and Alloy, not from Seq. Loki keeps local logs for 7 days.
+Grafana-visible logs currently come from Loki and Alloy, not from Seq. Loki keeps local logs for 7 days.
 
 ## Telemetry configuration switches
 
@@ -380,7 +408,7 @@ Then open:
 - Grafana: `http://localhost:3000`
 - Jaeger: `http://localhost:16686`
 
-Optional debugging tunnel:
+Grafana is enough for browsing logs. Add the optional tunnel below only when you want direct Loki API checks, Alloy diagnostics, or Jaeger metrics:
 
 ```bash
 ssh -i sws-ec2-key-pair.pem \
@@ -413,7 +441,7 @@ jq empty grafana/provisioning/dashboards/json/citiesservice-observability.json
 2. Generate REST, GraphQL, and gRPC traffic from the examples above.
 3. Prometheus: confirm `up{job=~"citiesservice|citiesgrpcservice"}` is `1`, custom `sws_cities_*` metrics update, and `ALERTS{alertname=~"Cities.*"}` is queryable.
 4. Jaeger: confirm `CitiesService.Api` and `CitiesGrpcService` traces appear, then restart `jaeger_infra` and confirm recent traces still query.
-5. Loki/Grafana: confirm `{service_name=~"citiesservice|citiesgrpcservice"} | json | trace_id != ""` returns logs and the `Trace` derived field opens Jaeger.
+5. Loki/Grafana: confirm `curl http://localhost:3100/ready`, `curl http://localhost:3100/loki/api/v1/label/service_name/values`, and Grafana Explore with `{service_name=~"citiesservice|citiesgrpcservice"} | json | trace_id != ""` all work. Expand a log line and confirm the `Trace` derived field opens Jaeger.
 
 ## Reference docs
 
