@@ -23,7 +23,7 @@ await mediator.SendAsync(request);
 
 public class PrintToConsoleRequest : IRequest<bool>
 {
-    public string Text { get; init; }
+    public string? Text { get; init; }
 }
 
 public class PrintToConsoleHandler : IRequestHandler<PrintToConsoleRequest, bool>
