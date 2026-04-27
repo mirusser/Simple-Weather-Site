@@ -90,6 +90,9 @@ Build images and start the local app compose stack:
 ```bash
 cd <YOUR_REPO>/src/deploy
 ./build-run-locally.sh
+
+# you  may need to provide PFX_PASSWORD for local certificate for testing purposes:
+PFX_PASSWORD=zaq1@WSX ./build-run-locally.sh
 ```
 
 Check running containers:

@@ -114,6 +114,17 @@ grpcurl \
 
 Wait for the next Prometheus scrape after sending traffic. The default scrape interval is 15 seconds.
 
+On Debian based Linux distros you may need to install `grpcurl` first, use:
+
+For 64-bit Intel/AMD Debian:
+```bash
+VERSION=1.9.3
+curl -L "https://github.com/fullstorydev/grpcurl/releases/download/v${VERSION}/grpcurl_${VERSION}_linux_x86_64.tar.gz" \
+  | sudo tar -xz -C /usr/local/bin grpcurl
+
+grpcurl -version
+```
+
 ## Health checks
 
 Most HTTP services expose these endpoints:
