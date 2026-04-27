@@ -19,6 +19,7 @@ INFRA_VOLUME_DIRS=(
     /opt/sws/volumes/seq/data
     /opt/sws/volumes/prometheus/data
     /opt/sws/volumes/grafana/data
+    /opt/sws/volumes/jaeger/badger
     /opt/sws/volumes/loki/data
     /opt/sws/volumes/rabbitmq/data
 )

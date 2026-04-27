@@ -55,6 +55,7 @@ public class CitiesTelemetryTests
     public void RecordCacheRequest_PublishesLowCardinalityTags()
     {
         var measurements = new List<MetricMeasurement<long>>();
+        var measurementsLock = new object();
         using var listener = new MeterListener();
 
         listener.InstrumentPublished = (instrument, meterListener) =>
@@ -74,10 +75,13 @@ public class CitiesTelemetryTests
                 tagDictionary[tag.Key] = tag.Value;
             }
 
-            measurements.Add(new MetricMeasurement<long>(
-                instrument.Name,
-                measurement,
-                tagDictionary));
+            lock (measurementsLock)
+            {
+                measurements.Add(new MetricMeasurement<long>(
+                    instrument.Name,
+                    measurement,
+                    tagDictionary));
+            }
         });
 
         listener.Start();
@@ -86,8 +90,14 @@ public class CitiesTelemetryTests
             CitiesTelemetryConventions.Operations.GetCitiesByName,
             CitiesTelemetryConventions.CacheResults.Hit);
 
+        MetricMeasurement<long>[] measurementSnapshot;
+        lock (measurementsLock)
+        {
+            measurementSnapshot = measurements.ToArray();
+        }
+
         var cacheMeasurement = Assert.Single(
-            measurements,
+            measurementSnapshot,
             measurement => measurement.InstrumentName == CitiesTelemetryConventions.MetricNames.CacheRequests
                            && (string?)measurement.Tags[CitiesTelemetryConventions.TagNames.Operation]
                            == CitiesTelemetryConventions.Operations.GetCitiesByName);

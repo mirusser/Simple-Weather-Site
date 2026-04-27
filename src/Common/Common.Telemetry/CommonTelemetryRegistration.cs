@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
@@ -20,6 +21,7 @@ public static class CommonTelemetryRegistration
 {
     private const string ServiceNamespace = "sws";
     private const string PrometheusEndpointEnabledKey = "SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED";
+    private const string TracesIncludeInfraEndpointsKey = "SWS_TELEMETRY_TRACES_INCLUDE_INFRA_ENDPOINTS";
 
     private static readonly string[] BuiltInMeterNames =
     [
@@ -97,7 +99,13 @@ public static class CommonTelemetryRegistration
             telemetry.WithTracing(tracing =>
             {
                 tracing
-                    .AddAspNetCoreInstrumentation()
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        if (!ShouldIncludeInfraEndpointTraces(configuration))
+                        {
+                            options.Filter = context => !IsInfraEndpoint(context.Request.Path);
+                        }
+                    })
                     .AddHttpClientInstrumentation()
                     .AddEntityFrameworkCoreInstrumentation();
 
@@ -132,6 +140,9 @@ public static class CommonTelemetryRegistration
 
     public static bool IsPrometheusEndpointEnabled(IConfiguration configuration)
         => bool.TryParse(configuration[PrometheusEndpointEnabledKey], out var enabled) && enabled;
+
+    public static bool ShouldIncludeInfraEndpointTraces(IConfiguration configuration)
+        => !bool.TryParse(configuration[TracesIncludeInfraEndpointsKey], out var include) || include;
 
     private static bool HasOtlpMetricsEndpoint(IConfiguration configuration)
         => !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_ENDPOINT"])
@@ -174,4 +185,23 @@ public static class CommonTelemetryRegistration
 
     private static string GetServiceInstanceId()
         => $"{Environment.MachineName}:{Environment.ProcessId}";
+
+    private static bool IsInfraEndpoint(PathString path)
+    {
+        var value = path.Value;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        if (string.Equals(value, "/", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, "/ping", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, "/metrics", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return value.StartsWith("/health", StringComparison.OrdinalIgnoreCase)
+               && (value.Length == "/health".Length || value["/health".Length] == '/');
+    }
 }

@@ -14,6 +14,12 @@ datasources:
     type: loki
     access: proxy
     url: http://loki:3100
+    jsonData:
+      derivedFields:
+        - name: Trace
+          matcherRegex: '"trace_id":"([0-9a-fA-F]+)"'
+          datasourceUid: sws-jaeger
+          url: '$${__value.raw}'
     editable: true
 
   - name: Jaeger

@@ -72,14 +72,14 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 0
       },
       "id": 1,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -89,7 +89,6 @@
           "fields": "",
           "values": false
         },
-        "showPercentChange": false,
         "textMode": "auto",
         "wideLayout": true
       },
@@ -100,13 +99,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "up{job=~\"citiesservice|citiesgrpcservice\"}",
+          "expr": "up{job=~\"$service\"}",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Scrape Targets Up",
+      "title": "Cities Targets Up",
       "type": "stat"
     },
     {
@@ -116,8 +115,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 0
       },
       "id": 2,
@@ -139,13 +138,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"citiesservice|citiesgrpcservice\"}[5m]))",
+          "expr": "sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$window]))",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "API + gRPC HTTP Request Rate",
+      "title": "HTTP Request Rate",
       "type": "timeseries"
     },
     {
@@ -155,8 +154,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 12,
         "y": 0
       },
       "id": 3,
@@ -178,13 +177,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le, job) (rate(http_server_request_duration_seconds_bucket{job=~\"citiesservice|citiesgrpcservice\"}[5m])))",
-          "legendFormat": "{{job}} p95",
+          "expr": "sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$window])) or sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_status_code=~\"5..\"}[$window]))",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "API + gRPC HTTP Duration p95",
+      "title": "HTTP 5xx Rate",
       "type": "timeseries"
     },
     {
@@ -193,10 +192,10 @@
         "uid": "sws-prometheus"
       },
       "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
       },
       "id": 4,
       "options": {
@@ -217,13 +216,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (operation, result) (rate(sws_cities_mediator_requests_total[5m]))",
-          "legendFormat": "{{operation}} {{result}}",
+          "expr": "histogram_quantile(0.95, sum by (le, job) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\"}[$window])))",
+          "legendFormat": "{{job}} p95",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Mediator Requests",
+      "title": "HTTP Duration p95",
       "type": "timeseries"
     },
     {
@@ -233,8 +232,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 0,
         "y": 4
       },
       "id": 5,
@@ -256,13 +255,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(sws_cities_mediator_request_duration_seconds_bucket[5m])))",
-          "legendFormat": "{{operation}} p95",
+          "expr": "sum by (operation, result) (rate(sws_cities_mediator_requests_total[$window]))",
+          "legendFormat": "{{operation}} {{result}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Mediator Duration p95",
+      "title": "Mediator Requests",
       "type": "timeseries"
     },
     {
@@ -272,9 +271,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 10
+        "w": 8,
+        "x": 8,
+        "y": 4
       },
       "id": 6,
       "options": {
@@ -295,13 +294,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (operation, cache_result) (rate(sws_cities_cache_requests_total[5m]))",
-          "legendFormat": "{{operation}} {{cache_result}}",
+          "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(sws_cities_mediator_request_duration_seconds_bucket[$window])))",
+          "legendFormat": "{{operation}} p95",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Cache Hit/Miss Rate",
+      "title": "Mediator Duration p95",
       "type": "timeseries"
     },
     {
@@ -311,9 +310,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 10
+        "w": 8,
+        "x": 16,
+        "y": 4
       },
       "id": 7,
       "options": {
@@ -334,13 +333,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(sws_cities_returned_bucket[5m])))",
-          "legendFormat": "{{operation}} p95",
+          "expr": "sum by (operation) (rate(sws_cities_cache_requests_total{cache_result=\"miss\"}[$window])) / sum by (operation) (rate(sws_cities_cache_requests_total[$window]))",
+          "legendFormat": "{{operation}} miss ratio",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Returned City Count p95",
+      "title": "Cache Miss Ratio",
       "type": "timeseries"
     },
     {
@@ -352,7 +351,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 16
+        "y": 10
       },
       "id": 8,
       "options": {
@@ -373,13 +372,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (grpc_method, result) (rate(sws_cities_grpc_calls_total[5m]))",
-          "legendFormat": "{{grpc_method}} {{result}}",
+          "expr": "sum by (operation, cache_result) (rate(sws_cities_cache_requests_total[$window]))",
+          "legendFormat": "{{operation}} {{cache_result}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "gRPC Calls",
+      "title": "Cache Hit/Miss Rate",
       "type": "timeseries"
     },
     {
@@ -391,7 +390,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 16
+        "y": 10
       },
       "id": 9,
       "options": {
@@ -412,13 +411,13 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le, grpc_method) (rate(sws_cities_grpc_call_duration_seconds_bucket[5m])))",
-          "legendFormat": "{{grpc_method}} p95",
+          "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(sws_cities_returned_bucket[$window])))",
+          "legendFormat": "{{operation}} p95",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "gRPC Duration p95",
+      "title": "Returned City Count p95",
       "type": "timeseries"
     },
     {
@@ -430,7 +429,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 16
+        "y": 10
       },
       "id": 10,
       "options": {
@@ -451,7 +450,124 @@
             "uid": "sws-prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (grpc_method) (rate(sws_cities_grpc_stream_messages_total[5m]))",
+          "expr": "sum by (grpc_method, result) (rate(sws_cities_grpc_calls_total[$window]))",
+          "legendFormat": "{{grpc_method}} {{result}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "gRPC Calls",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sws-prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 16
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sws-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (grpc_method) (rate(sws_cities_grpc_calls_total{result=\"exception\"}[$window]))",
+          "legendFormat": "{{grpc_method}} exceptions",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "gRPC Exceptions",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sws-prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 16
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sws-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, grpc_method) (rate(sws_cities_grpc_call_duration_seconds_bucket[$window])))",
+          "legendFormat": "{{grpc_method}} p95",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "gRPC Duration p95",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sws-prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sws-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (grpc_method) (rate(sws_cities_grpc_stream_messages_total[$window]))",
           "legendFormat": "{{grpc_method}}",
           "range": true,
           "refId": "A"
@@ -462,6 +578,130 @@
     },
     {
       "datasource": {
+        "type": "prometheus",
+        "uid": "sws-prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 22
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sws-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(ALERTS{alertname=~\"Cities.*\", alertstate=\"firing\"}) or vector(0)",
+          "legendFormat": "firing",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Firing Cities Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sws-prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 8,
+        "y": 22
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sws-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "up{job=~\"prometheus|jaeger|loki|alloy|grafana\"}",
+          "legendFormat": "{{job}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Observability Infra Up",
+      "type": "stat"
+    },
+    {
+      "datasource": {
         "type": "loki",
         "uid": "sws-loki"
       },
@@ -469,15 +709,15 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 26
       },
-      "id": 11,
+      "id": 16,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
         "prettifyLogMessage": false,
         "showCommonLabels": false,
-        "showLabels": true,
+        "showLabels": false,
         "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": true
@@ -488,37 +728,94 @@
             "type": "loki",
             "uid": "sws-loki"
           },
-          "direction": "backward",
           "editorMode": "code",
-          "expr": "{service_name=~\"citiesservice|citiesgrpcservice\"}",
+          "expr": "{service_name=~\"$service\"}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "CitiesService Logs",
+      "title": "Cities Logs",
       "type": "logs"
     }
   ],
-  "preload": false,
   "refresh": "15s",
   "schemaVersion": 41,
   "tags": [
-    "sws",
-    "citiesservice",
-    "citiesgrpcservice",
+    "simple-weather-site",
+    "cities",
     "observability"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "citiesservice|citiesgrpcservice",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service",
+        "multi": true,
+        "name": "service",
+        "options": [
+          {
+            "selected": false,
+            "text": "citiesservice",
+            "value": "citiesservice"
+          },
+          {
+            "selected": false,
+            "text": "citiesgrpcservice",
+            "value": "citiesgrpcservice"
+          }
+        ],
+        "query": "citiesservice,citiesgrpcservice",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "5m",
+          "value": "5m"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Window",
+        "multi": false,
+        "name": "window",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": true,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "15m",
+            "value": "15m"
+          }
+        ],
+        "query": "1m,5m,15m",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
     "to": "now"
   },
-  "timepicker": {},
   "timezone": "browser",
   "title": "CitiesService Observability",
-  "uid": "sws-citiesservice-observability",
-  "version": 2,
+  "uid": "sws-cities-observability",
+  "version": 1,
   "weekStart": ""
 }

@@ -11,8 +11,9 @@ The current stack includes:
   - `citiesservice` and `citiesgrpcservice` expose `/metrics` for Prometheus scraping
   - the remaining app services push metrics to Prometheus through its OTLP receiver
 - Grafana with provisioned Prometheus, Loki, and Jaeger datasources
-- Jaeger traces for `CitiesService.Api` and `CitiesGrpcService`
-- Loki logs for the CitiesService containers, collected by Grafana Alloy
+- Jaeger traces for `CitiesService.Api` and `CitiesGrpcService`, persisted locally with Badger storage
+- Loki logs for the CitiesService containers, collected by Grafana Alloy and linked to Jaeger by `trace_id`
+- Prometheus recording and alerting rules for the CitiesService observability milestone
 
 ## Run the stack locally
 
@@ -58,6 +59,9 @@ If Compose reports `Set POSTGRES_PASSWORD in .env.infra`, `Set MSSQL_SA_PASSWORD
 If the rendered config is correct but services still use old credentials, password state may already be persisted:
 
 - Grafana stores the admin user under `/opt/sws/volumes/grafana/data` after first startup.
+- Jaeger stores local trace data under `/opt/sws/volumes/jaeger/badger`.
+- Loki stores local log data under `/opt/sws/volumes/loki/data`.
+- Prometheus stores local metric data under `/opt/sws/volumes/prometheus/data`.
 - PostgreSQL and SQL Server store initialized database state under `/opt/sws/volumes/`.
 - HealthChecks UI reads the SQL Server password from Compose each time, but the SQL Server password itself is controlled by the existing SQL Server data.
 
@@ -201,6 +205,19 @@ sum by (grpc_method) (rate(sws_cities_grpc_stream_messages_total[5m]))
 
 Prometheus still starts with `--web.enable-otlp-receiver` because the remaining app services push metrics through OTLP HTTP. `citiesservice` and `citiesgrpcservice` intentionally do not set `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT`; Prometheus scrapes their `http://citiesservice:80/metrics` and `http://citiesgrpcservice:80/metrics` endpoints instead. This avoids duplicate API/gRPC metrics.
 
+Prometheus keeps local metrics for up to 15 days or 2 GB, whichever limit is reached first. It also evaluates local-only CitiesService rules from `src/deploy/prometheus/rules/cities-observability.yml`.
+
+Check recording and alerting rule output:
+
+```promql
+sws:cities:http_requests:rate5m
+sws:cities:http_duration:p95_5m
+sws:cities:cache_miss:ratio5m
+ALERTS{alertname=~"Cities.*"}
+```
+
+The local alert rules do not send notifications because this stack does not include Alertmanager. They are meant to make regressions visible in Prometheus and Grafana.
+
 ## Grafana
 
 Open:
@@ -219,6 +236,8 @@ Check these areas:
 - `Connections` / `Data sources`: Prometheus, Loki, and Jaeger should be present.
 - `Dashboards`: open `Simple Weather Site / CitiesService Observability`.
 - `Explore`: choose Prometheus or Loki and run the sample queries from this guide.
+
+The CitiesService dashboard has `service` and `window` variables, panels for HTTP/gRPC latency and errors, cache behavior, firing Cities alerts, observability infra health, and Loki logs. The Loki datasource has a derived field that turns `trace_id` values from JSON logs into Jaeger trace links.
 
 ## Jaeger
 
@@ -239,6 +258,10 @@ After generating CitiesService traffic:
 REST, GraphQL, and gRPC traces are exported to Jaeger through OTLP HTTP at `http://jaeger:4318/v1/traces`. Other app services currently export metrics only unless their Compose service sets `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`.
 
 `Common.Telemetry` maps the signal-specific OTLP endpoint/protocol environment variables into `AddOtlpExporter(...)` options explicitly. Keep that mapping in place: the OpenTelemetry .NET signal-specific `AddOtlpExporter()` calls do not read `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` or `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` by themselves.
+
+Jaeger uses local Badger storage in this stack. Trace data survives `jaeger_infra` container restarts and is retained for 7 days. To wipe only local Jaeger traces, stop Jaeger and remove `/opt/sws/volumes/jaeger/badger`.
+
+The Cities containers set `SWS_TELEMETRY_TRACES_INCLUDE_INFRA_ENDPOINTS=false`, so ASP.NET Core server traces for `/`, `/ping`, `/metrics`, `/health`, and `/health/*` are filtered out before export. Health and metrics endpoints still work and still produce metrics. Set the variable to `true` or remove it if you want those endpoint traces during a diagnostics session.
 
 If Prometheus/Grafana metrics and Loki logs update but Jaeger shows no traces, verify the trace path directly:
 
@@ -276,7 +299,7 @@ curl -s 'http://localhost:16686/api/traces?service=CitiesService.Api&lookback=1h
 curl -s 'http://localhost:16686/api/traces?service=CitiesGrpcService&lookback=1h&limit=20'
 ```
 
-For a UI sanity check, try `Last 2 Days` after generating fresh traffic. Jaeger uses transient in-memory storage in this local stack, so traces disappear when `jaeger_infra` restarts even though Prometheus/Loki data may still be present.
+For a UI sanity check, try `Last 2 Days` after generating fresh traffic. With Badger storage enabled, recent traces should still be queryable after restarting `jaeger_infra`.
 
 ## Loki and Alloy
 
@@ -298,6 +321,18 @@ In Grafana Explore, choose the Loki datasource and run:
 {service_name=~"citiesservice|citiesgrpcservice"}
 ```
 
+Cities Docker logs are JSON formatted. When `SWS_TELEMETRY_LOG_TRACE_CORRELATION_ENABLED=true`, log events written while an `Activity` is current include `trace_id` and `span_id`. These values are kept as log fields/structured metadata, not Loki labels, to avoid high-cardinality label growth.
+
+Useful LogQL checks:
+
+```logql
+{service_name=~"citiesservice|citiesgrpcservice"} | json
+{service_name=~"citiesservice|citiesgrpcservice"} | json | trace_id != ""
+{service_name=~"citiesservice|citiesgrpcservice", level="Error"}
+```
+
+In Grafana Explore or the dashboard log panel, expand a log line with `trace_id`; the `Trace` derived field should open the related Jaeger trace.
+
 If no logs appear, generate CitiesService traffic again and wait a few seconds:
 
 ```bash
@@ -305,7 +340,17 @@ curl -i http://localhost:8081/health
 curl -i http://localhost:8681/health
 ```
 
-Seq is still present as the existing Serilog structured logging target. Grafana-visible logs currently come from Loki and Alloy, not from Seq.
+Seq is still present as the existing Serilog structured logging target. Grafana-visible logs currently come from Loki and Alloy, not from Seq. Loki keeps local logs for 7 days.
+
+## Telemetry configuration switches
+
+These switches are intentionally runtime-only and do not change emitted metric names, tag names, span names, or dashboard queries:
+
+| Variable | Default | Cities Docker value | Purpose |
+| --- | --- | --- | --- |
+| `SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED` | `false` | `true` | Enables the local `/metrics` scrape endpoint. |
+| `SWS_TELEMETRY_TRACES_INCLUDE_INFRA_ENDPOINTS` | `true` | `false` | Includes or filters ASP.NET Core server traces for `/`, `/ping`, `/metrics`, `/health`, and `/health/*`. |
+| `SWS_TELEMETRY_LOG_TRACE_CORRELATION_ENABLED` | `false` | `true` | Adds `trace_id` and `span_id` to Serilog events when an `Activity` is current. |
 
 ## gRPC counters
 
@@ -341,6 +386,7 @@ Optional debugging tunnel:
 ssh -i sws-ec2-key-pair.pem \
   -L 3100:localhost:3100 \
   -L 12345:localhost:12345 \
+  -L 8888:localhost:8888 \
   admin@<EC2_PUBLIC_IP>
 ```
 
@@ -348,6 +394,26 @@ Then open:
 
 - Loki readiness: `http://localhost:3100/ready`
 - Alloy UI: `http://localhost:12345`
+- Jaeger metrics: `http://localhost:8888/metrics`
+
+## Verification checklist
+
+After changing observability config or rebuilding Cities containers:
+
+1. Validate configs:
+
+```bash
+cd <YOUR_REPO>/src/deploy
+docker compose --project-name sws-infra --env-file .env.infra -f docker-compose.infra.prod.yml config >/dev/null
+promtool check config prometheus/prometheus.yml
+promtool check rules prometheus/rules/cities-observability.yml
+jq empty grafana/provisioning/dashboards/json/citiesservice-observability.json
+```
+
+2. Generate REST, GraphQL, and gRPC traffic from the examples above.
+3. Prometheus: confirm `up{job=~"citiesservice|citiesgrpcservice"}` is `1`, custom `sws_cities_*` metrics update, and `ALERTS{alertname=~"Cities.*"}` is queryable.
+4. Jaeger: confirm `CitiesService.Api` and `CitiesGrpcService` traces appear, then restart `jaeger_infra` and confirm recent traces still query.
+5. Loki/Grafana: confirm `{service_name=~"citiesservice|citiesgrpcservice"} | json | trace_id != ""` returns logs and the `Trace` derived field opens Jaeger.
 
 ## Reference docs
 
@@ -360,6 +426,9 @@ Then open:
 - OpenTelemetry .NET exporters: <https://opentelemetry.io/docs/languages/dotnet/exporters/>
 - Jaeger 2.17 getting started: <https://www.jaegertracing.io/docs/2.17/getting-started/>
 - Jaeger 2.17 configuration: <https://www.jaegertracing.io/docs/2.17/deployment/configuration/>
+- Jaeger 2.17 Badger storage: <https://www.jaegertracing.io/docs/2.17/storage/badger/>
+- Loki retention: <https://grafana.com/docs/loki/latest/operations/storage/retention/>
+- Prometheus alerting rules: <https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/>
 
 ## Troubleshooting
 
