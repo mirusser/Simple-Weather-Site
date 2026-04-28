@@ -12,24 +12,23 @@ namespace Common.Telemetry;
 
 public sealed class CommonTelemetryOptions
 {
+    /// <summary>Additional application meter names to include in the metrics pipeline.</summary>
     public IReadOnlyCollection<string> MeterNames { get; init; } = [];
+
+    /// <summary>Additional activity source names to include in the tracing pipeline.</summary>
     public IReadOnlyCollection<string> ActivitySourceNames { get; init; } = [];
 }
 
 public static class CommonTelemetryRegistration
 {
-    private const string ServiceNamespace = "sws";
-    private const string PrometheusEndpointEnabledKey = "SWS_TELEMETRY_PROMETHEUS_ENDPOINT_ENABLED";
-    private const string TracesIncludeInfraEndpointsKey = "SWS_TELEMETRY_TRACES_INCLUDE_INFRA_ENDPOINTS";
-
     private static readonly string[] BuiltInMeterNames =
     [
-        "Microsoft.AspNetCore.Hosting",
-        "Microsoft.AspNetCore.Server.Kestrel",
-        "System.Net.Http",
-        "System.Net.NameResolution",
-        "System.Runtime",
-        "Microsoft.EntityFrameworkCore"
+        CommonTelemetryConventions.MeterNames.AspNetCoreHosting,
+        CommonTelemetryConventions.MeterNames.Kestrel,
+        CommonTelemetryConventions.MeterNames.HttpClient,
+        CommonTelemetryConventions.MeterNames.NameResolution,
+        CommonTelemetryConventions.MeterNames.Runtime,
+        CommonTelemetryConventions.MeterNames.EntityFrameworkCore
     ];
 
     public static IServiceCollection AddCommonTelemetry(
@@ -40,10 +39,12 @@ public static class CommonTelemetryRegistration
         CommonTelemetryOptions? options = null)
     {
         options ??= new CommonTelemetryOptions();
+        services.Configure<CommonTelemetryConfigurationOptions>(configuration);
 
-        var hasOtlpMetricsEndpoint = HasOtlpMetricsEndpoint(configuration);
-        var hasPrometheusEndpoint = IsPrometheusEndpointEnabled(configuration);
-        var hasTracesEndpoint = HasTracesEndpoint(configuration);
+        var telemetryConfiguration = ReadTelemetryConfiguration(configuration);
+        var hasOtlpMetricsEndpoint = HasOtlpMetricsEndpoint(telemetryConfiguration);
+        var hasPrometheusEndpoint = telemetryConfiguration.IsPrometheusEndpointEnabled;
+        var hasTracesEndpoint = HasTracesEndpoint(telemetryConfiguration);
 
         if (!hasOtlpMetricsEndpoint && !hasPrometheusEndpoint && !hasTracesEndpoint)
         {
@@ -54,11 +55,13 @@ public static class CommonTelemetryRegistration
             .AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(
                     serviceName: applicationName,
-                    serviceNamespace: ServiceNamespace,
+                    serviceNamespace: CommonTelemetryConventions.Resources.ServiceNamespace,
                     serviceVersion: GetServiceVersion(),
                     serviceInstanceId: GetServiceInstanceId())
                 .AddAttributes([
-                    new KeyValuePair<string, object>("deployment.environment.name", environmentName)
+                    new KeyValuePair<string, object>(
+                        CommonTelemetryConventions.Resources.DeploymentEnvironmentName,
+                        environmentName)
                 ]));
 
         if (hasOtlpMetricsEndpoint || hasPrometheusEndpoint)
@@ -81,9 +84,9 @@ public static class CommonTelemetryRegistration
                     metrics.AddOtlpExporter(exporter =>
                         ConfigureOtlpExporter(
                             exporter,
-                            configuration,
-                            "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT",
-                            "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL"));
+                            telemetryConfiguration,
+                            telemetryConfiguration.OtlpMetricsEndpoint,
+                            telemetryConfiguration.OtlpMetricsProtocol));
                 }
 
                 if (hasPrometheusEndpoint)
@@ -100,7 +103,7 @@ public static class CommonTelemetryRegistration
                 tracing
                     .AddAspNetCoreInstrumentation(options =>
                     {
-                        if (!ShouldIncludeInfraEndpointTraces(configuration))
+                        if (!telemetryConfiguration.ShouldIncludeInfraEndpointTraces)
                         {
                             options.Filter = context => !IsInfraEndpoint(context.Request.Path);
                         }
@@ -116,9 +119,9 @@ public static class CommonTelemetryRegistration
                 tracing.AddOtlpExporter(exporter =>
                     ConfigureOtlpExporter(
                         exporter,
-                        configuration,
-                        "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
-                        "OTEL_EXPORTER_OTLP_TRACES_PROTOCOL"));
+                        telemetryConfiguration,
+                        telemetryConfiguration.OtlpTracesEndpoint,
+                        telemetryConfiguration.OtlpTracesProtocol));
             });
         }
 
@@ -138,42 +141,51 @@ public static class CommonTelemetryRegistration
     }
 
     public static bool IsPrometheusEndpointEnabled(IConfiguration configuration)
-        => bool.TryParse(configuration[PrometheusEndpointEnabledKey], out var enabled) && enabled;
+        => ReadTelemetryConfiguration(configuration).IsPrometheusEndpointEnabled;
 
     public static bool ShouldIncludeInfraEndpointTraces(IConfiguration configuration)
-        => !bool.TryParse(configuration[TracesIncludeInfraEndpointsKey], out var include) || include;
+        => ReadTelemetryConfiguration(configuration).ShouldIncludeInfraEndpointTraces;
 
-    private static bool HasOtlpMetricsEndpoint(IConfiguration configuration)
-        => !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_ENDPOINT"])
-           || !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"]);
+    private static CommonTelemetryConfigurationOptions ReadTelemetryConfiguration(IConfiguration configuration)
+        => configuration.Get<CommonTelemetryConfigurationOptions>() ?? new CommonTelemetryConfigurationOptions();
 
-    private static bool HasTracesEndpoint(IConfiguration configuration)
-        => !string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"]);
+    private static bool HasOtlpMetricsEndpoint(CommonTelemetryConfigurationOptions options)
+        => !string.IsNullOrWhiteSpace(options.OtlpEndpoint)
+           || !string.IsNullOrWhiteSpace(options.OtlpMetricsEndpoint);
+
+    private static bool HasTracesEndpoint(CommonTelemetryConfigurationOptions options)
+        => !string.IsNullOrWhiteSpace(options.OtlpTracesEndpoint);
 
     private static void ConfigureOtlpExporter(
-        OtlpExporterOptions options,
-        IConfiguration configuration,
-        string signalEndpointKey,
-        string signalProtocolKey)
+        OtlpExporterOptions exporterOptions,
+        CommonTelemetryConfigurationOptions telemetryOptions,
+        string? signalEndpoint,
+        string? signalProtocol)
     {
         var endpoint =
-            configuration[signalEndpointKey]
-            ?? configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+            signalEndpoint
+            ?? telemetryOptions.OtlpEndpoint;
         if (!string.IsNullOrWhiteSpace(endpoint))
         {
-            options.Endpoint = new Uri(endpoint);
+            exporterOptions.Endpoint = new Uri(endpoint);
         }
 
         var protocol =
-            configuration[signalProtocolKey]
-            ?? configuration["OTEL_EXPORTER_OTLP_PROTOCOL"];
-        if (string.Equals(protocol, "http/protobuf", StringComparison.OrdinalIgnoreCase))
+            signalProtocol
+            ?? telemetryOptions.OtlpProtocol;
+        if (string.Equals(
+                protocol,
+                CommonTelemetryConventions.OtlpProtocolValues.HttpProtobuf,
+                StringComparison.OrdinalIgnoreCase))
         {
-            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
         }
-        else if (string.Equals(protocol, "grpc", StringComparison.OrdinalIgnoreCase))
+        else if (string.Equals(
+                     protocol,
+                     CommonTelemetryConventions.OtlpProtocolValues.Grpc,
+                     StringComparison.OrdinalIgnoreCase))
         {
-            options.Protocol = OtlpExportProtocol.Grpc;
+            exporterOptions.Protocol = OtlpExportProtocol.Grpc;
         }
     }
 
@@ -193,14 +205,15 @@ public static class CommonTelemetryRegistration
             return true;
         }
 
-        if (string.Equals(value, "/", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(value, "/ping", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(value, "/metrics", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(value, CommonTelemetryConventions.InfraEndpointPaths.Root, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, CommonTelemetryConventions.InfraEndpointPaths.Ping, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, CommonTelemetryConventions.InfraEndpointPaths.Metrics, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
-        return value.StartsWith("/health", StringComparison.OrdinalIgnoreCase)
-               && (value.Length == "/health".Length || value["/health".Length] == '/');
+        return value.StartsWith(CommonTelemetryConventions.InfraEndpointPaths.Health, StringComparison.OrdinalIgnoreCase)
+               && (value.Length == CommonTelemetryConventions.InfraEndpointPaths.Health.Length
+                   || value[CommonTelemetryConventions.InfraEndpointPaths.Health.Length] == '/');
     }
 }
